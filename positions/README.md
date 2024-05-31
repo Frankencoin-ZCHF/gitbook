@@ -2,7 +2,7 @@
 description: Documentation on minting Frankencoins against a collateral.
 ---
 
-# 💰 Collateralized Minting
+# 🖨️ Collateralized Minting
 
 When someone mints fresh Frankencoins against a collateral, we call the result a [position](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/Position.sol). At the time of writing, the only smart contract that is approved to create new positions is the [minting hub](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/MintingHub.sol). The notation is inspired by portfolio theory, where a position denotes an exposure to a specific asset. In the Frankencoin system, a position always belongs to exactly one owner. Initially, this is the user that created the position, but ownership is transferrable through the standard functions of Ownable contracts. The owner can deposit collateral into the position and mint Frankencoins up to a certain limit defined by the liquidation price. Anyone can challenge a position if they believe that the liquidation price is below the true value of the collateral, triggering an auction that serves to purpose of determining the market price of the collateral. Thanks to this mechanism, the Frankencoin does not depend on oracles and is very flexible with regards to the provided collateral.
 

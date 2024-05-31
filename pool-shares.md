@@ -4,11 +4,17 @@ description: >-
   Pool Shares (FPS) in return.
 ---
 
-# Pool Shares
+# 📈 Investing and Pool Shares
 
 ## Reserve Pool Shares
 
 Frankencoin Pool Shares (FPS) are shares in the equity reserve pool of the Frankencoin system. Being an FPS holdes is similar to being a shareholder of a bank. As the Frankencoin system makes profits through fees or liquidations, the price of the pool shares is automatically adjusted upwards. Likewise, when risks materialize and the reserve pool incurs a loss, the value declines. They can be minted at any time and redeemed again after a mimimum holding period of three months. Over time, reserve pools shares that are not moved accumulate votes. Shareholders with at least 2% of the votes gain veto power.
+
+## Usage
+
+TODO: screenshot of buying process, description that new FPS are being created and the invested capital is put into the reserve
+
+TODO: screenshot of selling process, description how the redeemed FPS are being burned and capital returned to the user.
 
 ## Economics
 
@@ -18,23 +24,23 @@ Anyone can create additional pool shares by depositing reserve capital at any ti
 
 In an approach inspired by the research paper "[The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract\_id=4189472)", the Frankencoin system evaluates itself at a constant multiple of its capital. This multiple is set to three. So if there is 1 million ZCHF in equity capital K, anyone can subscribe to new pool shares at a valuation of 3 million ZCHF, or also redeem old shares at that valuation. Mathematically, valuation V is:
 
-<figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption><p>Market cap as a function of capital</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption><p>Market cap as a function of capital</p></figcaption></figure>
 
 Whereas V(K) is the market cap of all Frankencoin Pool Shares (FPS) in circulation if there are K Frankencoins in equity capital. Given the number of pool shares s in circulation, the marginal price p per share is given as
 
-<figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption><p>Price per share</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption><p>Price per share</p></figcaption></figure>
 
 From the above constraints follow that an investment of additional capital ΔK leads to the following rules for determining the new number of shares given the old number of shares:
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption><p>New number of shares after investment ΔK</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption><p>New number of shares after investment ΔK</p></figcaption></figure>
 
 Similarly, the same investment ΔK leads to a new price:
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
 
 One can verify that the valuation equation still holds after that investment by multiplying the number of shares with their price in order to obtain the new valuation:
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
 
 In other words: when someone invests into the Frankencoin system, two thirds of the increased market cap comes from the price increase and one third from the increased number of shares.
 
