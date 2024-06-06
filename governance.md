@@ -1,7 +1,8 @@
 ---
 description: >-
-  A guide for reserve pool share holders on how they should use their veto
-  power.
+  The governance system of Frankencoin is designed to ensure fair participation,
+  community engagement, and efficient decision-making through a structured set
+  of rules.
 ---
 
 # ⚖️ Governance
