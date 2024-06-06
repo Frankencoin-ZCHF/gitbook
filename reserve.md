@@ -1,5 +1,7 @@
 ---
-description: The three types of reserves that help with stabilizing the system.
+description: >-
+  The Frankencoin system employs a detailed balance sheet framework, featuring
+  three types of reserves to ensure stability and security.
 ---
 
 # 🏦 Reserve
