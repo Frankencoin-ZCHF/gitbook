@@ -4,9 +4,11 @@ description: The three types of reserves that help with stabilizing the system.
 
 # 🏦 Reserve
 
-There are three types of reserves in the Frankencoin system. The first one consists of other Swiss franc stablecoins that reside in a bridge, the second one consists of funds provided by the borrowers when they mint new Frankencoins, and the third one is provided by the holders of reserve pool shares. The collateral used to mint Frankencoin is not considered reserve as it conceptually stays outside the "balance sheet" of the Frankencoin system.
+The Frankencoin system features three types of reserves. The first type comprises Swiss franc stablecoins held in a bridge. The second type includes funds provided by borrowers when they mint new Frankencoins. The third type consists of contributions from holders of reserve pool shares. It's important to note that the collateral used to mint Frankencoins is not considered part of the reserve, as it remains outside the Frankencoin system's "balance sheet."
 
-**Balance Sheet Diagram:**
+If the Frankencoin system were a company, its balance sheet would appear roughly as depicted below.
+
+**Balance Sheet Diagram**
 
 <div data-full-width="true">
 
@@ -14,7 +16,7 @@ There are three types of reserves in the Frankencoin system. The first one consi
 
 </div>
 
-If the Frankencoin system was a company, its balance sheet would roughly look as shown above:
+This balance sheet consists of the following components:
 
 **Assets:**
 
@@ -30,17 +32,23 @@ If the Frankencoin system was a company, its balance sheet would roughly look as
 
 #### Example Scenarios to Understand the Balance Sheet:
 
-1. **User Swaps ZCHF for XCHF:**
-   * If a user sends 100 ZCHF to the stablecoin bridge to swap them into XCHF, the balance sheet items for stablecoins locked in bridges (x) and the total ZCHF supply (z) both decrease by 100 units. Other balance sheet items remain unaffected.
-2. **User Mints New Frankencoins:**
-   * Suppose a user mints 500 ZCHF against collateral with a reserve ratio of 20% and a fee of 5%. On the asset side:
-     * **Minter Repayment Obligations (m):** Increases by 500 ZCHF.
-     * **Reserve (r):** Increases by 125 ZCHF (100 ZCHF into minters reserve and 25 ZCHF as fees).
-   * On the liabilities side:
-     * **Total ZCHF Supply (z):** Increases by 500 ZCHF.
-     * **Minters Reserve (b):** Increases by 100 ZCHF.
-     * **Equity (e):** Increases by 25 ZCHF (the fee retained by the system).
-   * The minting process thus expands the balance sheet by 625 ZCHF, which reflects both the debt and the new reserves.
+1.  **User Swaps ZCHF for XCHF:**
+
+    * If a user sends 100 ZCHF to the stablecoin bridge to swap them into XCHF, the balance sheet items for stablecoins locked in bridges (x) and the total ZCHF supply (z) both decrease by 100 units. Other balance sheet items remain unaffected.
+
+
+2.  **User Mints New Frankencoins:**
+
+    * Suppose a user mints 500 ZCHF against collateral with a reserve ratio of 20% and a fee of 5%. On the asset side:
+      * **Minter Repayment Obligations (m):** Increases by 500 ZCHF.
+      * **Reserve (r):** Increases by 125 ZCHF (100 ZCHF into minters reserve and 25 ZCHF as fees).
+    * On the liabilities side:
+      * **Total ZCHF Supply (z):** Increases by 500 ZCHF.
+      * **Minters Reserve (b):** Increases by 100 ZCHF.
+      * **Equity (e):** Increases by 25 ZCHF (the fee retained by the system).
+    * The minting process thus expands the balance sheet by 625 ZCHF, which reflects both the debt and the new reserves.
+
+
 3. **Successful Challenge of a Minter's Position:**
    * For a position that minted 5000 ZCHF and is successfully challenged with a highest bid of 4500 ZCHF:
      * **Reserve (r):** Decreases by 600 ZCHF to cover the shortfall.
