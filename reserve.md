@@ -10,7 +10,7 @@ The Frankencoin system features three types of reserves. The first type comprise
 
 If the Frankencoin system were a company, its balance sheet would appear roughly as depicted below.
 
-**Balance Sheet Diagram**
+## Balance Sheet Diagram
 
 <div data-full-width="true">
 
@@ -20,19 +20,19 @@ If the Frankencoin system were a company, its balance sheet would appear roughly
 
 This balance sheet consists of the following components:
 
-**Assets:**
+## Assets
 
 * **Stablecoins Locked in Bridges:** These are stablecoins like XCHF that are locked within bridge contracts, facilitating the exchange between Frankencoin (ZCHF) and other stablecoins.
 * **Minter Repayment Obligations:** This represents the amount borrowers need to repay after minting Frankencoin. It reflects the debt owed by users who have collateralized their assets to mint ZCHF.
 * **Reserve:** This includes the funds in the reserve pool contributed by minters and reserve pool share holders. These funds grow over time, providing a buffer.
 
-**Liabilities and Equity:**
+## Liabilities and Equity
 
 * **Total Frankencoin (ZCHF) Supply:** This is the total amount of Frankencoins in circulation, representing the system's obligations to the holders of ZCHF.
 * **Minters Reserve:** The specific reserve funds allocated to cover potential losses from minter defaults, ensuring the stability of the system.
 * **Equity:** Owned by reserve pool share holders, this represents the net value of the system after accounting for assets and liabilities. Holders of reserve pool shares play a crucial role in the system's governance and stability, benefiting from a share of the system's profits and having a say in governance decisions .
 
-#### Example Scenarios to Understand the Balance Sheet:
+## Example Scenarios
 
 1.  **User Swaps ZCHF for XCHF:**
 
@@ -59,7 +59,7 @@ This balance sheet consists of the following components:
      * **Minters Reserve (b):** Adjusts to reflect 400 ZCHF reassigned to equity as liquidation profit.
      * **Equity (e):** Increases by 400 ZCHF.
 
-#### Protection Mechanisms During Liquidation:
+## Protection Mechanisms During Liquidation:
 
 When a position is liquidated, the system employs three layers of protection to prevent losses:
 
@@ -67,6 +67,6 @@ When a position is liquidated, the system employs three layers of protection to 
 2. **Equity:** If the borrower's reserve is insufficient, losses are absorbed by reducing the equity, impacting the value of reserve pool shares.
 3. **General Borrower's Reserve:** As a last resort, this reserve is tapped into, potentially requiring other users to repay more than initially anticipated, creating an incentive for all participants to maintain system integrity.
 
-#### Equilibrium of Equity:
+## Equilibrium of Equity:
 
 The system is designed to ensure that in efficient markets, the equity will approximate one third of the Frankencoins not created through a bridge, mathematically represented as 3e=z−x3e = z - x3e=z−x. This equilibrium ensures a robust financial foundation, detailed further in the research paper.
