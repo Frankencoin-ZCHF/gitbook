@@ -12,7 +12,11 @@ This is the standard way to obtain Frankencoins against a collateral. Unlike cre
 
 Once you have chosen your collateral type, simply click the "Clone & Mint" button to be taken to the position overview page. Here, you can see a detailed view showing all the relevant parameters.&#x20;
 
-First, let's focus on the left side of the screen. While you can discover the page without connecting a wallet, doing so will give you a real-time view of what is possible with your current balance. Once you click on "Connect Wallet" on the bottom left, you will be given a choice of wallets. Choose whichever suits you best.&#x20;
+The "Limit" value shows how much this position can mint in total. The "Minted Total" denominates how much of that limit has been used already. In this case, we are left with a difference of 2,791,718.32 ZCHF - the "Available Amount" from the screenshot above.The "Retained Reserve" is calculated based on the "Reserve Requirement" section. The interest that needs to be paid upfront is shown under "Annual Interest". On the right, you can see that this position is not currently being challenged. If you want to proceed with cloning this position, click on "Clone & Mint" on the bottom left.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (10).png" alt=""><figcaption><p>Position overview</p></figcaption></figure>
+
+After that, you will be redirected to the minting page. First, let's focus on the left side of the screen. While you can discover the page without connecting a wallet, doing so will give you a real-time view of what is possible with your current balance. Once you click on "Connect Wallet" on the bottom left, you will be given a choice of wallets. Choose whichever suits you best.&#x20;
 
 <figure><img src="../.gitbook/assets/kuva (4).png" alt=""><figcaption><p>Connect a wallet of your choice</p></figcaption></figure>
 
