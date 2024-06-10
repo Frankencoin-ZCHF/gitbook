@@ -4,34 +4,40 @@ description: How to propose completely new positions with any collateral.
 
 # Opening New Positions
 
-For now, it is not possible to open new positions through the frontend. But bold degens can do so on Etherscan or through their other tool of choice. This page explains the meaning of all the parameters and provides some guidance on what kind of position should be rejected by the pool share holders. For criteria that collateral tokens should fulfill, have a look at the [acceptable collateral](https://github.com/Frankencoin-ZCHF/FrankenCoin/discussions/11) page. Most of the time, the preferred way of creating a position is not to open a new one, but to clone an existing one, which is described on the next page.
+You want to mint ZCHF, but your preferred type of collateral is not available yet? In that case, you can propose a new collateral type.&#x20;
 
-To open a new position with the default minting hub (there might be other minting hubs in the future, but for now there is only one), one needs to call its [openPosition method](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/MintingHub.sol). It has the following signature:
+To do so, head over to the [positions page](https://app.frankencoin.com/positions) and scroll to the bottom until you find the "Propose New Position Type" button.&#x20;
 
-```solidity
-openPosition(
-        address _collateralAddress, uint256 _minCollateral, uint256 _initialCollateral,
-        uint256 _mintingMaximum, uint256 _expirationSeconds, uint256 _challengeSeconds,
-        uint32 _mintingFeePPM, uint256 _liqPriceE18, uint32 _reservePPM)
-```
+<figure><img src="../.gitbook/assets/kuva (2).png" alt=""><figcaption><p>Click this button to propose a new position type</p></figcaption></figure>
 
-When opening a position, it is already provided with some collateral, but nothing is minted yet. Minting is not possible until the initialization period of at least three days has passed. This gives other system participants enough time to veto or to challenge the new position. A veto can only be cast by qualified pool share holders by calling the "deny" method on the position. If a position is denied, it cannot ever be used to mint Frankencoins, but it can still be challenged. New positions can be challenged immediately using the normal challenge mechanism.&#x20;
+On the next page are four boxes. Let's take a look at the top left box.&#x20;
 
-Before being able to open a position, one needs to allow the minting hub to spend Frankencoin and the collateral of choice. **Without these two allowances, opening the position will fail.** When opening a new position, one needs to carefully decide on a number of defining variables:
+<figure><img src="../.gitbook/assets/kuva (7).png" alt=""><figcaption><p>Initialization</p></figcaption></figure>
 
-* _collateralAddress_: this must be the address of the ERC-20 token contract that serves as collateral. The chosen collateral should be freely traded on the market and have a somewhat stable value.
-* _minCollateral_: this is the minimum acceptable amount of collateral to put into the smart contract or to start a challenge with. It should be set to about 5000 ZCHF worth of collateral. It is not possible to decrease the collateral in a position below the minimum without closing it entirely. Do not forget to scale this number according to the token's decimals, typically 10^18.
-* _initialCollateral_: the initial amount of collateral. It will be automatically transferred to the newly created position during the call. As the minting hub is executing the transfer, an according allowance must be present. The initial collateral must be at least as large as the minimum collateral. Do not forget to scale this number according to the token's decimals, typically 10^18.
-* _mintingMaximum_: the maximum amount of Frankencoins that can be minted against this position and its clones. When the position is cloned, the remaining amount is split between the original and the clone. The purpose is to limit the exposure of the Frankencoin system to a single collateral. The Frankencoin should be able to withstand the total failure of one or more related collaterals, even if all their positions are maximally minted.
-* _expirationSeconds_: the number of seconds until the position expires. Finance people would call this the term to maturity. Together with the minting fee, the maturity implies a yearly interest rate. In the long run, the interest rate of the average position should be in line with the interest on Swiss Franc debt of similar risk. A typical value could be three years.
-* _challengeSeconds_: this parameter specifies the duration of the auction phase of a challenge in seconds. For highly liquid collaterals such as Wrapped ETH, this can be rather low, maybe in the range of hours or even minutes once there are automated bidders in the market. For less liquid collateral that is harder to evaluate, challenges could last up to two weeks on order to allow the bidders to organize themselves. The longer the challenge duration, the higher is the required reserve for the position to be economically sound.
-* _mintingFeePPM_: this is a one time minting fee in parts per million. If, for example, Swiss Franc interests for credit of comparable risk is at 2.5% and the expiration is in two years, this should be set to about 5%, minus some deduction for the reserve, so maybe 4% on the entire mint amount if only 80% is available to the minter and 20% is going into the reserve.
-* _liqPriceE18_: the liquidation price with 18 digits of accuracy. If an auction ends at a price below the liquidation price, the position is liquidated. For example, if there is a WETH position with a liquidation price of 500 ZCHF / WETH, this parameter would be 500 \* 10^18. For tokens with a different number of decimals, the price needs to be scaled accordingly in the reverse direction. For a token with zero decimals, the price should be scaled by 10^36 instead of 10^18.
-* _reservePPM_: this parameter indicates the reserve that is put aside when minting in parts per million, for example 250,000 for a reserve requirement of 25%. It should be set such that there is a very high confidence that challenges do not end more than that below the liquidation price under the assumption that the market price has just fallen slightly below the liquidation price at the start of the challenge. The more volatile the collateral and the longer the challenge period, the higher must be the reserve requirement.
+The proposal fee is fixed at 1'000 ZCHF. This fee is not returned if the position is denied and goes to the equity holders. The price tag of 1'000 ZCHF ensures that each proposal is well thought-out. Having a low fee would likely encourage the proposal of illiquid and/or otherwise unfit tokens. The initialization period has to be at least 3 days. This gives other system participants enough time to veto or to challenge the new position. A veto can only be cast by qualified pool share holders by calling the "deny" method on the position. If a position is denied, it cannot ever be used to mint Frankencoins, but it can still be challenged. New positions can be challenged immediately using the normal challenge mechanism.&#x20;
 
-Note that calling the _openPosition_ method, an opening fee of 1000 ZCHF is automatically deducted. That is why the Frankencoin allowance is necessary. This fee is not returned if the position is denied and goes to the equity holders.
+Next, we can inspect the box on the bottom left.
 
-Here is a screenshot of the parameters used to open the first position with Wrapped Ether as collateral in transaction [0x380b...8d](https://etherscan.io/tx/0x380b574e4b9489c8ffe66ae169156d4aaeba44ec29bb173dc208740086bf128d):
+<figure><img src="../.gitbook/assets/kuva (10).png" alt=""><figcaption><p>Financial Terms</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
+The annual interest is charged upfront and can be set by the user. With a maturity of 12 months, this is the entire fee that is charged. Of course, if the maturity is set to 6 months for example, the final interest changes accordingly. The minting limit describes the maximum amount of Frankencoins that can be minted against this position and its clones. When the position is cloned, the remaining amount is split between the original and the clone. The purpose is to limit the exposure of the Frankencoin system to a single collateral. The Frankencoin should be able to withstand the total failure of one or more related collaterals, even if all their positions are maximally minted.
 
+Next, the box on the top right comes into play.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (14).png" alt=""><figcaption><p>Collateral</p></figcaption></figure>
+
+First of all, the collateral token needs to be selected by pasting its contract address into the first field, and approve the handling of the token. This can be done for example through MetaMask. The chosen collateral should be freely traded on the market and have a somewhat stable value. For criteria that collateral tokens should fulfil, have a look at the [acceptable collateral](https://github.com/Frankencoin-ZCHF/FrankenCoin/discussions/11) page. The minimum collateral section is the minimum acceptable amount of collateral and should be set to about 5000 ZCHF worth of collateral (in this specific case 1.9 WETH). It is not possible to decrease the collateral in a position below the minimum without closing it entirely. The last remaining section is the initial amount of collateral. This will be automatically transferred to the newly created position during the minting. The initial collateral must be equal to or larger than the minimum collateral.&#x20;
+
+The last remaining box is located on the bottom right. Here, the (potential) liquidation process is discussed.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (16).png" alt=""><figcaption><p>Liquidation</p></figcaption></figure>
+
+The liquidation price can be set freely but must result in a position liquidation of at least 5'000 ZCHF. In the previous box, we've set a minimum collateral of around 5'000 ZCHF or 1.9 WETH. With a minimum collateral liquidation value of 5'000 ZCHF, the liquidation price for each WETH must thus be at least 2'631.58 ZCHF, as 1.9 \* 2'631.58 = 5'000. Has we chosen a minimum collateral of 20 WETH, the minimum liquidation price would thus be (5'000 / 20) 250 ZCHF.&#x20;
+
+If an auction ends at a price below the liquidation price, the position is liquidated.&#x20;
+
+The "Retained Reserve" should be set to ensure a very high confidence that challenges do not end significantly below the liquidation price, assuming the market price has just fallen slightly below it at the start of the challenge. The more volatile the collateral and the longer the challenge period, the higher the reserve requirement needs to be to mitigate risks.
+
+The last field, the "Auction Duration", describes how long an auction should be. For highly liquid collaterals such as Wrapped ETH, the challenge duration can be quite short, possibly ranging from hours to even minutes, especially with automated bidders in the market. For less liquid collaterals that are harder to evaluate, challenges might last up to two weeks to allow bidders to organize. The longer the challenge duration, the higher the required reserve should be to ensure the position remains economically sound.
+
+Once all parameters are set, you can hit the "Propose Position" at the bottom of the page. If there's no veto, you will have minted new ZCHF!
