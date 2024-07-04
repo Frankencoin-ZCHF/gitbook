@@ -18,15 +18,21 @@ When you're directed here, all fields are empty at first. If you have just propo
 
 In the above example, you can see that the "Collateral" part indicates that 2 WETH will be sent back to the wallet, as long as the input is 0.  However, it is important to observe the dust limit. For example, if the minimum collateral is 2 WETH (as it is in this example), the collateral cannot be reduced to 1.9 WETH. This means that this particular transaction would fail. However, if there is any excess collateral above the minimum requirement, it can be withdrawn here.&#x20;
 
-On the other hand, if the full 2 WETH should be used to go ahead and mint new ZCHF, the parameters would look like this:&#x20;
+On the other hand, if the full 2 WETH should be used to mint new ZCHF, the parameters would look like this:&#x20;
 
 <figure><img src="../.gitbook/assets/kuva (21).png" alt=""><figcaption><p>Adjust Position with Parameters</p></figcaption></figure>
 
-Now, the amount is set to the 5,000 ZCHF. This was set during the opening of a new position. The liquidation price of 2,500 ZCHF per WETH, plus two WETH as collateral, result in the amount of 5,000 ZCHF.&#x20;
+Now, the amount is set to the 5,000 ZCHF. This was set during the opening of a new position. The liquidation price of 2,500 ZCHF per WETH and two WETH as collateral, result in the amount of 5,000 ZCHF.&#x20;
 
 This is confirmed by the "Outcome" section on the right side. While 5,000 ZCHF are minted, the number of ZCHF that will be received is actually lower (4,352.05 ZCHF). This is because of the minting fee, or the interest, that is charged. This was also set during the proposal of WETH as collateral. Similarly, the amount that is added to the reserve was also set during the proposal, in this case 10%. Both of these are charged upfront. You will never get the fee back, but you will likely get the reserve back when you return and burn the minted Frankencoins. The reserve might be used to cover the system's losses after all equity has been wiped out. This creates an incentive for you to help looking after the system.
 
-When decreasing the amount, meaning paying back your loan, you need to have some Frankencoins in the wallet, but some are also taken out of the reserve. For example, if the reserve ratio is 10%, it suffices to return 900 ZCHF in order to close a 1000 ZCHF position as the other 100 ZCHF are taken from the reserve.&#x20;
+If you want to decrease or increase the liquidation price, you can adjust it here as well.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (26).png" alt=""><figcaption><p>Adjust liquidation price</p></figcaption></figure>
+
+In this example, the liquidation price is decreased to 2,000 ZCHF. With 2 WETH as collateral, the new maximum amount that can now be minted is 4,000 ZCHF.
+
+When paying back your loan, meaning decreasing the amount, you need to have some Frankencoins in the wallet, but some are also taken out of the reserve. For example, if the reserve ratio is 10%, it suffices to return 900 ZCHF in order to close a 1000 ZCHF position as the other 100 ZCHF are taken from the reserve.&#x20;
 
 If you would like to add more collateral to achieve a lower liquidation point, you can also do this here. There is no limit for how much collateral you can add.&#x20;
 
