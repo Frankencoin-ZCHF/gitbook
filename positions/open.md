@@ -8,7 +8,7 @@ You want to mint ZCHF, but your preferred type of collateral is not available ye
 
 To do so, head over to the [positions page](https://app.frankencoin.com/positions) and scroll to the bottom until you find the "Propose New Position Type" button.&#x20;
 
-<figure><img src="../.gitbook/assets/kuva (2).png" alt=""><figcaption><p>Click this button to propose a new position type</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (2) (1).png" alt=""><figcaption><p>Click this button to propose a new position type</p></figcaption></figure>
 
 On the next page are four boxes. Let's take a look at the top left box.&#x20;
 

@@ -17,3 +17,30 @@ This example reveals one of the underlying assumptions of the system and a requi
 One good property about the auction design is that as long as somoeone is willing to bid the market price for a collateral asset, the maintenance of the position does not require any attention of the owner. Only when the market price is about to fall below the liquidation price, the owner should start thinking about repaying it or making it more sound again by providing more collateral and adjusting the liquidation price downwards.
 
 In case the highest bid is below the liquidation price, the challenge is considered successful. After a successful challenge, the minter reserve associated with the position is dissolved and added to the proceeds from the auction. The total proceeds are then used to repay the position and to reward the challenger. If there are not enough funds to do that, equity holders have to jump in and suffer a loss. If there is something left, the remaining amount is sent to the equity holders as a profit. For example, if the minter reserve was 20% and the highest bid for Alice's collateral was 950 ZCHF, the equity holders make a profit of 150 ZCHF, minus the challenger reward. However, if the highest bid was below 800 ZCHF, they will make a loss.
+
+## How to Initiate an Auction
+
+On the monitoring app, you can find a list of all open positions. If you believe that the conditions are right to challenge a position, you can simply click on the "Challenge" button here.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva.png" alt=""><figcaption><p>Click on "Challenge" to Start a Challenge</p></figcaption></figure>
+
+After that, you can launch a new challenge.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (1).png" alt=""><figcaption><p>Start a New Challenge</p></figcaption></figure>
+
+Here, you can choose the amount of collateral you want to challenge. For that, you need to have the corresponding amount of the collateral asset in your wallet. The "Potential Reward" is the 2% potential reward. The challenge itself is divided into two phases. In the first phase, the price remains fixed. In the second phase (in case there is still some collateral left), the price starts to decline towards zero. At this stage, the bidders are buying the original minter's collateral.&#x20;
+
+## How to Participate in Auctions
+
+Under the "Auctions" tab, you can find all ongoing challenges.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (2).png" alt=""><figcaption><p>Ongoing Challenge</p></figcaption></figure>
+
+The above shows a currently ongoing challenge. This position has 1.5 WETH left at a price of 2'000 per WETH. The auction is currently in the fixed price stage, which ends in 15 hours and 49 minutes. In order to purchase part of the collateral, simply click on the "Buy" button.&#x20;
+
+<figure><img src="../.gitbook/assets/kuva (3).png" alt=""><figcaption><p>Participate in an Auction</p></figcaption></figure>
+
+After clicking on "Buy", you can choose how much of the remaining collateral you want to purchase. The maximum available here is 1.5 WETH out of the original 2 WETH position size, implying that 0.5 WETH have already been bought by someone else.&#x20;
+
+Once you have decided how much of the open position you want to acquire, simply click on "Buy" to finalise the transaction.&#x20;
+

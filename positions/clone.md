@@ -8,7 +8,7 @@ description: >-
 
 This is the standard way to obtain Frankencoins against a collateral. Unlike creating an entirely new position, which takes a lot of time, borrowing by cloning an established position can be done immediately. To do so, [find an existing position](https://app.frankencoin.com/positions) that is based on your collateral of choice and that is not maxed out yet, i.e. where the borrowed total is below the limit. You can spot such a position by searching for the red "Clone & Mint" button. Note the available amount: This shows how many more ZCHF can be minted by cloning this particular position. The third position shown here has 0.00 ZCHF left and no "Clone & Mint" button, meaning that this position can no longer be cloned. When looking for a position to clone, make sure to pay attention to the liquidation price. In this case, while all three positions are based on WBTC, the liquidation price differs.&#x20;
 
-<figure><img src="../.gitbook/assets/kuva (2) (1).png" alt=""><figcaption><p>Note the "Available Amount"</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (2) (1) (1).png" alt=""><figcaption><p>Note the "Available Amount"</p></figcaption></figure>
 
 Once you have chosen your collateral type, simply click the "Clone & Mint" button to be taken to the position overview page. Here, you can see a detailed view showing all the relevant parameters.&#x20;
 
@@ -18,7 +18,7 @@ The "Limit" value shows how much this position can mint in total. The "Minted To
 
 After that, you will be redirected to the minting page. First, let's focus on the left side of the screen. While you can discover the page without connecting a wallet, doing so will give you a real-time view of what is possible with your current balance. Once you click on "Connect Wallet" on the bottom left, you will be given a choice of wallets. Choose whichever suits you best.&#x20;
 
-<figure><img src="../.gitbook/assets/kuva (4) (1).png" alt=""><figcaption><p>Connect a wallet of your choice</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (4) (1) (1).png" alt=""><figcaption><p>Connect a wallet of your choice</p></figcaption></figure>
 
 Once you connected a wallet, you can enter how many ZCHF you want to mint. This amount needs to be at or below the limit. The required collateral is adjusted accordingly. The expiration can be set between today and the limit date. The limit date is the date the parent position was minted, plus one year. Note: The amount borrowed can be changed later, but not increased beyond the initial amount. The liquidation price is inherited from the parent position but can be adjusted later. For example, the liquidation price could be doubled and then half of the collateral taken out if the new liquidation price is not challenged.&#x20;
 
