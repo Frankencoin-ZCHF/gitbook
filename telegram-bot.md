@@ -17,6 +17,7 @@ The Frankencoin API Telegram Bot is a communication tool designed to keep users 
 > Telegram Name: **@FrankencoinApiBot**
 
 ![alt text](.gitbook/assets/telegram-qr-small.png)
+
 https://t.me/FrankencoinApiBot
 
 # Basic Messages
@@ -57,6 +58,7 @@ It informs users when new challenges are started, providing information about th
 # Subscription Handels
 
 Use the command `/help` to get your subsctiption state. Use and handle to subscribe or unsubscribe, its a toggle function.
+
 ![alt text](<.gitbook/assets/Screenshot 2024-09-26 at 12.25.01 PM.png>)
 
 ![alt text](<.gitbook/assets/Screenshot 2024-09-26 at 12.25.11 PM.png>)
