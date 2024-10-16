@@ -36,11 +36,11 @@ From the above constraints follow that an investment of additional capital ΔK l
 
 Similarly, the same investment ΔK leads to a new price:
 
-<figure><img src=".gitbook/assets/image.png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
 
 One can verify that the valuation equation still holds after that investment by multiplying the number of shares with their price in order to obtain the new valuation:
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
 
 In other words: when someone invests into the Frankencoin system, two thirds of the increased market cap comes from the price increase and one third from the increased number of shares.
 
