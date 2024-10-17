@@ -41,22 +41,30 @@ Frankencoin offers a stablecoin pegged to the Swiss franc, preserving purchasing
 * **Step 3:** Choose either FPS on ETH or WFPS on Polygon
 * **Step 4:** Pay via bank wire or credit card with Apple and Google Pay
 
-**Option 2:**
+**Option 2:**&#x20;
+
+* **Step 1:** Head over to [https://app.frankencoin.com/equity](https://app.frankencoin.com/equity)
+* **Step 2:** Connect your wallet
+* **Step 3:** Choose what you would like to trade (ZCHF, FPS or WFPS)
+* **Step 4:** Choose the target asset
+* **Step 5:** Mint new FPS or redeem your FPS. Observe the minimum holding time of 3 months before FPS can be redeemed
+
+**Option 3:**
 
 * **Step 1:** It’s possible to use the following website: [https://frankencoin.dfx.swiss/](https://frankencoin.dfx.swiss/)
 * **Step 2:** Connect with Metamask
 * **Step 3:** Either choose FPS on ETH or WFPS on Polygon
 * **Step 4:** Pay via bank wire or credit card with Apple and Google Pay
 
-**Option 3:**
+**Option 4:**
 
 * **Step 1:** Via Uniswap (ZCHF to FPS/FPS)
 
-**Option 4:**
+**Option 5:**
 
 * **Step 1:** Polygon: Via Uniswap (ZCHF to WFPS)
 
-**Tip:** Due to fees, it might be better to use Polygon if the value is below USD 1'000.
+**Tip:** Due to fees, it might be better to use Polygon if the value is below \~1 000 ZCHF.
 
 ### How long is the locking period for FPS?
 
@@ -64,7 +72,7 @@ FPS are not locked. FPS can be transferred at any time. FPS can also be sold at 
 
 ### Is the Frankencoin a security?
 
-No, it neither qualifies formally nor functionally as a security. It does not qualify formally as a security under Swiss law as it does not represent a claim towards an issuer. Also, it does not qualify functionally as a security as it does not serve a financing purpose.
+No, it neither qualifies formally nor functionally as a security. It does not qualify formally as a security under Swiss law as it does not represent a claim towards an issuer. Also, it does not qualify functionally as a security as it does not serve a financing purpose. For more information, please read the [memorandum](https://github.com/Frankencoin-ZCHF/www/blob/main/documents/ZCHF\_FPS\_Memo.pdf) by Swiss law firm LEXR.
 
 ### Is Frankencoin political?
 
@@ -76,8 +84,4 @@ We are having an ongoing debate on whether the term "borrow", "mint", or somethi
 
 ### Are Reserve Pool Shares securities?
 
-Probably not.
-
-Functionally, they can be used to invest in an system and allow the holders to make capital gains (or losses) as the system grows (or shrinks). This is how the system compensates the FPS holders for their willingness to stabilize the system with their capital. However, the FPS tokens lacks some of the most important economic functions of a security. Most notably, when buying newly issued FPS tokens, no funds are moved into the hands of a third party. Instead, the funds are just locked until used for one of the pre-defined purposes on the blockchain.
-
-Formally, reserve pool shares do not represent securities as there is no identifiable issuer. So a regulator following the "function over form" approach might conclude reserve pool shares to be securities. However, this would create all kind of hairy legal questions as most securities laws have been written with traditional securities in mind that represent a claim towards an identifiable issuer. In the long run, legislators will have to figure out whether to create new laws designed designated to crypto assets (the European Union is in the process of doing so with their MiCA regulation) or whether they want to make existing securities regulation applicable to functionally similar crypto assets.
+Functionally, securities can be used to invest in a system and allow the holders to make capital gains (or losses) as the system grows (or shrinks). This is how the system compensates the FPS holders for their willingness to stabilize the system with their capital. However, the FPS tokens lacks some of the most important economic functions of a security. Most notably, when buying newly issued FPS tokens, no funds are moved into the hands of a third party. Instead, the funds are just locked until used for one of the pre-defined purposes on the blockchain. Swiss law firm LEXR also believes that the FPS does likely not qualify as a security. For more information, please read the [memorandum](https://github.com/Frankencoin-ZCHF/www/blob/main/documents/ZCHF\_FPS\_Memo.pdf).

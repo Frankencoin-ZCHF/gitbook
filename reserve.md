@@ -52,10 +52,10 @@ This balance sheet consists of the following components:
 
 
 3. **Successful Challenge of a Minter's Position:**
-   * For a position that minted 5000 ZCHF and is successfully challenged with a highest bid of 4500 ZCHF:
+   * For a position that minted 5 000 ZCHF and is successfully challenged with a highest bid of 4 500 ZCHF:
      * **Reserve (r):** Decreases by 600 ZCHF to cover the shortfall.
-     * **Total ZCHF Supply (z):** Decreases by 5000 ZCHF as the loan is repaid.
-     * **Minter Repayment Obligations (m):** Decreases by 5000 ZCHF.
+     * **Total ZCHF Supply (z):** Decreases by 5 000 ZCHF as the loan is repaid.
+     * **Minter Repayment Obligations (m):** Decreases by 5 000 ZCHF.
      * **Minters Reserve (b):** Adjusts to reflect 400 ZCHF reassigned to equity as liquidation profit.
      * **Equity (e):** Increases by 400 ZCHF.
 

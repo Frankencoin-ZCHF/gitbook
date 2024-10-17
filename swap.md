@@ -6,7 +6,7 @@ description: >-
 
 # 🌁 Stablecoin Bridges
 
-The swap page allows users to exchange recognized Swiss franc stablecoins for Frankencoins and vice versa. This mechanism is critical for maintaining the liquidity and stability of the Frankencoin system.
+The [Swap page](https://app.frankencoin.com/swap) allows users to exchange recognized Swiss franc stablecoins for Frankencoins and vice versa. Note that this bridge will cease to exist on the 26th of October.&#x20;
 
 The ability to move back into other stablecoins is only possible as long as there are sufficient amounts of those stablecoins left in the bridge contract. This functionality essentially pegs the Frankencoin 1:1 to other stablecoins, helping stabilize its value. The peg ensures that Frankencoin can always be redeemed for an equivalent amount of recognized stablecoins, which helps maintaining trust in its value.
 
