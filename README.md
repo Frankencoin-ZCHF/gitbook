@@ -6,7 +6,7 @@ description: Introducing the two tokens and the overall structure of the system.
 
 ## Structure and Purpose
 
-The purpose of this page is to provide potential users of the Frankencoin system with everything they need to know to meaningfully interact with it. For a deeper analysis of its economic properties, we refer to [the research publication](https://frankencoin.com/thesis-frankencoin.pdf) and for actually interacting with the system, there is a standard [frontend](https://frankencoin.com). The name Frankencoin hints at its self-governing nature, but also the risks associated with releasing an artificial machinery into the wild. If you encounter errors or if things are not clear to you, you can [reach out to us in the Telegram group](https://web.telegram.org/a/#-1001924255643) or [file a suggestion for improving this page on GitHub](https://github.com/Frankencoin-ZCHF/frankencoin-dapp/issues).
+The purpose of this page is to provide potential users of the Frankencoin system with everything they need to know to meaningfully interact with it. For a deeper analysis of its economic properties, we refer to [the research publication](https://app.frankencoin.com/thesis-frankencoin.pdf) and for actually interacting with the system, there is a standard [frontend](https://frankencoin.com). The name Frankencoin hints at its self-governing nature, but also the risks associated with releasing an artificial machinery into the wild. If you encounter errors or if things are not clear to you, you can [reach out to us in the Telegram group](https://web.telegram.org/a/#-1001924255643) or [file a suggestion for improving this page on GitHub](https://github.com/Frankencoin-ZCHF/frankencoin-dapp/issues).
 
 ## Frankencoin (ZCHF) and Frankencoin Pool Shares (FPS)
 
