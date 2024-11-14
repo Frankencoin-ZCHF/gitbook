@@ -1,13 +1,18 @@
 ---
 description: >-
-  The governance system of Frankencoin is designed to ensure fair participation,
-  community engagement, and efficient decision-making through a structured set
-  of rules.
+  Frankencoin's veto-based governance system pushes the boundaries of being
+  scalable and decentralized at the same time.
 ---
 
 # ⚖️ Governance
 
-The governance system is subject to the following rules:
+## Veto Power
+
+Unlike other decentralized protocols, Frankencoin does not depend on lengthy voting processes. Instead, it's governance revolves around veto power. Anyone who has (alone or in coordination with others) at least 2% of the FPS tokens can obtain veto power over time.
+
+More precisely, the voting power of an address is calculated by multiplying the FPS it holds with the average time these FPS have been held. It is possible to delegate voting power to others, and delegate delegated voting power further. Unlike in other systems, delegation does not remove your own voting power, so it is more like an "authorization to act on one's behalf" than a true delegation.
+
+For example, if there is a group of seven FPS holders that delegate their power to each other in a circle, all seven FPS holders gain veto power if they collectively have at least 2% of the votes. (Note: the frontend currently ignores delegations when exercising veto rights. So to actually make use of the delegations, you have to do it directly on etherscan or so until this is implemented.)
 
 ## Proposal Submission
 

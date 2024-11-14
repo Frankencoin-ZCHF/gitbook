@@ -10,6 +10,5 @@
 * [📈 Investing and Pool Shares](pool-shares.md)
 * [🏦 Reserve](reserve.md)
 * [⚖️ Governance](governance.md)
-* [🌁 Stablecoin Bridges](swap.md)
 * [⁉️ Background FAQ](faq.md)
 * [🤖 Telegram API Bot](telegram-api-bot.md)
