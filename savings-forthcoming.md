@@ -1,15 +1,14 @@
 ---
 description: >-
   The savings module allows users to earn an interest on their Frankencoin
-  holdings. This feature is under review and is scheduled to be released by the
-  end of November.
+  holdings.
 ---
 
-# 💰 Savings (forthcoming)
+# 💰 Savings
 
 ### Overview
 
-The savings module ([frontend](https://app.frankencoin.com/savings),  [source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/Savings.sol), deployed contract TODO) takes money out of the equity pool and gives it to Frankencoin holders that have stored some of their Frankencoins in the savings module. The transferred amount depends on the currently applicable interest rate.
+The savings module ([frontend](https://app.frankencoin.com/savings),  [source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/Savings.sol), [deployed contract](https://etherscan.io/address/0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae)) takes money out of the equity pool and gives it to Frankencoin holders that have stored some of their Frankencoins in the savings module. The transferred amount depends on the currently applicable interest rate.
 
 <figure><img src=".gitbook/assets/image.png" alt=""><figcaption><p>Savers can acquire ZCHF (7), store them in the savings module (8) and earn an interest (9) paid for by the system.</p></figcaption></figure>
 
