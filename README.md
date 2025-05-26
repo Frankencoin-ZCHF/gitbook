@@ -26,7 +26,7 @@ The Frankencoin (ZCHF) can be used to make payments in Swiss francs. Please cons
 
 ### Store of Wealth
 
-The Swiss franc has an excellent track record of stability relative to other fiat currencies. Over the past fifty years it has lost XX% of its value, whereas the dollar and the euro have lost more than YY%. It is often considered a safe haven when the world is in turmoil. So far, crypto investors could not get significant Swiss franc exposure without going off-chain. For this use-case, it is important to be able to trade the ZCHF in high volumes at narrow spreads.
+The Swiss franc has an excellent track record of stability relative to other fiat currencies. For example, over the last 50 years, the US Dollar has lost more than 70% of its value against the Swiss Franc. It is often considered a safe haven when the world is in turmoil. So far, crypto investors could not get significant Swiss franc exposure without going off-chain. For this use-case, it is important to be able to trade the ZCHF in high volumes at narrow spreads.
 
 ### Borrowing / Seignorage
 
