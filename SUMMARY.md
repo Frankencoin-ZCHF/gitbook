@@ -12,3 +12,4 @@
 * [⚖️ Governance](governance.md)
 * [⁉️ Background FAQ](faq.md)
 * [🤖 Telegram API Bot](telegram-api-bot.md)
+* [Bridge to other Chains](bridge-to-other-chains.md)

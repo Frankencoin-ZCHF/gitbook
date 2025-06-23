@@ -46,7 +46,7 @@ Anyone can create additional pool shares by depositing reserve capital at any ti
 
 ### Proportional Capital Valuation
 
-In an approach inspired by the research paper "[The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract\_id=4189472)", the Frankencoin system evaluates itself at a constant multiple of its capital. This multiple is set to three. So if there is 1 million ZCHF in equity capital K, anyone can subscribe to new pool shares at a valuation of 3 million ZCHF, or also redeem old shares at that valuation. Mathematically, valuation V is:
+In an approach inspired by the research paper "[The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4189472)", the Frankencoin system evaluates itself at a constant multiple of its capital. This multiple is set to three. So if there is 1 million ZCHF in equity capital K, anyone can subscribe to new pool shares at a valuation of 3 million ZCHF, or also redeem old shares at that valuation. Mathematically, valuation V is:
 
 <figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption><p>Market cap as a function of capital</p></figcaption></figure>
 
@@ -60,11 +60,11 @@ From the above constraints follow that an investment of additional capital ΔK l
 
 Similarly, the same investment ΔK leads to a new price:
 
-<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
 
 One can verify that the valuation equation still holds after that investment by multiplying the number of shares with their price in order to obtain the new valuation:
 
-<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
+<figure><img src=".gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
 
 In other words: When someone invests into the Frankencoin system, two thirds of the increased market cap come from the price increase and one third comes from the increased number of shares.
 
