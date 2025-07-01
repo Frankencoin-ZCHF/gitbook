@@ -6,7 +6,9 @@ description: >-
 
 # 💰 Savings
 
-The Savings Module ([frontend](https://app.frankencoin.com/savings)) allows users to earn interest on their Frankencoin (ZCHF) holdings by storing them in the protocol. There are currently two types of savings modules available: SavingsV2 and SavingsReferral.
+([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/minting/v2/SavingsV2.sol), [deployed contract](https://etherscan.io/address/0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae))
+
+The Savings Module ([frontend](https://app.frankencoin.com/savings)) allows users to earn interest on their Frankencoin (ZCHF) holdings by storing them in the protocol.
 
 ### Overview
 
@@ -22,32 +24,63 @@ Anyone can store Frankencoins in the savings module. These Frankencoins are attr
 
 Frankencoins can be sent to the Savings module and withdrawn again at any time. However, there is a delay of three days until interest starts to accrue. The purpose of the delay is to discourage users from trying to earn an interest on Frankencoins that are held temporarily for transactional purposes. In case the user already has some Frankencoins in his savings account, the applicable delay is a weighted average between the already stored and the newly added Frankencoins.
 
-### Risks
-
-The main risk for the savers is the depeg risk, i.e. the Frankencoin having an exchange rate below 1.00 Swiss franc when the saved Frankencoins are withdrawn again. An additional small risk is that the interest rate can only be added to the balance as long as the system is solvent. The interest is paid from the equity capital of the system and if there is no equity capital left, no interest can be paid. There is no counterparty risk as the Frankencoins are never transferred outside the savings module. The users can be sure to get the stored Frankencoins back.
-
 ### Interest
 
 The applicable interest rate is determined by the [governance process](governance.md). The savings rate and the borrow rate are independent values. Proposed interest changes can be enacted after seven days if no veto was cast. For simplicity, the interest is only calculated on the principal amount. There is no interest on the accrued interest. The interest is automatically collected and added to the account whenever funds are added or withdrawn.
 
-## Savings Module Variants
-
-### Savings V2
-
-([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/minting/v2/SavingsV2.sol), [deployed contract](https://etherscan.io/address/0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae))
-
-The SavingsV2 Module is integrated with MintingHubV2, using a governance-controlled lead rate to determine the borrow rate across the system, including PositionV2.
-
-Interest on deposited funds in the SavingsV2 Module begins to accrue after a 3-day locktime, discouraging short-term or transactional deposits.
-
-### Savings Referral
+## SavingReferral
 
 ([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/savings/Savings.sol), [deployed contract](https://etherscan.io/address/0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38))
 
-The SavingsReferral Module operates independently from the minting hubs and introduces a referral-based incentive system designed to encourage network growth.
+The **SavingsReferral Module** introduces a referral-based incentive layer on top of Frankencoin's decentralized savings infrastructure. It is designed to help wallets, dApps, and integrators build sustainable revenue models while offering a native Swiss Franc-denominated yield product to their users. Using the SavingsReferral module, builders can get up to 25% of the savings earned by "their" users.
 
-Users can deposit Frankencoins and withdraw at any time without a lock period, making it more flexible than the SavingsV2 Module. However, interest still begins accruing only after a 3-day delay, consistent with the system’s overall design to discourage short-term deposits.
+### How It Works
 
-A key feature of this module is the ability to assign a referrer address, allowing interest earnings to be shared between the saver and their referrer. The system supports a maximum referral split of 25%, meaning up to a quarter of the earned interest can be allocated to the referrer.
+1. A frontend/wallet integrates the savings UI
+2. When calling `save()` or `adjust()` methods, a **referrer address** and **referral fee (ppm)** are passed
+3. Interest accrues on user deposits after a 3-day delay
+4. When interest is claimed, the smart contract:
+   * Pays the user
+   * Automatically redirects up to 25% of earned interest to the referrer
 
-**Please note:** Frontend support for the SavingsV2 Module is planned to be phased out and replaced by support for the SavingsReferral Module. Users may eventually need to interact with SavingsV2 through alternative interfaces or directly via smart contracts.
+### Integration Details
+
+* Call `save(amount, referrer, referralFeePPM)` or `adjust(targetAmount, referrer, referralFeePPM)`
+* Max referral fee is **250,000 ppm** (25%)
+
+### Wallet Implementation Guide
+
+To ensure users of your wallet automatically assign your address as the referrer:
+
+* Add a custom savings integration UI that interfaces with the Frankencoin contract
+* In the backend or UI logic, always pass your designated referrer address and chosen referral fee (e.g., 200\_000 ppm) to the `save()` or `adjust()` calls
+* Example:
+
+```solidity
+savings.save(1_000e18, 0xYourFrontendAddress, 200_000); // 20% referral fee
+```
+
+* Optional: Give users the ability to drop/change their referrer, or hide this setting depending on UX goals
+
+### Claiming Accrued Referral Fees
+
+Referral fees are automatically distributed to the referrer whenever a user’s interest is collected. Referrers do not need to actively claim fees — they are transferred on-chain in real-time as interest is paid out to users.
+
+However, **interest collection must be triggered** manually by calling `refresh()` or `refreshBalance()` on the user’s account. This can be done by:
+
+* The user
+* The referrer (to collect their share)
+* A third party (e.g., a keeper bot)
+
+This means that a referrer can actively call `refresh()` on behalf of their referred users to ensure interest (and thus their fee) is paid out regularly.
+
+### Using the Frankencoin App to Refer Users
+
+You can also use the Frankencoin App to share referral links as follows:
+
+```
+<https://app.frankencoin.com/savings?referrer=0x123...4&fee=500>
+```
+
+This will automatically set the referrer and fee when the user lands on the page and initiates a savings deposit.
+
