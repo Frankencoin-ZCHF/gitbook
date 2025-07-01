@@ -1,5 +1,6 @@
 ---
 description: How Frankencoins can be transferred acrossdifferent blockchains
+hidden: true
 icon: bridge
 ---
 
