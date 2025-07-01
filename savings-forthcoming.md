@@ -28,7 +28,7 @@ Frankencoins can be sent to the Savings module and withdrawn again at any time. 
 
 The applicable interest rate is determined by the [governance process](governance.md). The savings rate and the borrow rate are independent values. Proposed interest changes can be enacted after seven days if no veto was cast. For simplicity, the interest is only calculated on the principal amount. There is no interest on the accrued interest. The interest is automatically collected and added to the account whenever funds are added or withdrawn.
 
-## SavingReferral
+## Referral Module
 
 ([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/savings/Savings.sol), [deployed contract](https://etherscan.io/address/0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38))
 
