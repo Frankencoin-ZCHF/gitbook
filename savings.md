@@ -43,10 +43,29 @@ The **SavingsReferral Module** introduces a referral-based incentive layer on to
    * Pays the user
    * Automatically redirects up to 25% of earned interest to the referrer
 
-### Integration Details
+### Using the Frankencoin App to Refer Users
 
-* Call `save(amount, referrer, referralFeePPM)` or `adjust(targetAmount, referrer, referralFeePPM)`
-* Max referral fee is **250,000 ppm** (25%)
+You can also use the Frankencoin App to share referral links as follows:
+
+```
+<https://app.frankencoin.com/savings?referrer=0x123...4&fee=500>
+```
+
+This will automatically set the referrer and fee when the user lands on the page and initiates a savings deposit.
+
+### Claiming Accrued Referral Fees
+
+Referral fees are automatically distributed to the referrer whenever a user’s interest is collected. Referrers do not need to actively claim fees — they are transferred on-chain in real-time as interest is paid out to users.
+
+However, **interest collection must be triggered** manually by calling `refresh()` or `refreshBalance()` on the user’s account. This can be done by:
+
+* The user
+* The referrer (to collect their share)
+* A third party (e.g., a keeper bot)
+
+This means that a referrer can actively call `refresh()` on behalf of their referred users to ensure interest (and thus their fee) is paid out regularly.
+
+
 
 ### Wallet Implementation Guide
 
@@ -62,25 +81,10 @@ savings.save(1_000e18, 0xYourFrontendAddress, 200_000); // 20% referral fee
 
 * Optional: Give users the ability to drop/change their referrer, or hide this setting depending on UX goals
 
-### Claiming Accrued Referral Fees
+### Integration Details
 
-Referral fees are automatically distributed to the referrer whenever a user’s interest is collected. Referrers do not need to actively claim fees — they are transferred on-chain in real-time as interest is paid out to users.
+* Call `save(amount, referrer, referralFeePPM)` or `adjust(targetAmount, referrer, referralFeePPM)`
+* Max referral fee is **250,000 ppm** (25%)
 
-However, **interest collection must be triggered** manually by calling `refresh()` or `refreshBalance()` on the user’s account. This can be done by:
 
-* The user
-* The referrer (to collect their share)
-* A third party (e.g., a keeper bot)
-
-This means that a referrer can actively call `refresh()` on behalf of their referred users to ensure interest (and thus their fee) is paid out regularly.
-
-### Using the Frankencoin App to Refer Users
-
-You can also use the Frankencoin App to share referral links as follows:
-
-```
-<https://app.frankencoin.com/savings?referrer=0x123...4&fee=500>
-```
-
-This will automatically set the referrer and fee when the user lands on the page and initiates a savings deposit.
 
