@@ -2,7 +2,7 @@
 
 * [🧀 Overview](README.md)
 * [Bridge to other Chains](bridge-to-other-chains.md)
-* [💰 Savings](savings-forthcoming.md)
+* [💰 Savings](savings.md)
 * [🖨️ Collateralized Minting](positions/README.md)
   * [Opening New Positions](positions/open.md)
   * [Cloning Existing Positions](positions/clone.md)
