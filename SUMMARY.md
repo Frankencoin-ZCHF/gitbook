@@ -12,4 +12,5 @@
 * [🏦 Reserve](reserve.md)
 * [⚖️ Governance](governance.md)
 * [⁉️ Background FAQ](faq.md)
+* [🪪 Wallet Integration](wallet-integration.md)
 * [🤖 Telegram API Bot](telegram-api-bot.md)
