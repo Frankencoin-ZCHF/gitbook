@@ -78,29 +78,29 @@ struct Account {
 
 ```solidity
 // Refresh and return the current balance for an account
-function refreshBalance(address owner) public returns (uint192)
+function refreshBalance(address owner) public returns (uint192);
 
 // View accrued interest for an account at current time
-function accruedInterest(address accountOwner) public view returns (uint192)
+function accruedInterest(address accountOwner) public view returns (uint192);
 
 // View accrued interest for an account at a specific timestamp
-function accruedInterest(address accountOwner, uint256 timestamp) public view returns (uint192)
+function accruedInterest(address accountOwner, uint256 timestamp) public view returns (uint192);
 ```
 
 #### Basic Operations
 
 ```solidity
 // Save ZCHF from caller's wallet
-function save(uint192 amount) public
+function save(uint192 amount) public;
 
 // Save ZCHF on behalf of another address
-function save(address owner, uint192 amount) public
+function save(address owner, uint192 amount) public;
 
 // Withdraw ZCHF to a target address
-function withdraw(address target, uint192 amount) public returns (uint256)
+function withdraw(address target, uint192 amount) public returns (uint256);
 
 // Adjust savings to a target amount (save or withdraw as needed)
-function adjust(uint192 targetAmount) public
+function adjust(uint192 targetAmount) public;
 ```
 
 #### Referral Functions
@@ -109,16 +109,16 @@ The savings module includes a referral system that allows wallets and frontends 
 
 ```solidity
 // Save with referrer
-function save(uint192 amount, address referrer, uint24 referralFeePPM) public
+function save(uint192 amount, address referrer, uint24 referralFeePPM) public;
 
 // Withdraw with referrer
-function withdraw(uint192 amount, address referrer, uint24 referralFeePPM) public
+function withdraw(uint192 amount, address referrer, uint24 referralFeePPM) public;
 
 // Adjust with referrer
-function adjust(uint192 targetAmount, address referrer, uint24 referralFeePPM) public
+function adjust(uint192 targetAmount, address referrer, uint24 referralFeePPM) public;
 
 // Drop the current referrer
-function dropReferrer() public
+function dropReferrer() public;
 ```
 
 ### Referral Logic
@@ -545,7 +545,7 @@ This package provides typed API clients and utilities for interacting with the F
 
 ## Smart Contract Addresses
 
-For the latest contract addresses across all supported chains, please refer to the [official Frankencoin documentation](https://docs.frankencoin.com) or the [GitHub repository](https://github.com/Frankencoin-ZCHF/Frankencoin).
+For the latest contract addresses across all supported chains, please refer to the [official Frankencoin Landing Page](https://frankencoin.com) or the [GitHub repository](https://github.com/Frankencoin-ZCHF/Frankencoin).
 
 ## Support and Resources
 
