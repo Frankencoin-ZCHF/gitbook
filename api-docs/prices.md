@@ -33,23 +33,41 @@ These ratios indicate how well-backed the ZCHF stablecoin is by collateral.
 
 ## Main Endpoints
 
-### Current Prices
+### Prices Controller
 
-- `GET /prices` - Get current prices for all collateral assets
+#### Current Prices
 
-Returns a simple mapping of collateral addresses to current prices.
+- `GET /prices/ticker/:ticker` - Get price for a specific ticker symbol (e.g., WBTC, WETH, FPS)
+- `GET /prices/list` - Get all token prices with metadata
+- `GET /prices/mapping` - Get prices as address-keyed mapping for efficient lookup
 
-### Price History
+#### Token Information
 
-- `GET /prices/history/list` - Complete price history for all collateral types
+- `GET /prices/erc20/mint` - Get Frankencoin (ZCHF) token information
+- `GET /prices/erc20/fps` - Get FPS token information
+- `GET /prices/erc20/collateral` - Get all collateral token information
+
+#### Owner Analytics
+
+- `GET /prices/owner/:address/valueLocked` - Get historical time series of total value locked by owner
+
+#### Market Data
+
+- `GET /prices/marketChart` - Get Frankencoin market chart data from CoinGecko (prices, market caps, volumes)
+
+### Prices History Controller
+
+#### Price History
+
+- `GET /prices/history/list` - Complete price history for all collateral types with CHF prices
 - `GET /prices/history/:address` - Price history for a specific collateral token
 
 The history endpoint for a specific token returns:
 - Token metadata (name, symbol, decimals, address)
-- Current price
-- Historical prices as a time-series (timestamp → price mapping)
+- Current price in CHF
+- Historical prices as a time-series (timestamp → CHF price mapping)
 
-### Collateralization Ratios
+#### Collateralization Ratios
 
 - `GET /prices/history/ratio` - Historical collateralization ratio data
 
@@ -65,10 +83,20 @@ Returns:
 Fetch current prices to calculate if positions are adequately collateralized:
 
 ```
-GET /prices
+GET /prices/list
 ```
 
 Then compare position collateral value against minted amount.
+
+### Quick Price Lookup by Ticker
+
+Get the price of a specific token by its symbol:
+
+```
+GET /prices/ticker/WBTC
+```
+
+Returns price in USD and CHF for WBTC.
 
 ### Price Charts
 
@@ -94,7 +122,7 @@ Display ratios over time to show protocol health trends.
 
 Compare current prices against position liquidation thresholds to alert users of risks:
 
-1. Get current price: `GET /prices`
+1. Get current prices: `GET /prices/list`
 2. Fetch user's positions: `GET /positions/owner/:address`
 3. Calculate collateralization ratios
 4. Alert if approaching liquidation levels
@@ -109,16 +137,75 @@ GET /prices/history/list
 
 Analyze which collateral types are most stable or volatile.
 
+### Token Metadata Lookup
+
+Get ERC20 information for system tokens:
+
+```
+GET /prices/erc20/mint        # ZCHF token info
+GET /prices/erc20/fps         # FPS token info
+GET /prices/erc20/collateral  # All collateral tokens
+```
+
+### Owner Value Tracking
+
+Track historical value locked by a specific owner across all their positions:
+
+```
+GET /prices/owner/0x963eC454423CD543dB08bc38fC7B3036B425b301/valueLocked
+```
+
+Returns yearly time series of total collateral value.
+
+### Market Data Integration
+
+Fetch CoinGecko market data for Frankencoin:
+
+```
+GET /prices/marketChart
+```
+
+Returns prices, market caps, and trading volumes over time.
+
 ## Data Structure
 
-### Current Price Response
+### Price List Response
 
-Simple object mapping collateral addresses to prices:
+Array of price objects with metadata:
+
+```json
+[
+  {
+    "address": "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
+    "name": "Frankencoin Pool Share",
+    "symbol": "FPS",
+    "decimals": 18,
+    "timestamp": 1768915146172,
+    "price": {
+      "usd": 1555.45,
+      "chf": 1234.49
+    }
+  }
+]
+```
+
+### Price Mapping Response
+
+Object mapping addresses to price data:
 
 ```json
 {
-  "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599": "95000.00",
-  "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0": "3500.00"
+  "0x1ba26788dfde592fec8bcb0eaff472a42be341b2": {
+    "address": "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
+    "name": "Frankencoin Pool Share",
+    "symbol": "FPS",
+    "decimals": 18,
+    "timestamp": 1768915146172,
+    "price": {
+      "usd": 1555.45,
+      "chf": 1234.49
+    }
+  }
 }
 ```
 
@@ -206,19 +293,22 @@ The free float ratio is typically higher (more conservative) than the total supp
 
 ```javascript
 // 1. Get current prices
-const prices = await fetch('https://api.frankencoin.com/prices').then(r => r.json());
+const pricesData = await fetch('https://api.frankencoin.com/prices/mapping').then(r => r.json());
 
 // 2. Get user positions
-const positions = await fetch(`https://api.frankencoin.com/positions/owner/${address}`).then(r => r.json());
+const positions = await fetch(`https://api.frankencoin.com/positions/owners`).then(r => r.json());
+const userPositions = positions.map[address] || [];
 
 // 3. Calculate health for each position
-positions.map.forEach(position => {
-  const collateralPrice = prices[position.collateral];
-  const collateralValue = position.collateralBalance * collateralPrice;
-  const ratio = collateralValue / position.minted;
+userPositions.forEach(position => {
+  const priceInfo = pricesData[position.collateral.toLowerCase()];
+  const collateralPrice = priceInfo.price.usd;
+  const collateralValue = (position.collateralBalance / Math.pow(10, position.collateralDecimals)) * collateralPrice;
+  const mintedValue = position.minted / 1e18;
+  const ratio = collateralValue / mintedValue;
 
   if (ratio < 1.2) {
-    console.warn(`Position ${position.position} is at risk!`);
+    console.warn(`Position ${position.position} is at risk! Ratio: ${ratio.toFixed(2)}`);
   }
 });
 ```

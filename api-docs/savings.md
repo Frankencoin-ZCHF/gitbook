@@ -36,29 +36,50 @@ Access core savings module data including balances, rates, and transaction histo
 
 ### Endpoints
 
-- `GET /savings/core/info` - Complete savings module information across all chains
-- `GET /savings/core/list` - List all savings events (deposits, withdrawals, interest payments)
-- `GET /savings/core/account/:address` - Get savings data for a specific account
+- `GET /savings/core/info` - Complete savings ecosystem information across all chains and modules
+- `GET /savings/core/ranked` - Get ranked savings accounts by balance (top 1000)
+- `GET /savings/core/balance/:account` - Get savings balance for a specific account
+- `GET /savings/core/activity/:account` - Get savings activity history for a specific account
 
 ### What It Provides
 
-**Per-Chain Data**:
-- Module contract address
-- Total balance in savings
+#### `/info` endpoint:
+
+**Per-Chain and Module Status**:
+
+- Module contract addresses
+- Total balance in each module
 - Accrued interest
-- Total deposits and withdrawals
-- Current interest rate
-- Event counters (interest payments, rate changes, rate proposals)
+- Total saved and withdrawn amounts
+- Current interest rate (in PPM)
+- Event counters (interest collections, rate changes, rate proposals, save/withdraw transactions)
 
 **Aggregate Metrics**:
-- Total balance across all chains
-- Percentage of total ZCHF supply in savings
-- Total interest earned system-wide
 
-**Account-Specific Data**:
-- User's balance on each chain
-- Interest earned by the user
-- Deposit and withdrawal history
+- Total balance across all modules
+- Ratio of ZCHF total supply in savings
+- Total interest collected system-wide
+
+#### `/ranked` endpoint:
+
+- Latest 1000 savings accounts sorted by balance
+- Balance, save/interest/withdraw totals per account
+- Transaction counters per account
+- Chain and module information
+
+#### `/balance/:account` endpoint:
+
+- Account balance organized by chain ID and module address
+- Created and updated timestamps
+- Save, interest, and withdraw totals
+- Transaction counters
+
+#### `/activity/:account` endpoint:
+
+- Recent activity history (Saved, Withdrawn, InterestCollected, RateChanged events)
+- Amounts, balances, timestamps
+- Transaction hashes and block heights
+- Current rates at time of activity
 
 ### Use Cases
 
@@ -75,99 +96,160 @@ GET /savings/core/info
 Show a user's savings balance and earned interest:
 
 ```
-GET /savings/core/account/0x963eC454423CD543dB08bc38fC7B3036B425b301
+GET /savings/core/balance/0x963eC454423CD543dB08bc38fC7B3036B425b301
 ```
 
-#### Yield Comparison
+#### Activity Tracking
 
-Compare savings rates across different chains (though typically they're uniform):
+View complete transaction history for an account:
 
 ```
-GET /savings/core/info
+GET /savings/core/activity/0x963eC454423CD543dB08bc38fC7B3036B425b301
 ```
 
-Filter the response by chain ID to compare rates.
+#### Leaderboard
+
+Display top savers in the ecosystem:
+
+```
+GET /savings/core/ranked
+```
 
 ## Leadrate Controller
 
-Access lead rate calculations, which represent the competitive interest rate the protocol should offer.
+Access lead rate information, proposals, and approved rates across all chains and savings modules.
 
 ### Endpoints
 
-- `GET /savings/leadrate/current` - Get current lead rate calculation
-- `GET /savings/leadrate/history` - Historical lead rate data
+- `GET /savings/leadrate/info` - Complete lead rate information including current rates, proposals, and open proposals
+- `GET /savings/leadrate/rates` - Currently approved lead rates per chain and module
+- `GET /savings/leadrate/proposals` - All lead rate proposals and their history
 
 ### What It Provides
 
-- Calculated lead rate based on protocol metrics
-- Components used in the lead rate formula
-- Historical evolution of the lead rate
-- Comparison between lead rate and actual savings rate
+#### `/info` endpoint:
+
+**Current Approved Rates** per chain and module:
+
+- Approved interest rate in PPM
+- Approval timestamp and transaction hash
+- Rate change counter
+
+**Proposed Rate Changes** per chain and module:
+
+- Proposer address
+- Next rate to be applied
+- Timestamp when rate will change
+- Proposal transaction details
+
+**Open Proposals**:
+
+- Pending rate proposals awaiting execution
+- Comparison between current and next rates
+- Sync status across chains
+
+#### `/rates` endpoint:
+
+- Latest approved rate per module
+- Complete historical list of all rate changes
+- Rate progression over time
+
+#### `/proposals` endpoint:
+
+- Latest proposal per module
+- Complete historical list of all proposals
+- Proposer information and timing
 
 ### Use Cases
 
 #### Rate Policy Monitoring
 
-Compare the current savings rate to the calculated lead rate:
+View current rates and pending proposals:
 
 ```
-GET /savings/leadrate/current
-GET /savings/core/info
+GET /savings/leadrate/info
 ```
 
-If the actual rate differs significantly from the lead rate, it may indicate a need for rate adjustment.
+Track when rate changes will take effect.
 
-#### Rate Trend Analysis
+#### Rate History Analysis
 
-Track how the competitive rate has evolved:
+Review how interest rates have evolved:
 
 ```
-GET /savings/leadrate/history
+GET /savings/leadrate/rates
 ```
 
-Chart this data to show rate trends over time.
+Analyze rate adjustment patterns.
+
+#### Governance Participation
+
+Monitor rate proposals to participate in governance:
+
+```
+GET /savings/leadrate/proposals
+```
+
+View who proposed changes and when they'll be executed.
 
 ## Referrer Controller
 
-Access referrer program data for tracking who refers new savers and their rewards.
+Access referrer program data for tracking savings accounts that use referrers and their earnings.
 
 ### Endpoints
 
-- `GET /savings/referrer/list` - List all referrers and their referral counts
-- `GET /savings/referrer/address/:address` - Get referrer statistics for a specific address
-- `GET /savings/referrer/referred/:address` - See who referred a specific address
+- `GET /savings/referrer/:referrer/mapping` - Get all savings accounts using a specific referrer
+- `GET /savings/referrer/:referrer/earnings` - Get total earnings for a specific referrer
 
 ### What It Provides
 
-- Referrer addresses and their referral counts
-- Rewards earned by referrers
-- Referral relationships (who referred whom)
-- Referrer performance metrics
+#### `/:referrer/mapping` endpoint:
+
+**Account Mapping** organized by chain ID, module, and account address:
+
+- Account creation and update timestamps
+- Current savings balance
+- Referrer address and fee percentage (in PPM)
+- Total number of accounts using this referrer
+- Array of all account addresses
+
+#### `/:referrer/earnings` endpoint:
+
+**Earnings Breakdown**:
+
+- Nested mapping of earnings: chain → module → account → amount
+- Total earnings per chain
+- Overall total earnings across all chains
 
 ### Use Cases
 
 #### Referral Program Dashboard
 
-Display top referrers and their statistics:
+View all accounts referred by a specific address:
 
 ```
-GET /savings/referrer/list
+GET /savings/referrer/0x0000000000000000000000000000000000000000/mapping
 ```
+
+For default referrer (zero address), shows unreferred accounts.
 
 #### Referrer Rewards Tracking
 
-Show rewards earned by a specific referrer:
+Calculate total earnings for a referrer:
 
 ```
-GET /savings/referrer/address/0x963eC454423CD543dB08bc38fC7B3036B425b301
+GET /savings/referrer/0x963eC454423CD543dB08bc38fC7B3036B425b301/earnings
 ```
 
-#### Referral Verification
+Shows breakdown of earnings per account and chain.
 
-Check if a user was referred and by whom:
+#### Referral Performance Analysis
+
+Combine both endpoints to analyze referrer performance:
 
 ```
-GET /savings/referrer/referred/0x6a4a629d14EC0fc8e2b7DB41949FefaA4F63327F
+GET /savings/referrer/:address/mapping  # Get account count
+GET /savings/referrer/:address/earnings # Get total rewards
 ```
 
 ## Data Structure
@@ -176,31 +258,32 @@ GET /savings/referrer/referred/0x6a4a629d14EC0fc8e2b7DB41949FefaA4F63327F
 
 ```json
 {
-  "status": {
-    "1": {  // Ethereum
-      "0xmodule_address": {
-        "chainId": 1,
-        "updated": 1768964400,
-        "module": "0x...",
-        "balance": "1000000000000000000000000",
-        "interest": "50000000000000000000000",
-        "save": "1200000000000000000000000",
-        "withdraw": "200000000000000000000000",
-        "rate": "500000000000000000",
-        "counter": {
-          "interest": 100,
-          "rateChanged": 5,
-          "rateProposed": 8,
-          "save": 1500,
-          "withdraw": 300
-        }
-      }
-    },
-    // ... other chains
-    "totalBalance": 5000000.00,
-    "ratioOfSupply": 0.25,
-    "totalInterest": 250000.00
-  }
+	"status": {
+		"1": {
+			// Ethereum
+			"0xmodule_address": {
+				"chainId": 1,
+				"updated": 1768964400,
+				"module": "0x...",
+				"balance": "1000000000000000000000000",
+				"interest": "50000000000000000000000",
+				"save": "1200000000000000000000000",
+				"withdraw": "200000000000000000000000",
+				"rate": "500000000000000000",
+				"counter": {
+					"interest": 100,
+					"rateChanged": 5,
+					"rateProposed": 8,
+					"save": 1500,
+					"withdraw": 300
+				}
+			}
+		},
+		// ... other chains
+		"totalBalance": 5000000.0,
+		"ratioOfSupply": 0.25,
+		"totalInterest": 250000.0
+	}
 }
 ```
 
@@ -208,15 +291,15 @@ GET /savings/referrer/referred/0x6a4a629d14EC0fc8e2b7DB41949FefaA4F63327F
 
 ```json
 {
-  "address": "0x963eC454423CD543dB08bc38fC7B3036B425b301",
-  "chains": {
-    "1": {
-      "balance": "1000000000000000000000",
-      "interest": "50000000000000000000"
-    }
-  },
-  "totalBalance": "1000000000000000000000",
-  "totalInterest": "50000000000000000000"
+	"address": "0x963eC454423CD543dB08bc38fC7B3036B425b301",
+	"chains": {
+		"1": {
+			"balance": "1000000000000000000000",
+			"interest": "50000000000000000000"
+		}
+	},
+	"totalBalance": "1000000000000000000000",
+	"totalInterest": "50000000000000000000"
 }
 ```
 
@@ -224,15 +307,19 @@ GET /savings/referrer/referred/0x6a4a629d14EC0fc8e2b7DB41949FefaA4F63327F
 
 ### Rate Format
 
-Interest rates in the API are typically expressed in wei (1e18 precision):
-- `500000000000000000` = 0.5 = 50% APY
-- `30000000000000000` = 0.03 = 3% APY
+Interest rates in the API are expressed in PPM (parts per million):
 
-To convert to percentage: `(rate / 1e18) * 100`
+- `40000` = 4% APY (40000 / 1000000 = 0.04)
+- `15000` = 1.5% APY (15000 / 1000000 = 0.015)
+
+To convert to percentage: `(rate / 1000000) * 100`
+
+Referrer fees are also in PPM.
 
 ### Rate Calculation
 
 The lead rate is calculated using:
+
 - Borrowing costs from positions
 - FPS token earnings
 - Protocol revenue
@@ -244,31 +331,41 @@ The lead rate is calculated using:
 
 ```javascript
 // Fetch current rate
-const savingsInfo = await fetch('https://api.frankencoin.com/savings/core/info')
-  .then(r => r.json());
+const savingsInfo = await fetch(
+	'https://api.frankencoin.com/savings/core/info',
+).then((r) => r.json());
 
-// Get rate from Ethereum mainnet
-const ethModule = Object.values(savingsInfo.status[1])[0];
-const rate = ethModule.rate / 1e18; // Convert to decimal
+// Get rate from Ethereum mainnet module
+const ethModule = Object.values(savingsInfo.status['1'])[0];
+const rate = ethModule.rate / 1000000; // Convert from PPM to decimal
 
 // Calculate estimated earnings
 const principal = 10000; // ZCHF
 const timeYears = 1;
 const interest = principal * rate * timeYears;
-console.log(`Estimated interest: ${interest} ZCHF`);
+console.log(`Estimated interest: ${interest.toFixed(2)} ZCHF`);
+console.log(`Current APY: ${(rate * 100).toFixed(2)}%`);
 ```
 
 ### Savings Tracker
 
 ```javascript
 // Get user's current savings
-const account = await fetch(`https://api.frankencoin.com/savings/core/account/${userAddress}`)
-  .then(r => r.json());
+const account = await fetch(
+	`https://api.frankencoin.com/savings/core/balance/${userAddress}`,
+).then((r) => r.json());
 
-// Display across all chains
-Object.entries(account.chains).forEach(([chainId, data]) => {
-  console.log(`Chain ${chainId}: ${data.balance / 1e18} ZCHF`);
-  console.log(`Interest earned: ${data.interest / 1e18} ZCHF`);
+// Display across all chains and modules
+Object.entries(account).forEach(([chainId, modules]) => {
+	Object.entries(modules).forEach(([moduleAddress, data]) => {
+		console.log(`Chain ${chainId}, Module ${moduleAddress}:`);
+		console.log(
+			`  Balance: ${(BigInt(data.balance) / BigInt(1e18)).toString()} ZCHF`,
+		);
+		console.log(
+			`  Interest earned: ${(BigInt(data.interest) / BigInt(1e18)).toString()} ZCHF`,
+		);
+	});
 });
 ```
 

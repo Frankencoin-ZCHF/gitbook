@@ -15,17 +15,33 @@ The Ecosystem API is organized into four main controllers:
 
 Access comprehensive information about the ZCHF stablecoin across all supported blockchains.
 
-### Endpoint
+### Endpoints
 
-- `GET /ecosystem/frankencoin/info`
+- `GET /ecosystem/frankencoin/info` - Complete Frankencoin ecosystem information
+- `GET /ecosystem/frankencoin/keyvalues` - Key-value mapping of ecosystem metrics and counters
+- `GET /ecosystem/frankencoin/totalsupply` - Historical time series of total supply with multichain allocation
 
 ### What It Provides
 
+#### `/info` endpoint:
 - **ERC20 Details**: Token name, symbol, decimals
 - **Multichain Data**: Supply and contract addresses on each blockchain (Ethereum, Optimism, Base, Arbitrum, Polygon, Gnosis, Avalanche, etc.)
 - **Token Metrics**: Current USD price, total supply across all chains
 - **FPS Information**: FPS price, supply, and market cap
 - **TVL**: Total value locked in USD and CHF
+
+#### `/keyvalues` endpoint:
+- Transaction counters and analytics
+- Equity metrics (investments, redemptions, profits/losses)
+- Minter statistics
+- Position and challenge counters
+- Savings totals
+- Transfer reference counts
+
+#### `/totalsupply` endpoint:
+- Historical daily snapshots of total supply (last 1000 days)
+- Multichain allocation breakdown per timestamp
+- Supply evolution tracking
 
 ### Use Cases
 
@@ -34,6 +50,8 @@ Access comprehensive information about the ZCHF stablecoin across all supported 
 - Display current token price and supply
 - Build multichain explorers
 - Analyze which chains have the most ZCHF activity
+- Track ecosystem-wide counters and metrics
+- Chart historical supply growth and distribution
 
 ## FPS Controller
 
@@ -62,44 +80,62 @@ Query data about the Frankencoin Pool Shares (FPS) token, which represents owner
 
 ## Minter Controller
 
-Access information about minting hub contracts, which are the factories that create and manage positions.
+Access information about minter proposals, which are requests to authorize new minting contracts in the Frankencoin ecosystem.
 
 ### Endpoints
 
-- `GET /ecosystem/minter/list` - List all minter contracts
-- `GET /ecosystem/minter/address/:address` - Get specific minter details
+- `GET /ecosystem/minter/list` - List all minter proposals across all chains
+- `GET /ecosystem/minter/list/:chainId` - Get minter proposals filtered by specific chain
 
 ### What It Provides
 
-- **Minter Identification**: Contract address, version (V1, V2)
-- **Status**: Active, deprecated, or proposed
-- **Capabilities**: What types of positions this minter can create
-- **Statistics**: Number of positions created, total minted amount
-- **Blockchain Info**: Which chain the minter operates on
+- **Proposal Details**: Minter contract address, application period, application fee
+- **Status Information**: Application date, denial status (if any)
+- **Proposer Info**: Address of the proposer, suggestor
+- **Metadata**: Transaction hash, proposal description, denial reason
+- **Chain Info**: Which blockchain the minter operates on
 
 ### Use Cases
 
-- Identify which minters to use for creating positions
-- Track minting activity across different hub versions
+- Track new minter contract proposals
+- Monitor minter approval status
+- Filter minters by specific blockchain
 - Verify minter contract addresses for integrations
-- Analyze adoption of newer minting hub versions
-- Monitor protocol upgrades and migrations
+- Analyze minter proposal activity across chains
+- View denied proposals and reasons
 
 ## Collateral Controller
 
-Query approved collateral types and their properties.
+Query approved collateral types and their properties, usage statistics, and position relationships.
 
 ### Endpoints
 
-- `GET /ecosystem/collateral/list` - List all approved collateral types
+- `GET /ecosystem/collateral/list` - Array list of all collateral tokens used in positions
+- `GET /ecosystem/collateral/mapping` - Collateral information as an address-keyed mapping
+- `GET /ecosystem/collateral/positions` - Mapping of collateral addresses to position addresses
+- `GET /ecosystem/collateral/positions/details` - Mapping of collateral addresses to complete position details
+- `GET /ecosystem/collateral/stats` - Comprehensive statistics for each collateral type
 
 ### What It Provides
 
-- **Token Details**: Address, name, symbol, decimals
-- **Approval Status**: Whether collateral is active, proposed, or denied
-- **Risk Parameters**: Typical interest rates, LTV ratios, reserve contributions
-- **Usage Statistics**: Number of positions using this collateral, total amount minted
-- **Price Data**: Current collateral price feed information
+#### `/list` and `/mapping` endpoints:
+- **Token Details**: Address, name, symbol, decimals for each collateral type
+
+#### `/positions` endpoint:
+- Collateral token information
+- Count of positions using each collateral
+- Array of position contract addresses per collateral
+
+#### `/positions/details` endpoint:
+- Everything from `/positions` plus:
+- Complete position objects for each collateral type
+- Full position details including balances, minted amounts, owners
+
+#### `/stats` endpoint:
+- **Position Counts**: Total, open, requested, closed, denied, originals, clones
+- **Financial Metrics**: Total minted, total limits, collateral balance
+- **Pricing**: Current collateral price in USD and CHF
+- **TVL**: Total value locked per collateral and overall system TVL
 
 ### Use Cases
 
@@ -107,8 +143,10 @@ Query approved collateral types and their properties.
 - Validate collateral addresses before position creation
 - Show collateral statistics (most popular, highest minted amounts)
 - Filter positions by collateral type
-- Build collateral comparison tools
-- Monitor new collateral proposals
+- Build collateral comparison and analysis tools
+- Monitor TVL distribution across collateral types
+- Analyze collateral concentration risk
+- Track which collaterals are most actively used
 
 ## Integration Examples
 
