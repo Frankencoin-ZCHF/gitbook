@@ -2,6 +2,7 @@
 description: >-
   A long list of all kind of risks that users of the Frankencoin system are
   exposed to and how to handle them.
+hidden: true
 ---
 
 # 🚒 Risks
