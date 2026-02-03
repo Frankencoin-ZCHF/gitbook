@@ -1,8 +1,10 @@
 ---
-description: Developer guide for integrating Frankencoin and the Savings Module into wallets and applications
+description: >-
+  Developer guide for integrating Frankencoin and the Savings Module into
+  wallets and applications
 ---
 
-# 🪪 Wallet Integration
+# Wallet Integration
 
 This guide provides developers with the technical details needed to integrate Frankencoin (ZCHF) and its native savings module into wallets, applications, and services.
 
@@ -12,12 +14,12 @@ This guide provides developers with the technical details needed to integrate Fr
 
 Frankencoin is a standard ERC-20 token that implements all standard functions:
 
--   `balanceOf(address account)`
--   `totalSupply()`
--   `transfer(address to, uint256 amount)`
--   `transferFrom(address from, address to, uint256 amount)`
--   `allowance(address owner, address spender)`
--   `approve(address spender, uint256 amount)`
+* `balanceOf(address account)`
+* `totalSupply()`
+* `transfer(address to, uint256 amount)`
+* `transferFrom(address from, address to, uint256 amount)`
+* `allowance(address owner, address spender)`
+* `approve(address spender, uint256 amount)`
 
 ### Multi-chain Support
 
@@ -25,8 +27,7 @@ Frankencoin is deployed across multiple blockchain networks, allowing users to i
 
 ### Interface Reference
 
-The complete ERC-20 interface can be found in the official repository:
-[IERC20.sol](https://github.com/Frankencoin-ZCHF/Frankencoin/blob/main/contracts/erc20/IERC20.sol)
+The complete ERC-20 interface can be found in the official repository: [IERC20.sol](https://github.com/Frankencoin-ZCHF/Frankencoin/blob/main/contracts/erc20/IERC20.sol)
 
 ## Savings Module Integration
 
@@ -36,10 +37,10 @@ The Frankencoin savings module allows users to lock up Frankencoins to earn yiel
 
 The savings module uses an `Account` structure that tracks:
 
--   `saved`: Amount of ZCHF currently saved
--   `ticks`: Internal counter for interest calculation
--   `referrer`: Optional address for referral fees
--   `referralFeePPM`: Referral fee in parts per million (ppm)
+* `saved`: Amount of ZCHF currently saved
+* `ticks`: Internal counter for interest calculation
+* `referrer`: Optional address for referral fees
+* `referralFeePPM`: Referral fee in parts per million (ppm)
 
 ### Events
 
@@ -125,10 +126,10 @@ function dropReferrer() public;
 
 The referral system allows wallets and frontends to monetize their integration:
 
--   Referral fees can be up to **25%** (250,000 ppm) of earned interest
--   Fees are deducted from the collected interest, not the principal
--   Users can drop or change referrers at any time
--   The fee represents convenience value - users pay for easier interaction with the protocol
+* Referral fees can be up to **25%** (250,000 ppm) of earned interest
+* Fees are deducted from the collected interest, not the principal
+* Users can drop or change referrers at any time
+* The fee represents convenience value - users pay for easier interaction with the protocol
 
 **Important**: The referral fee is not sticky. Users retain full control and can modify or remove referrers, so the fee depends on the convenience and value your wallet provides.
 
@@ -409,7 +410,7 @@ Get detailed information about all accounts that have set a specific address as 
 
 **Example Response**:
 
-```Json
+```json
 {
   "num": 1,
   "accounts": ["0x637f00cab9665cb07d91bfb9c6f3fa8fabfef8bc"],
@@ -467,7 +468,7 @@ Get aggregated earnings information for a referrer across all chains and modules
 
 **Example Response**:
 
-```Json
+```json
 {
   "earnings": {
     "1": {
@@ -538,10 +539,10 @@ This package provides typed API clients and utilities for interacting with the F
 
 ### Referral Program Recommendations
 
--   Set a reasonable referral fee (typically 5-15%) to balance user value and wallet revenue
--   Clearly communicate to users that they pay a small convenience fee
--   Allow power users to easily drop the referrer if they prefer direct interaction
--   Use the referrer mapping endpoint to trigger `refreshBalance()` for your referred accounts periodically
+* Set a reasonable referral fee (typically 5-15%) to balance user value and wallet revenue
+* Clearly communicate to users that they pay a small convenience fee
+* Allow power users to easily drop the referrer if they prefer direct interaction
+* Use the referrer mapping endpoint to trigger `refreshBalance()` for your referred accounts periodically
 
 ## Smart Contract Addresses
 
@@ -549,6 +550,6 @@ For the latest contract addresses across all supported chains, please refer to t
 
 ## Support and Resources
 
--   [Frankencoin GitHub](https://github.com/Frankencoin-ZCHF/Frankencoin)
--   [Telegram Community](https://t.me/frankencoinzchf)
--   [API Documentation](https://api.frankencoin.com/)
+* [Frankencoin GitHub](https://github.com/Frankencoin-ZCHF/Frankencoin)
+* [Telegram Community](https://t.me/frankencoinzchf)
+* [API Documentation](https://api.frankencoin.com/)

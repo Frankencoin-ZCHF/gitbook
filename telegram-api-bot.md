@@ -5,7 +5,7 @@ description: >-
   ecosystem.
 ---
 
-# 🤖 Telegram API Bot
+# 🤖 Notification Bot
 
 The Frankencoin API Telegram Bot is a communication tool designed to keep users informed about various activities and updates within the Frankencoin ecosystem.
 
@@ -36,8 +36,7 @@ The bot welcomes new users or groups and provides help information on demand. It
 
 The bot announces new minter proposals, including application periods and relevant transaction details.
 
-\
-
+<br>
 
 <figure><img src=".gitbook/assets/kuva (4).png" alt=""><figcaption></figcaption></figure>
 
