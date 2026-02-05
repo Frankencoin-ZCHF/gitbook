@@ -71,11 +71,11 @@ The Frankencoin is designed to incentivize all system participants to behave wel
 
 ### Regulatory Risks
 
-While their are established rules to [legally classify](https://www.frankencoin.com/compliance#compliance-summary) crypto currencies like the Frankencoin, interacting with decentralized system still bears significant risks. For example, there is uncertainty about when a DeFi user has the duty to identify a counterparty. Therefore, financial institutions are often hesitant to interact with decentralized finance protocols.
+While there are established rules to [legally classify](https://www.frankencoin.com/compliance#compliance-summary) crypto currencies like the Frankencoin, interacting with decentralized system still comes with regulatory uncertainty. For example, there is uncertainty about when a DeFi user has the duty to identify a counterparty under the travel rule or other potentially applicable laws. Therefore, financial institutions are often hesitant to interact with decentralized finance protocols.
 
 Also, the tax implications of holding crypto assets are often unclear. For the Frankencoin system, one can assume that one Frankencoin has a tax value of one Swiss franc and that interests earned from the savings module are taxable income. To simplify tax reporting, Frankencoin Association has created a [report tool](https://app.frankencoin.com/report) that summarizes your holdings and incomes by the end of each year.
 
-There is a non-negligible risk that the responsible authority arrives at the (wrong) conclusion that the Frankencoin system violates financial market laws, which could lead them to to attempting to shut down the system. They could for example try to do so by scaring participants from taking part in the governance process, which could lead to a governance failure and severe financial harm for all participants.
+There is a non-negligible risk that the responsible authority arrives at the (wrong) conclusion that the Frankencoin system violates financial market laws, which could lead them to attempting to shut down the system. They could for example try to do so by scaring active ecosystem participants from taking part in the governance process, which could lead to a governance failure and in turn severe financial harm for all participants.
 
 ### Unknown Risks
 
