@@ -2,7 +2,6 @@
 description: >-
   A long list of all kind of risks that users of the Frankencoin system are
   exposed to and how to handle them.
-hidden: true
 ---
 
 # 🚒 Risks
@@ -75,7 +74,7 @@ While there are established rules to [legally classify](https://www.frankencoin.
 
 Also, the tax implications of holding crypto assets are often unclear. For the Frankencoin system, one can assume that one Frankencoin has a tax value of one Swiss franc and that interests earned from the savings module are taxable income. To simplify tax reporting, Frankencoin Association has created a [report tool](https://app.frankencoin.com/report) that summarizes your holdings and incomes by the end of each year.
 
-There is a non-negligible risk that the responsible authority arrives at the (wrong) conclusion that the Frankencoin system violates financial market laws, which could lead them to attempting to shut down the system. They could for example try to do so by scaring active ecosystem participants from taking part in the governance process, which could lead to a governance failure and in turn severe financial harm for all participants.
+There is a non-negligible risk that the responsible authority arrives at the (wrong) conclusion that the Frankencoin system violates financial market laws, which could lead them to attempting to shut down the system. They could for example try to do so by scaring active ecosystem participants from taking part in the governance process, which could lead to a governance failure and in turn severe financial harm for all participants. Frankencoin Association is mitigating this risk by being responsive to regulatory inquiries and by seeking legal certainty for all system participants.
 
 ### Unknown Risks
 
