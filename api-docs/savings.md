@@ -11,12 +11,117 @@ The Savings module enables ZCHF holders to earn yield by depositing into savings
 - Lead rate calculations (the competitive interest rate)
 - Referrer information and reward tracking
 
+## Deployed Contracts
+
+Savings modules are deployed across multiple blockchains. The API aggregates data from all chains.
+
+| Chain | Address | Explorer |
+|-------|---------|----------|
+| Ethereum | `0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38` | [Etherscan](https://etherscan.io/address/0x27d9ad987bde08a0d083ef7e0e4043c857a17b38) |
+| Polygon | `0xb519bae359727e69990c27241bef29b394a0acbd` | [Polygonscan](https://polygonscan.com/address/0xb519bae359727e69990c27241bef29b394a0acbd) |
+| Gnosis | `0xbf594d0fed79ae56d910cb01b5dd4f4c57b04402` | [Gnosisscan](https://gnosisscan.io/address/0xbf594d0fed79ae56d910cb01b5dd4f4c57b04402) |
+| Arbitrum | `0xb41715e54e9f0827821a149ae8ec1af70aa70180` | [Arbiscan](https://arbiscan.io/address/0xb41715e54e9f0827821a149ae8ec1af70aa70180) |
+| Optimism | `0x6426324af1b14df3cd03b2d500529083c5ea61bc` | [Optimistic Etherscan](https://optimistic.etherscan.io/address/0x6426324af1b14df3cd03b2d500529083c5ea61bc) |
+| Base | `0x6426324af1b14df3cd03b2d500529083c5ea61bc` | [Basescan](https://basescan.org/address/0x6426324af1b14df3cd03b2d500529083c5ea61bc) |
+| Avalanche | `0x8e7c2a697751a1ce7a8db51f01b883a27c5c8325` | [Snowtrace](https://snowtrace.io/address/0x8e7c2a697751a1ce7a8db51f01b883a27c5c8325) |
+
+## Smart Contract Interaction
+
+In addition to the data API described below, you can interact directly with the savings smart contract on-chain. The source code is available on [GitHub](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/savings/Savings.sol).
+
+### Reading Balances
+
+Each account's saved balance is stored in the `savings` mapping:
+
+```solidity
+mapping(address => Account) public savings;
+```
+
+To get the current saved balance (excluding accrued but uncollected interest), read `savings[owner].saved`.
+
+To get the accrued interest that has not yet been collected, call the view function:
+
+```solidity
+function accruedInterest(address accountOwner) public view returns (uint192)
+```
+
+The total balance of a user is `savings[owner].saved + accruedInterest(owner)`.
+
+### Adding Savings
+
+To deposit ZCHF into the savings module, call one of the `save` functions. The caller must have approved the savings contract to spend ZCHF on their behalf.
+
+```solidity
+// Save to your own account
+function save(uint192 amount) public
+
+// Save to another account
+function save(address owner, uint192 amount) public
+```
+
+Alternatively, use `adjust` to set the balance to a target amount. This will deposit or withdraw as needed:
+
+```solidity
+function adjust(uint192 targetAmount) public
+```
+
+Note that newly deposited funds are subject to a 3-day delay before interest starts accruing.
+
+### Withdrawing Savings
+
+To withdraw ZCHF from the savings module:
+
+```solidity
+function withdraw(address target, uint192 amount) public returns (uint256)
+```
+
+If the requested amount exceeds the available balance, the entire balance is withdrawn. The function returns the actual amount transferred.
+
+### Refreshing Balances
+
+Interest does not compound automatically. Anyone can trigger an accumulation of accrued interest (together with a payout of any referrer fee) by calling:
+
+```solidity
+// Refresh another account's balance
+function refreshBalance(address owner) public returns (uint192)
+
+// Shortcut for refreshBalance(msg.sender)
+function refreshMyBalance() public returns (uint192)
+```
+
+Calling `refreshBalance` collects the accrued interest and adds it to the account balance. It can be beneficial to do so periodically in order to start earning interest on the previously accrued interest. This can be called by anyone — not just the account owner — making it useful for keeper bots or referrers who want to trigger their fee payout.
+
+### Referrer and Referral Fee
+
+Frontends and wallets can earn a share of the interest collected by their users by setting a referrer. The referral fee is capped at **25% (250,000 ppm)** and is deducted from the collected interest.
+
+To save and set a referrer in a single transaction:
+
+```solidity
+function save(uint192 amount, address referrer, uint24 referralFeePPM) public
+```
+
+The referrer can also be set when adjusting or withdrawing:
+
+```solidity
+function adjust(uint192 targetAmount, address referrer, uint24 referralFeePPM) public
+function withdraw(uint192 amount, address referrer, uint24 referralFeePPM) public
+```
+
+A user can remove their referrer at any time:
+
+```solidity
+function dropReferrer() public
+```
+
+The referral fee is paid out automatically whenever interest is collected (e.g., via `refreshBalance`). The user can change or drop their referrer at any time, so the fee is not sticky — it depends on the convenience the frontend provides.
+
 ## Key Concepts
 
 ### How Savings Works
 
 1. Users deposit ZCHF into savings modules on any supported chain
-2. Interest accrues based on the current savings rate
+2. Interest accrues based on the current savings rate (with a 3-day initial delay)
 3. Rates are adjusted through governance proposals
 4. Users can withdraw their balance plus earned interest at any time
 
@@ -25,10 +130,6 @@ The Savings module enables ZCHF holders to earn yield by depositing into savings
 - **Savings Rate**: The APY paid to depositors
 - **Lead Rate**: A calculated competitive rate based on various protocol metrics
 - **Rate Proposals**: Changes to the savings rate must go through a governance process
-
-### Multichain Savings
-
-Savings modules are deployed across multiple blockchains, and the API aggregates data from all chains.
 
 ## Savings Core Controller
 
