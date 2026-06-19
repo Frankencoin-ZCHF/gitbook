@@ -12,17 +12,19 @@ Frankencoin Pool Shares (FPS) are shares in the equity reserve pool of the Frank
 
 ## Usage
 
-If you want to acquire or sell some FPS, you can head over to the [Equity page](https://app.frankencoin.com/equity). Once there, you can find two sections. Let's focus on the left one first.&#x20;
+If you want to acquire or sell some FPS, you can head over to the [Equity page](https://app.frankencoin.com/equity).&#x20;
 
-<figure><img src=".gitbook/assets/kuva (44).png" alt=""><figcaption><p>Buy new FPS</p></figcaption></figure>
+Once there, you can find two sections. On the left side, you can buy new FPS, or sell the FPS you own:
 
-Here, you can buy new FPS or sell the FPS you own. In this example, the user wants to acquire 1 000 ZCHF worth of FPS. The current price of one FPS is 1 016 ZCHF, so 1 000 ZCHF would net the user 0.9812 FPS. Note that the wrapped FPS, or WFPS, can also be traded/wrapped here.&#x20;
+<img width="611" height="550" alt="Screenshot 2026-06-19 at 10 27 42" src="https://github.com/user-attachments/assets/68cd5417-3b1e-495f-8f6f-93f037336b2e" />
 
-Selling FPS can be done here as well. In this case, the FPS are burned and the corresponding amount of capital is sent to the redeemer. It is important to observe the minimum holding time of 3 months required to redeem FPS.
+When you buy FPS, you contribute your ZCHF to the equity pool and new FPS are minted.
 
-Below this section, we can see that this address currently owns 7.60 FPS at a value of 7 721 ZCHF and a holding duration of 4 months. At the bottom of the page there's a link to trade WFPS on Polygon.&#x20;
+When you sell FPS, you redeem ZCHF from the equity pool, and your FPS are burned.
 
-Next, let's take a look at the right side.
+Note that the wrapped FPS, or WFPS, can also be traded/wrapped here. &#x20;
+
+Next, let's take a look at the right side:
 
 <figure><img src=".gitbook/assets/kuva (45).png" alt=""><figcaption><p>FPS stats</p></figcaption></figure>
 
