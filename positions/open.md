@@ -1,47 +1,43 @@
 ---
-description: How to propose completely new positions with any collateral.
+description: Proposing a collateralised position and selecting its borrowing terms.
 ---
 
 # Opening New Positions
 
-You want to mint ZCHF, but your preferred type of collateral is not available yet? In that case, you can propose a new collateral type.&#x20;
+A new position is an advanced-user proposal. The [creation page](https://app.frankencoin.com/mint/create) exposes the route; [cloning an accepted position](clone.md) reuses existing terms. The contract behaviour below refers to the [pinned minting sources](README.md#contract-versions). Screenshots show a historical interface, not current quotes.
 
-To do so, head over to the [Mint page](https://app.frankencoin.com/mint) and scroll to the bottom until you find the "Propose New Position or Collateral" button.&#x20;
+<figure><img src="../.gitbook/assets/kuva (46).png" alt="Historical new-position button"><figcaption><p>Historical entry point for proposing a position.</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/kuva (46).png" alt=""><figcaption><p>Click this button to propose a new position type</p></figcaption></figure>
+## Proposal terms
 
-On the next page are four boxes. Let's take a look at the box in the top left.&#x20;
+In the pinned source, opening a position costs 1,000 ZCHF and the initialisation period is at least three days. The fee is not returned after a veto. A qualified holder can veto the position during this period. This is separate from the FCS minter-application rule of 1,200 ZCHF and 60 days.
 
-<figure><img src="../.gitbook/assets/kuva (30).png" alt=""><figcaption><p>Proposal process</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (30).png" alt="Historical position proposal terms"><figcaption><p>Historical proposal form.</p></figcaption></figure>
 
-The proposal fee is fixed at 1 000 ZCHF. This fee is not returned if the position is denied and goes to the equity holders. The price tag of 1 000 ZCHF ensures that each proposal is well thought-out. Having a low fee would likely encourage the proposal of illiquid and/or otherwise unfit tokens. The initialization period has to be at least 3 days. This gives other system participants enough time to veto or to challenge the new position. A veto can only be cast by qualified pool share holders by calling the "deny" method on the position. If a position is denied, it cannot ever be used to mint Frankencoins, but it can still be challenged. New positions can be challenged immediately using the normal challenge mechanism.&#x20;
+## Interest and minting capacity
 
-Next, we can inspect the box on the bottom left.
+The newer `contracts/minting/Position.sol` calculates the annual rate as the **global borrowing rate plus the position's risk premium**, in ppm. The proposer selects the risk premium, not the global rate. Minting deducts a fee for the remaining term, using the applicable rate at the mint. The source uses a 365-day year and caps the fee fraction at 100%.
 
-<figure><img src="../.gitbook/assets/kuva (31).png" alt=""><figcaption><p>Financial terms</p></figcaption></figure>
+Older interfaces described a user-set annual interest rate. That description is not the complete rate formula for the pinned newer source.
 
-The annual interest is charged upfront and can be set by the user. With a maturity of 12 months, this is the entire fee that is charged. Of course, if the maturity is set to 6 months for example, the final interest changes accordingly. The minting limit describes the maximum amount of Frankencoins that can be minted against this position and its clones. When the position is cloned, the remaining amount is split between the original and the clone. The purpose is to limit the exposure of the Frankencoin system to a single collateral. The Frankencoin should be able to withstand the total failure of one or more related collaterals, even if all their positions are maximally minted.
+The original position and its clones share a family minting limit. Available clone capacity changes with the family's outstanding minted amount and capacity reserved for the original position's collateral. It is not a permanent split of the remaining limit into independent clone allocations. The amount displayed before submission can change before execution.
 
-Next, the box on the top right comes into play.&#x20;
+<figure><img src="../.gitbook/assets/kuva (31).png" alt="Historical position financial terms"><figcaption><p>Historical financial terms; field names differ between versions.</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/kuva (33).png" alt=""><figcaption><p>Collateral</p></figcaption></figure>
+## Collateral and liquidation price
 
-First of all, the collateral token needs to be selected by pasting its contract address into the first field, and approve handling of the token. This can be done for example through MetaMask. The chosen collateral should be freely traded on the market and have a somewhat stable value. For criteria that collateral tokens should fulfil, have a look at the [Acceptable Collateral](https://github.com/Frankencoin-ZCHF/FrankenCoin/discussions/11) page. The minimum collateral section is the minimum acceptable amount of collateral and should be set to about 5 000 ZCHF worth of collateral (in this specific case 2 WETH were chosen). It is not possible to decrease the collateral in a position below the minimum without closing it entirely.&#x20;
+The collateral is identified by its chain and token address. Challengers need access to the same asset for the [auction mechanism](auctions.md). The [collateral discussion](https://github.com/Frankencoin-ZCHF/FrankenCoin/discussions/11) sets out selection considerations.
 
-The last section is the initial amount of collateral. This will be automatically transferred to the newly created position during the minting. The initial collateral must be equal to or larger than the minimum collateral.&#x20;
+Initial collateral must meet the position's minimum. The liquidation price is an explicit stored parameter, not a live oracle value or automatically calculated debt-to-collateral ratio. A numerical example: two WETH at 2,500 ZCHF per WETH have a liquidation value of 5,000 ZCHF; 20 WETH at 250 ZCHF have the same value. These are examples, not quotes or universal minimum-value rules.
 
-The last remaining box is located on the bottom right. Here, the (potential) liquidation process is discussed.&#x20;
+<figure><img src="../.gitbook/assets/kuva (33).png" alt="Historical collateral fields"><figcaption><p>Historical collateral selection.</p></figcaption></figure>
 
-The liquidation price can be set freely but must result in a position liquidation of at least 5 000 ZCHF. In the previous box, we've set a minimum collateral of 2 WETH. With a minimum collateral liquidation value of 5 000 ZCHF, the liquidation price for each WETH must thus be at least 2 500 ZCHF, as 2 \* 2 500 = 5 000. Had a minimum collateral of 20 WETH been chosen, the minimum liquidation price would thus be (5 000 / 20) 250 ZCHF.&#x20;
+## Reserve and auction duration
 
-<figure><img src="../.gitbook/assets/kuva (34).png" alt=""><figcaption><p>Liquidation</p></figcaption></figure>
+The reserve contribution withholds part of the gross minted ZCHF. It absorbs losses under the [reserve rules](../reserve.md). Collateral volatility and auction duration affect how far sale proceeds can fall below the position's liquidation value.
 
-If an auction ends at a price below the liquidation price, the position is liquidated.&#x20;
+<figure><img src="../.gitbook/assets/kuva (34).png" alt="Historical liquidation parameters"><figcaption><p>Historical reserve and auction-duration fields.</p></figcaption></figure>
 
-The "Retained Reserve" should be set to ensure a very high confidence that challenges do not end significantly below the liquidation price, assuming the market price has just fallen slightly below it at the start of the challenge. The more volatile the collateral and the longer the challenge period, the higher the reserve requirement needs to be to mitigate risks.
+## Submission and confirmation
 
-The last field, the "Auction Duration", describes how long an auction should be. For highly liquid collaterals such as Wrapped ETH, the challenge duration can be quite short, possibly ranging from hours to even minutes, especially with automated bidders in the market. For less liquid collaterals that are harder to evaluate, challenges might last up to two weeks to allow bidders to organize. The longer the challenge duration, the higher the required reserve should be to ensure the position remains economically sound.
-
-Once all parameters are set, you can hit the "Propose Position" at the bottom of the page.&#x20;
-
-If there's no veto within the initialization process, you will have successfully opened a new position! After that, you can head over to the [My Positions page](https://app.frankencoin.com/mypositions) and mint your new ZCHF.
+Review the chain, hub, collateral address, rate components, expiry, reserve contribution, stored liquidation price and family limit. After proposal confirmation, the initialisation period must finish without a veto before minting becomes available. Opening a proposal is not itself a ZCHF mint. The [adjustment guide](adjust.md) describes minting and later changes.

@@ -1,27 +1,17 @@
 ---
-description: >-
-  Immediately mint Frankencoins by cloning an established position that is not
-  maxed out.
+description: Borrowing through an existing position's terms and available family capacity.
 ---
 
 # Cloning Existing Positions
 
-This is the standard way to obtain Frankencoins against a collateral. Unlike creating an entirely new position, which takes a lot of time, borrowing by cloning an established position can be done immediately. To do so, [find an existing position](https://app.frankencoin.com/mint) that is based on your collateral of choice and that is not maxed out yet, i.e. where the borrowed total is below the limit. You can spot such a position by searching for the blue "Mint" button. Note the available amount: This shows how many more ZCHF can be minted by cloning this particular position. When looking for a position to clone, make sure to pay attention to the liquidation price. &#x20;
+A clone reuses an accepted position's terms without a new collateral proposal. On the [mint page](https://app.frankencoin.com/mint), select a position for the intended collateral and inspect its available capacity, rate, reserve contribution, liquidation price and expiry. The [version reference](README.md#contract-versions) distinguishes the newer source from legacy interfaces.
 
-<figure><img src="../.gitbook/assets/kuva (35).png" alt=""><figcaption><p>Note the "Available"</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (35).png" alt="Historical list of positions available for cloning"><figcaption><p>Historical availability display, not a current capacity quote.</p></figcaption></figure>
 
-Once you have chosen your collateral type, simply click the "Mint" button to be taken to the position overview page.&#x20;
+In the pinned newer implementation, the original and its clones share a family limit. The original's collateral can reserve capacity, and other family mints can change what remains available. The displayed limit is not a separate guaranteed allocation to the clone. A clone's expiry cannot exceed its parent's expiry.
 
-<figure><img src="../.gitbook/assets/kuva (36).png" alt=""><figcaption><p>Hit "Approve" to mint</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (36).png" alt="Historical clone transaction preview"><figcaption><p>Historical clone preview.</p></figcaption></figure>
 
-Here, you can see a detailed view showing all the relevant parameters. In this example, we are trying to mint an additional 3 000 ZCHF using the WETH position.&#x20;
+For the historical example, a gross mint of 3,000 ZCHF with a 10% reserve and a 60 ZCHF up-front fee gives the wallet 2,640 ZCHF. The reserve receives 300 ZCHF. The fee depends on the applicable annual rate and remaining term; the newer source uses the global borrowing rate plus the position's risk premium.
 
-The "Limit" value shows how much this position can mint in total. In this case, we can still mint another 997 000 ZCHF. After that, we can set the mint amount, in this case 3 000 ZCHF. The required collateral depends on the parent position and is 2 WETH in this case. The expiration date can be changed but not beyond the expiration date of the parent position.&#x20;
-
-The right side breaks down what happens with the 3 000 ZCHF. 2 640 are sent to you wallet, 300 ZCHF are retained as reserve (remember the 10% reserve requirement of the parent position) and the interest is charged upfront.&#x20;
-
-The "Notes" section shows the effective annual interest, the set liquidation price, the current market price of the collateral and the loan-to-value ratio. It also provides a link to the parent position.&#x20;
-
-Ready to mint your new ZCHF?&#x20;
-
-Just hit "Approve", confirm the transaction in your wallet and get your new ZCHF!
+Token approval authorises spending; it is not necessarily the mint transaction. After the clone transaction confirms, the new position address, owner, collateral, gross debt, stored price and received ZCHF identify the result. Subsequent changes follow the [adjustment guide](adjust.md).

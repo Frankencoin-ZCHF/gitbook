@@ -1,72 +1,86 @@
 ---
-description: >-
-  The Frankencoin system employs a detailed balance sheet framework, featuring
-  three types of reserves to ensure stability and security.
+description: Reserve and equity accounting, with explicit example assumptions.
 ---
 
 # 🏦 Reserve
 
-The Frankencoin system features three types of reserves. The first type comprises Swiss franc stablecoins held in a bridge. The second type includes funds provided by borrowers when they mint new Frankencoins. The third type consists of contributions from holders of reserve pool shares. It's important to note that the collateral used to mint Frankencoins is not considered part of the reserve, as it remains outside the Frankencoin system's "balance sheet."
-
-If the Frankencoin system were a company, its balance sheet would appear roughly as depicted below.
+The reserve consists of ZCHF held for minter reserves and equity. External stablecoins in conversion bridges are separate assets. Collateral remains in individual positions; the stylised balance sheet below records the associated repayment obligations rather than adding the collateral a second time.
 
 ## Balance Sheet Diagram
 
-<div data-full-width="true">
+The accounting model is:
 
-<figure><img src=".gitbook/assets/image (6).png" alt="" width="375"><figcaption><p>The Frankencoin "balance sheet"</p></figcaption></figure>
+```text
+Assets                         Liabilities and equity
+x: external bridge assets      z: total ZCHF supply
+m: minter repayment claims      b: minter-reserve allocation
+r: ZCHF reserve                e: equity
 
-</div>
+x + m + r = z + b + e
+```
 
-This balance sheet consists of the following components:
+This gross presentation includes reserve-held ZCHF within total supply. It is an explanatory protocol balance sheet, not a company balance sheet or a valuation of every collateral token.
 
 ## Assets
 
-* **Stablecoins Locked in Bridges:** These are stablecoins like XCHF that are locked within bridge contracts, facilitating the exchange between Frankencoin (ZCHF) and other stablecoins.
-* **Minter Repayment Obligations:** This represents the amount borrowers need to repay after minting Frankencoin. It reflects the debt owed by users who have collateralized their assets to mint ZCHF.
-* **Reserve:** This includes the funds in the reserve pool contributed by minters and reserve pool share holders. These funds grow over time, providing a buffer.
+* **Bridge assets (`x`):** external stablecoins held by stablecoin-conversion bridges. XCHF was used by the bootstrap bridge; that is a historical example, not a list of active bridges.
+* **Minter repayment claims (`m`):** outstanding gross ZCHF debt recorded by positions.
+* **Reserve (`r`):** ZCHF held for the system's minter-reserve allocation and equity.
 
 ## Liabilities and Equity
 
-* **Total Frankencoin (ZCHF) Supply:** This is the total amount of Frankencoins in circulation, representing the system's obligations to the holders of ZCHF.
-* **Minters Reserve:** The specific reserve funds allocated to cover potential losses from minter defaults, ensuring the stability of the system.
-* **Equity:** Owned by reserve pool share holders, this represents the net value of the system after accounting for assets and liabilities. Holders of reserve pool shares play a crucial role in the system's governance and stability, benefiting from a share of the system's profits and having a say in governance decisions .
+* **Total ZCHF supply (`z`):** issued ZCHF, including reserve holdings in this model.
+* **Minter reserve (`b`):** the reserve allocation associated with minted debt. It can absorb losses and is not unconditionally recoverable by each minter.
+* **Equity (`e`):** the residual reserve capital. FPS represents this capital; [FCS](fcs.md) wraps FPS rather than creating a second equity pool.
 
 ## Example Scenarios
 
-1.  **User Swaps ZCHF for XCHF:**
+All amounts below are ZCHF-denominated illustrations, not observations of deployed positions.
 
-    * If a user sends 100 ZCHF to the stablecoin bridge to swap them into XCHF, the balance sheet items for stablecoins locked in bridges (x) and the total ZCHF supply (z) both decrease by 100 units. Other balance sheet items remain unaffected.
+### Historical stablecoin conversion
 
+A 100 ZCHF redemption through the historical one-to-one XCHF bridge reduces bridge assets `x` and ZCHF supply `z` by 100. The example assumes available bridge assets and an eligible redemption; it says nothing about current route availability.
 
-2.  **User Mints New Frankencoins:**
+### Minting
 
-    * Suppose a user mints 500 ZCHF against collateral with a reserve ratio of 20% and a fee of 5%. On the asset side:
-      * **Minter Repayment Obligations (m):** Increases by 500 ZCHF.
-      * **Reserve (r):** Increases by 125 ZCHF (100 ZCHF into minters reserve and 25 ZCHF as fees).
-    * On the liabilities side:
-      * **Total ZCHF Supply (z):** Increases by 500 ZCHF.
-      * **Minters Reserve (b):** Increases by 100 ZCHF.
-      * **Equity (e):** Increases by 25 ZCHF (the fee retained by the system).
-    * The minting process thus expands the balance sheet by 625 ZCHF, which reflects both the debt and the new reserves.
+Assume a gross mint of 500 ZCHF, a 20% reserve contribution and a 5% up-front fee. The wallet receives 375 ZCHF; the reserve retains 100 ZCHF for the minter and 25 ZCHF as equity income.
 
+| Account | Change in ZCHF |
+| --- | ---: |
+| Minter repayment claims `m` | +500 |
+| Reserve `r` | +125 |
+| Total supply `z` | +500 |
+| Minter reserve `b` | +100 |
+| Equity `e` | +25 |
 
-3. **Successful Challenge of a Minter's Position:**
-   * For a position that minted 5 000 ZCHF and is successfully challenged with a highest bid of 4 500 ZCHF:
-     * **Reserve (r):** Decreases by 600 ZCHF to cover the shortfall.
-     * **Total ZCHF Supply (z):** Decreases by 5 000 ZCHF as the loan is repaid.
-     * **Minter Repayment Obligations (m):** Decreases by 5 000 ZCHF.
-     * **Minters Reserve (b):** Adjusts to reflect 400 ZCHF reassigned to equity as liquidation profit.
-     * **Equity (e):** Increases by 400 ZCHF.
+Both sides increase by 625 ZCHF under the gross presentation.
 
-## Protection Mechanisms During Liquidation:
+### Challenge settlement
 
-When a position is liquidated, the system employs three layers of protection to prevent losses:
+Assume a fully liquidated debt of 5,000 ZCHF, an unimpaired 20% assigned reserve of 1,000 ZCHF, and a winning bid of 4,500 ZCHF. Use a challenger reward of **2% of the bid**, as in the [pinned MintingHub source](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/MintingHub.sol). This example describes that source's accounting, not an unidentified historical deployment.
 
-1. **Borrower's Reserve:** Directly associated with the liquidated position, used first to cover any losses.
-2. **Equity:** If the borrower's reserve is insufficient, losses are absorbed by reducing the equity, impacting the value of reserve pool shares.
-3. **General Borrower's Reserve:** As a last resort, this reserve is tapped into, potentially requiring other users to repay more than initially anticipated, creating an incentive for all participants to maintain system integrity.
+The challenger receives 90 ZCHF. The remaining 4,410 ZCHF of bid proceeds leaves a 590 ZCHF shortfall against the 5,000 ZCHF burn. The full 1,000 ZCHF minter-reserve liability is released; after covering the shortfall, equity gains 410 ZCHF.
 
-## Equilibrium of Equity:
+| Account | Change in ZCHF |
+| --- | ---: |
+| Minter repayment claims `m` | -5,000 |
+| Reserve `r` | -590 |
+| Total supply `z` | -5,000 |
+| Minter reserve `b` | -1,000 |
+| Equity `e` | +410 |
 
-The system is designed to ensure that in efficient markets, the equity will approximate one third of the Frankencoins not created through a bridge, mathematically represented as 3e=z−x3e = z - x3e=z−x. This equilibrium ensures a robust financial foundation, detailed further in the research paper.
+Both sides fall by 5,590 ZCHF. The equity gain is not the same as the minter-reserve release. Different reward bases, partial liquidations or impaired reserves change the calculation. Expiry sales follow a [separate settlement path](risks.md#missing-maturity-dates).
+
+## Protection Mechanisms During Liquidation
+
+Losses first use the affected position's minter reserve, then equity, then shared minter reserves. The last step can increase what other borrowers must return to settle their debt. This order describes loss allocation, not a guarantee that losses will fit within the available reserve.
+
+## Equilibrium of Equity
+
+The simplified model without savings expense, losses or different required returns gives:
+
+```text
+3e = z - x
+```
+
+Here `e` is equity, `z` is total ZCHF supply and `x` is bridge-backed issuance, measured in ZCHF under the model's one-to-one bridge assumption. It is not an enforced reserve requirement. The [economic model](pool-shares.md#equilibrium) explains how savings expense changes net equity income. FCS redemption prices and market quotes are separate from this relationship.

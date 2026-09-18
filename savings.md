@@ -1,90 +1,70 @@
 ---
-description: >-
-  The savings module allows users to earn an interest on their Frankencoin
-  holdings.
+description: Version-specific savings, interest collection and referral terms.
 ---
 
 # 💰 Savings
 
-([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/minting/v2/SavingsV2.sol), [deployed contract](https://etherscan.io/address/0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae))
+The [savings application](https://app.frankencoin.com/savings) lets users deposit ZCHF and earn a governance-set rate. Interest comes from the system's equity; borrowing and savings rates are separate parameters. Deposited ZCHF remains attributed to the savings account rather than being lent out to borrowers.
 
-The Savings Module ([frontend](https://app.frankencoin.com/savings)) allows users to earn interest on their Frankencoin (ZCHF) holdings by storing them in the protocol.
+## Contract versions
 
-### Overview
+These Ethereum addresses were listed in the documentation reviewed on 18 September 2026. The linked source is pinned to `8b4c4ab67bb361b91d58c474b87f4608fc4c0566`; this table separates source behaviour from address identification. It does not establish which implementation the application currently selects or deployed-bytecode equivalence.
 
-The savings module takes money out of the equity pool and gives it to Frankencoin holders that have stored some of their Frankencoins in the savings module. The transferred amount depends on the currently applicable interest rate.
-
-<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption><p>Savers can acquire ZCHF (7), store them in the savings module (8) and earn an interest (9) paid for by the system.</p></figcaption></figure>
+| Version | Existing address reference | Source behaviour |
+| --- | --- | --- |
+| Legacy SavingsV2 | [0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae](https://etherscan.io/address/0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae#code) | [SavingsV2.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/v2/SavingsV2.sol) applies an interest delay and a `FundsLocked` withdrawal check |
+| Referral-enabled Savings | [0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38](https://etherscan.io/address/0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38#code) | [Savings.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/savings/Savings.sol) inherits [AbstractSavings.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/savings/AbstractSavings.sol): an interest delay, no equivalent ticks-based withdrawal lock, and referral support |
 
 ### Saving
 
-Anyone can store Frankencoins in the savings module. These Frankencoins are attributable to their owner at all times (i.e. they are fully segregated) and stay in the savings module until their owner withdraws them again. There is no lending or other transfer happening in the background. Also, unlike the minter reserves, the stored Frankencoins cannot be touched to save the system in case of a depeg.
+A savings deposit transfers ZCHF to the selected module and credits the account. An old deposit remains in its original contract. Moving to a different module requires withdrawing under the old module's rules and depositing into the new one; it is not an automatic upgrade. The new deposit uses the new module's delay and referral terms.
 
 ### Delay
 
-Frankencoins can be sent to the Savings module and withdrawn again at any time. However, there is a delay of three days until interest starts to accrue. The purpose of the delay is to discourage users from trying to earn an interest on Frankencoins that are held temporarily for transactional purposes. In case the user already has some Frankencoins in his savings account, the applicable delay is a weighted average between the already stored and the newly added Frankencoins.
+Both source versions use a three-day delay before a fresh deposit earns interest. Adding funds to an existing account produces a weighted delay rather than restarting the full delay on the entire balance.
+
+In **SavingsV2**, `withdraw` reverts with `FundsLocked` while the account's stored ticks exceed current ticks. The delay therefore also restricts withdrawals. In the **referral-enabled source**, `withdraw` has no equivalent ticks-based lock, so the interest delay does not itself prevent withdrawing principal. The contract version, not the page title, determines which behaviour applies.
 
 ### Interest
 
-The applicable interest rate is determined by the [governance process](governance.md). The savings rate and the borrow rate are independent values. Proposed interest changes can be enacted after seven days if no veto was cast. For simplicity, the interest is only calculated on the principal amount. There is no interest on the accrued interest. The interest is automatically collected and added to the account whenever funds are added or withdrawn.
+The rate can change through [governance](governance.md#proposal-submission). Interest accrues on the stored principal. Uncollected interest does not compound; collection adds the user's interest to principal, after which it can earn interest too. Deposits and withdrawals refresh accrued interest as part of their operation.
 
 ## Referral Module
 
-([source code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/savings/Savings.sol), [deployed contract](https://etherscan.io/address/0x27d9AD987BdE08a0d083ef7e0e4043C857A17B38))
-
-The **SavingsReferral Module** introduces a referral-based incentive layer on top of Frankencoin's decentralized savings infrastructure. It is designed to help wallets, dApps, and integrators build sustainable revenue models while offering a native Swiss Franc-denominated yield product to their users. Using the SavingsReferral module, builders can get up to 25% of the savings earned by "their" users.
+A referral fee allocates a share of **earned interest**, not a share of deposited principal, to a referrer. The maximum is 250,000 parts per million (ppm), or 25%. At 200,000 ppm, 100 ZCHF of gross interest becomes 80 ZCHF for the user and 20 ZCHF for the referrer.
 
 ### How It Works
 
-1. A frontend/wallet integrates the savings UI
-2. When calling `save()` or `adjust()` methods, a **referrer address** and **referral fee (ppm)** are passed
-3. Interest accrues on user deposits after a 3-day delay
-4. When interest is claimed, the smart contract:
-   * Pays the user
-   * Automatically redirects up to 25% of earned interest to the referrer
+The referral-enabled source exposes these signatures:
+
+```text
+save(uint192 amount, address referrer, uint24 referralFeePPM)
+adjust(uint192 targetAmount, address referrer, uint24 referralFeePPM)
+```
+
+Amounts use ZCHF's 18-decimal base units. The fee uses a denominator of 1,000,000; for example, `200_000` means 20%, not 20 basis points. The transaction interface should show the referrer, fee percentage and resulting net interest before the user signs.
 
 ### Using the Frankencoin App to Refer Users
 
-You can also use the Frankencoin App to share referral links as follows:
-
-```
-<https://app.frankencoin.com/savings?referrer=0x123...4&fee=500>
-```
-
-This will automatically set the referrer and fee when the user lands on the page and initiates a savings deposit.
+A referral link is an application feature, not a contract method. Its query parameters must match the selected application's implementation. The signed transaction's referrer and `referralFeePPM` determine the on-chain setting; an abbreviated address is not a valid transaction argument.
 
 ### Claiming Accrued Referral Fees
 
-Referral fees are automatically distributed to the referrer whenever a user’s interest is collected. Referrers do not need to actively claim fees — they are transferred on-chain in real-time as interest is paid out to users.
+Collection pays the referrer when the user's interest is refreshed. A separate collection transaction is optional because deposits and withdrawals also refresh interest. The public methods in both pinned source versions are:
 
-However, **interest collection must be triggered** manually by calling `refresh()` or `refreshBalance()` on the user’s account. This can be done by:
+```text
+refreshMyBalance()
+refreshBalance(address owner)
+```
 
-* The user
-* The referrer (to collect their share)
-* A third party (e.g., a keeper bot)
-
-This means that a referrer can actively call `refresh()` on behalf of their referred users to ensure interest (and thus their fee) is paid out regularly.
-
-
+The account holder can use `refreshMyBalance()`. A referrer or another caller can use `refreshBalance(userAddress)`. The internal `refresh(address)` function is not an externally callable method. Refreshing another account does not change its owner or redirect the user's principal.
 
 ### Wallet Implementation Guide
 
-To ensure users of your wallet automatically assign your address as the referrer:
+An integration supplies the amount, referrer and fee to a supported method of the selected contract. It displays the gross rate, referral share and net rate separately. The maximum fee is a protocol limit, not a default fee.
 
-* Add a custom savings integration UI that interfaces with the Frankencoin contract
-* In the backend or UI logic, always pass your designated referrer address and chosen referral fee (e.g., 200\_000 ppm) to the `save()` or `adjust()` calls
-* Example:
-
-```solidity
-savings.save(1_000e18, 0xYourFrontendAddress, 200_000); // 20% referral fee
-```
-
-* Optional: Give users the ability to drop/change their referrer, or hide this setting depending on UX goals
+The account holder can remove the referral by calling **`dropReferrer()`** on the referral-enabled contract through an interface exposing its verified ABI. This first collects accrued interest and settles the accrued referral fee, then clears the referrer and sets the fee to zero. Future interest has no referral deduction unless a later transaction sets a referrer again. Removal does not reverse fees already earned.
 
 ### Integration Details
 
-* Call `save(amount, referrer, referralFeePPM)` or `adjust(targetAmount, referrer, referralFeePPM)`
-* Max referral fee is **250,000 ppm** (25%)
-
-
-
+[The savings API reference](api-docs/savings.md) describes indexed balances and rates. API reads do not create deposits, collect interest or remove a referrer; those are on-chain transactions.

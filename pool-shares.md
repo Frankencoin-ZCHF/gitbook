@@ -1,85 +1,72 @@
 ---
-description: >-
-  Directly contribute risk capital to the Frankencoin system to get Frankencoin
-  Pool Shares (FPS) in return.
+description: Legacy FPS, the underlying equity curve and a simplified economic model.
 ---
 
 # 📈 Investing and Pool Shares
 
 ## Reserve Pool Shares
 
-Frankencoin Pool Shares (FPS) are shares in the equity reserve pool of the Frankencoin system. Being an FPS holdes is similar to being a shareholder of a bank. As the Frankencoin system makes profits through fees or liquidations, the price of the pool shares is automatically adjusted upwards. Likewise, when risks materialize and the reserve pool incurs a loss, the value declines. They can be minted at any time and redeemed again after a minimum holding period of three months. Over time, reserve pool shares that are not moved accumulate votes. Shareholders with at least 2% of the votes gain veto power.
+Frankencoin Pool Shares (FPS) represent the equity capital of the system. Net fees and liquidation results change that capital and the protocol's FPS price. Losses reduce it. FPS also accumulates time-weighted governance votes under the legacy rules.
+
+This page describes **legacy FPS and the underlying Equity curve**, not an interchangeable FCS investment path. [FCS](fcs.md) wraps FPS one to one, but uses different voting and exit rules. The [migration guide](fcs-migration.md) covers FPS and WFPS.
 
 ## Usage
 
-If you want to acquire or sell some FPS, you can head over to the [Equity page](https://app.frankencoin.com/equity). Once there, you can find two sections. Let's focus on the left one first.&#x20;
+The [equity application](https://app.frankencoin.com/equity) provides investment interfaces. A transaction may be a protocol mint, redemption, wrap or secondary-market trade; these are distinct operations. Legacy FPS redemption burns FPS and returns ZCHF under the Equity curve. It requires the holder's **average holding duration of at least 90 days**, rather than an age attached to individual transferable tokens. Balance changes and vote destruction can affect that duration.
 
-<figure><img src=".gitbook/assets/kuva (44).png" alt=""><figcaption><p>Buy new FPS</p></figcaption></figure>
+The following screenshots are historical FPS interface examples. Their prices, balances, routes and controls are not current quotes or FCS instructions.
 
-Here, you can buy new FPS or sell the FPS you own. In this example, the user wants to acquire 1 000 ZCHF worth of FPS. The current price of one FPS is 1 016 ZCHF, so 1 000 ZCHF would net the user 0.9812 FPS. Note that the wrapped FPS, or WFPS, can also be traded/wrapped here.&#x20;
+<figure><img src=".gitbook/assets/kuva (44).png" alt="Historical FPS investment interface"><figcaption><p>Historical FPS entry and redemption view.</p></figcaption></figure>
 
-Selling FPS can be done here as well. In this case, the FPS are burned and the corresponding amount of capital is sent to the redeemer. It is important to observe the minimum holding time of 3 months required to redeem FPS.
+A marginal FPS price does not determine the exact output of a finite purchase: fees and the curve also apply. WFPS is a separate wrapper, not another name for FCS.
 
-Below this section, we can see that this address currently owns 7.60 FPS at a value of 7 721 ZCHF and a holding duration of 4 months. At the bottom of the page there's a link to trade WFPS on Polygon.&#x20;
+<figure><img src=".gitbook/assets/kuva (45).png" alt="Historical FPS statistics"><figcaption><p>Historical FPS statistics, retaining the FPS unit and supply.</p></figcaption></figure>
 
-Next, let's take a look at the right side.
+| Metric | Meaning |
+| --- | --- |
+| FPS reference valuation | FPS supply multiplied by the underlying marginal FPS price |
+| Total reserve | ZCHF held in the reserve, including minter reserve and equity |
+| Equity capital | Reserve capital after the minter-reserve allocation |
+| Minter reserve | Reserve attributed to outstanding positions, subject to loss sharing |
+| Income and losses | Historical flows over the displayed period, not a future return |
 
-<figure><img src=".gitbook/assets/kuva (45).png" alt=""><figcaption><p>FPS stats</p></figcaption></figure>
-
-The top of the sections displays the current price of one FPS and the current supply of all FPS. This is followed by a price chart and another section with various information:&#x20;
-
-Market Cap: The total value of all the FPS in circulation, calculated by multiplying the number of FPS by the current FPS price. This shows the overall value of the governance tokens in the system.
-
-Total reserve: The total reserve in ZCHF that is held to support the system. This reserve acts as collateral to back the stability of Frankencoins and ensures the system’s solvency.
-
-Equity capital: This represents the value of the equity that FPS holders own in the system. It’s the capital available to cover potential losses within the Frankencoin system.
-
-Minter reserve: The total reserve set aside specifically for positions created by minters. This reserve acts as a safety net.
-
-Total income: The total amount of income generated by the system.
-
-Total losses: This shows the total losses incurred by the system. In this case, it’s at zero, indicating that no losses have been recorded in the system.
+An FPS statistic does not become an FCS statistic because an interface also offers FCS. See [reserve accounting](reserve.md).
 
 ## Economics
 
-Anyone can create additional pool shares by depositing reserve capital at any time, or redeem them again after a minimum holding period of 90 days. Therefore, an important design consideration is the pricing mechanism for pool shares. As having a price implies having a valuation, this boils down to evaluating the Frankencoin system.
-
 ### Proportional Capital Valuation
 
-In an approach inspired by the research paper "[The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4189472)", the Frankencoin system evaluates itself at a constant multiple of its capital. This multiple is set to three. So if there is 1 million ZCHF in equity capital K, anyone can subscribe to new pool shares at a valuation of 3 million ZCHF, or also redeem old shares at that valuation. Mathematically, valuation V is:
+The underlying curve is inspired by [The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4189472). For equity capital `K` in ZCHF and outstanding FPS supply `s`, its marginal reference valuation and price are:
 
-<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption><p>Market cap as a function of capital</p></figcaption></figure>
+```text
+V(K) = 3 × K
+p = 3 × K / s
+```
 
-Whereas V(K) is the market cap of all Frankencoin Pool Shares (FPS) in circulation if there are K Frankencoins in equity capital. Given the number of pool shares s in circulation, the marginal price p per share is given as
+For positive capital and supply, the continuous model gives the following change after adding net capital `ΔK`, before implementation fees and integer rounding:
 
-<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption><p>Price per share</p></figcaption></figure>
+```text
+s_new = s × ((K + ΔK) / K)^(1/3)
+p_new = p × ((K + ΔK) / K)^(2/3)
+```
 
-From the above constraints follow that an investment of additional capital ΔK leads to the following rules for determining the new number of shares given the old number of shares:
-
-<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption><p>New number of shares after investment ΔK</p></figcaption></figure>
-
-Similarly, the same investment ΔK leads to a new price:
-
-<figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption><p>New price per share after investment ΔK</p></figcaption></figure>
-
-One can verify that the valuation equation still holds after that investment by multiplying the number of shares with their price in order to obtain the new valuation:
-
-<figure><img src=".gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>Verification</p></figcaption></figure>
-
-In other words: When someone invests into the Frankencoin system, two thirds of the increased market cap come from the price increase and one third comes from the increased number of shares.
+For example, equity of 1,000,000 ZCHF and supply of 10,000 FPS imply a marginal reference price of 300 ZCHF per FPS. This is not a guaranteed execution price. Finite transactions move along the curve; FCS ZCHF exits also apply the [wrapper's redemption discount](fcs.md#prices-and-redemption-discount). Secondary-market prices depend on trading liquidity and orders.
 
 ### Equilibrium
 
-Consider again the example with 30 million ZCHF in outstanding mints and an interest of 5%, leading to a reserve inflow of 1.5 million per year. Under these circumstances, rational market participants will value the entire pool at 30 million ZCHF and therefore buy additional pool shares until the valuation hits 30 million ZCHF. This valuation is reached at a reserve pool size of 10 million ZCHF, leaving 20 million ZCHF in circulation that can be used for other purposes.
+A simplified model considers 30,000,000 ZCHF of outstanding mints at 5% annual interest: gross annual borrowing income is 1,500,000 ZCHF. If investors require a 5% return, and if that income continues without expenses or losses, capitalising it gives a valuation of 30,000,000 ZCHF. The FPS curve reaches that reference valuation at 10,000,000 ZCHF of equity.
 
-This is at least the simple case without savings. The savings module that was later added splits the income stream into two: one to
+Savings changes the income available to equity holders:
 
-This is essentially fractional reserve banking with a reserve of one third. In contrast, the tier 1 equity capital of modern banks is usually much less than that, so the Frankencoin system has considerably higher reserves. However, unlike in the traditional banking system, this reserve requirement is not strictly enforced by a regulator, but more like a carrot that attracts the equilibrium towards the reserve target.
+```text
+net equity income = borrowing income + other net income - savings expense - losses
+savings expense = interest-bearing savings balance × applicable savings rate
+```
 
-If the effective interest at which new positions can be opened is at 5% and the reserve is below the target of one third of the outstanding balance, then it is possible to do interest arbitrage by minting additional ZCHF at an interest of 5% per year and using those to buy pool shares that yield maybe 6% per year. The opposite is the case if the reserve is higher than one third. In that case, minters should think about selling pool shares to repay their debt (if they are able to).
+For example, an average interest-bearing savings balance of 10,000,000 ZCHF at 2% costs 200,000 ZCHF a year. With the borrowing income above, no other income and no losses, net equity income is 1,300,000 ZCHF. At the same assumed 5% required return, that would support a model valuation of 26,000,000 ZCHF, not 30,000,000 ZCHF. Actual accrual timing, changing rates, referrals and losses affect realised flows. Referral fees divide savings interest between the user and referrer; they are not an extra payment on top of that gross interest.
 
-This leads to the following rule of thumb: if the FPS market cap is higher than the market cap of ZCHF, then that means that the market participants are betting on the system to grow. If the FPS market cap is lower than the ZCHF market cap, then the market is signalling that it expects the Frankencoin system to shrink.
+The one-third equity relationship is therefore a model result under assumptions, not a reserve requirement enforced by the contracts. Borrowing to buy equity exposes the holder to fees, losses, price changes and redemption conditions; a spread between quoted rates is not a risk-free arbitrage. Nor does comparing FPS reference valuation with ZCHF supply uniquely reveal expected growth.
 
 ### Limits to Capital Efficiency
 
-What if someone creates a clone of the Frankencoin system with a reserve target of 25%? Would they be able to offer a better deal thanks to better capital efficiency? Here, one needs to be aware that there is a trade-off. It is certainly more attractive for those who mint some ZCHF to buy pool shares and sellthe remaining coins on the market. However, one needs to be aware that this implies that there is a buyer for the other 75% of the ZCHF to keep the system in equilibrium. These buyers are typically users that hold ZCHF for transactional purposes. And for them, stability is key. But stability suffers if one aims for an overly ambitious level of capital efficiency, making the clone less attractive for transactional purposes. It is hard to tell where exactly the right equilibrium is, but this is not a race to the bottom where the system with the lowest capital requirements automatically wins. We believe that aiming for a 33% reserve is a robust middle ground, that still allows for plenty of seigniorage gains.
+Lower equity means a smaller buffer before losses reach shared minter reserves. More equity provides a larger buffer but changes the returns available per share. Neither the curve nor a proposed equilibrium ensures a particular reserve ratio or market price.
