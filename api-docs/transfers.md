@@ -1,6 +1,8 @@
 # Transfers API
 
-Read indexed ZCHF transfers carrying reference messages. These GET endpoints do not send payments, establish finality, or prove that an invoice has been paid. Ordinary ERC-20 transfers without references are outside this dataset.
+A transfer reference is public text attached to a ZCHF transfer, such as an invoice number, order ID or payment purpose. The Transfers API indexes reference-bearing transfers so an application can find recent activity and identify payments to verify against an invoice.
+
+Ordinary ERC-20 transfers without references are outside this dataset. An indexed match is a candidate, not proof of payment settlement; the [invoice workflow](#invoice-integration-boundary) explains the checks needed before crediting it.
 
 ## Endpoints and response shapes
 
@@ -11,24 +13,37 @@ Read indexed ZCHF transfers carrying reference messages. These GET endpoints do 
 | `/transfer/reference/by/count/:count` | One record or an error | A missing record is not proof of no transfer |
 | `/transfer/reference/by/from/:from` | Array | Cached outgoing matches |
 | `/transfer/reference/by/to/:to` | Array | Cached incoming matches |
-| `/transfer/reference/history/by/from/:from` | Array | Indexed history, capped at 100 rows in inspected source, no exposed cursor |
+| `/transfer/reference/history/by/from/:from` | Array | Indexed history, capped at 100 rows, no exposed cursor |
 | `/transfer/reference/history/by/to/:to` | Array | Same cap and completeness limitation |
 
 The opposite-party filter is `to` on sender routes and `from` on recipient routes. `reference` is an **exact, case-sensitive** match, not substring search. Encode query parameters with `URLSearchParams`. Do not interpolate reference text into a URL. References are public, untrusted text; render them as text, not HTML, and never include secrets.
 
+### Find transfers for an account
+
+For a recent-activity view, choose `/by/from/:from` for outgoing transfers or `/by/to/:to` for incoming transfers. For an invoice search, add the other party and the exact reference string. The history routes add a time window, but cap the result at 100 records without a cursor.
+
+For example, this request searches indexed outgoing history for one exact reference:
+
+```bash
+curl --fail --get 'https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301' \
+  --data-urlencode 'reference=12 months loan'
+```
+
+Read each row's recipient, source chain, amount and `targetChain` as well as its reference. The [candidate lookup](#candidate-lookup-example) adds an expected recipient and time window and checks the response against the invoice requirements.
+
 ### Time ranges and errors
 
-Use ISO dates or explicit UTC ISO timestamps for history `start` and `end`. Inspected source applies an inclusive start and exclusive end after converting the dates to seconds. Whole-second UTC boundaries avoid rounding ambiguity.
+Use ISO dates or explicit UTC ISO timestamps for history `start` and `end`. The range has an inclusive start and exclusive end after the API converts the dates to seconds. Whole-second UTC boundaries avoid rounding ambiguity.
 
 ```text
 GET /transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?start=2024-01-01T00%3A00%3A00.000Z&end=2025-01-01T00%3A00%3A00.000Z
 ```
 
-The review on 18 September 2026 observed numeric Unix-second query strings returning HTTP 200 with an Apollo/GraphQL `NaN` error, while ISO-date strings returned an array. This is an upstream parsing defect, not repaired by these docs. Always check both HTTP status and payload shape. An error, timeout, null row or malformed response means **data unavailable**, never “no payments”. An empty valid array means no indexed matches in that response, not a complete absence of payments.
+Numeric Unix-second query strings can produce an error payload even with HTTP 200; use the ISO form above and check the payload shape. An error, timeout, null row or malformed response means **data unavailable**, never “no payments”. An empty valid array means no indexed matches in that response, not a complete absence of payments.
 
 ### Counter and completeness limitations
 
-The same review observed counter `1000` while count `1001` existed, a null entry in the list, and a later counter of `0`. Do not use counter increases, ordering, or `count > lastCount` as a notification/payment cursor. Latest caches and capped history can omit records. There is no documented transfer-history pagination contract; splitting time ranges alone cannot prove completeness when 100 events share a boundary.
+The counter is not a reliable high-water mark. Do not use counter increases, ordering or `count > lastCount` as a notification/payment cursor. Refresh the relevant account query for a recent-activity display and retain its incomplete-history status. Latest caches and capped history can omit records; splitting time ranges alone cannot prove completeness when 100 events share a boundary.
 
 For a complete ledger, use a separately validated indexer or the relevant contracts' logs via an RPC with explicit block-range pagination, persisted checkpoints, reorg handling and reconciliation against receipts. Verify each supported chain, contract deployment block and event ABI. Do not label an API-only export complete.
 
@@ -38,7 +53,7 @@ For a complete ledger, use a separately validated indexer or the relevant contra
 | --- | --- |
 | `amount` | Decimal integer string in ZCHF base units (18 decimals) |
 | `chainId` | Number: source EIP-155 chain ID |
-| `count`, `created` | Observed decimal integer strings; Swagger also describes numbers. `created` is Unix seconds. Preserve count without floating-point coercion |
+| `count`, `created` | Decimal integer strings; the specification also allows numbers. `created` is Unix seconds. Preserve count without floating-point coercion |
 | `from`, `sender`, `to` | Addresses; `from` and original `sender` can differ. Validate before case-normalised comparison |
 | `reference` | Exact public reference string, possibly empty |
 | `targetChain` | Decimal string: `0` is the same-chain sentinel; otherwise a CCIP chain selector, **not** an EIP-155 ID |
@@ -122,4 +137,6 @@ export async function historyCandidates(invoice, start, end, fetchImpl = fetch) 
 }
 ```
 
-See [API conventions](README.md) for units and validation, and [wallet integration](wallet-integration.md) for read-only versus transaction boundaries.
+Pass an invoice object containing `from`, `to`, `chainId`, `reference` and a decimal integer-string `amount` in ZCHF base units to `historyCandidates`, along with whole-second UTC ISO start and end timestamps. It returns `unverified-candidates` when rows meet those requirements, or `no-indexed-match` when none do. Both results have `complete: false`; malformed or unavailable responses throw. Send candidates to the receipt-verification stage, not directly to order fulfilment.
+
+See [API conventions](README.md) for units and shared validation.

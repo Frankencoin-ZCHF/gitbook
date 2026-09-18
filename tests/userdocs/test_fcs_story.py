@@ -137,7 +137,7 @@ class CanonicalStory(unittest.TestCase):
     def test_whole_markdown_inventory_is_accounted_for(self):
         observed = {str(p.relative_to(ROOT)) for p in ROOT.rglob('*.md')
                     if '.git' not in p.relative_to(ROOT).parts}
-        self.assertEqual(set(BASELINE['anchors']) | {'fps-reference.md'}, observed)
+        self.assertEqual(set(BASELINE['anchors']) | {'fps-reference.md', 'tests/api-docs/EVIDENCE.md'}, observed)
 
     def test_existing_heading_fragments_survive_restructure(self):
         for name, previous in BASELINE['anchors'].items():
@@ -147,6 +147,11 @@ class CanonicalStory(unittest.TestCase):
     def test_api_code_blocks_are_unchanged_from_tested_base(self):
         for name, expected in BASELINE['api_fence_sha256'].items():
             blocks = re.findall(r'^```[^\n]*\n.*?^```\s*$', page(name), re.M | re.S)
+            # The reader pass adds only curl fences. Keep the original aggregate
+            # hash rather than rebaselining tested JSON/JavaScript/text examples.
+            # API reader tests execute the added shell requests offline and also
+            # preserve every individual base fence, in order.
+            blocks = [block for block in blocks if not block.startswith('```bash\n')]
             digest = hashlib.sha256('\n'.join(blocks).encode()).hexdigest()
             self.assertEqual(expected, digest, name)
 

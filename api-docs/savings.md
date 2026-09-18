@@ -1,6 +1,6 @@
 # Savings API
 
-Read savings balances, activity and leadrate proposals. API GET requests do not deposit, withdraw or collect interest. See [wallet integration](wallet-integration.md) for the contract methods.
+Savings modules let ZCHF holders earn interest on deposited balances. Use this API to show an account's savings, collected interest and recent activity, compare module rates or follow proposed rate changes. Each chain and module has its own records, so an account may have several separate savings balances.
 
 ## Endpoints
 
@@ -16,7 +16,15 @@ Read savings balances, activity and leadrate proposals. API GET requests do not 
 | `/savings/referrer/:referrer/mapping` | `{num, accounts, map}`; `map` is chain -> module -> account -> details |
 | `/savings/referrer/:referrer/earnings` | `{earnings, chains, total}`; `earnings` is chain -> module -> account -> scaled ZCHF |
 
-The API exposes no tested exhaustive activity pagination recipe. Reconcile an independent block-paginated event index for complete histories. An empty response or absent module is not a confirmed zero on-chain balance.
+## Build a savings view
+
+1. Fetch `GET /savings/core/info` for module rates and aggregate savings totals.
+2. Fetch `/savings/core/balance/:account` with the wallet's address. Select the chain and exact module address in both responses, or show each pair as a separate account row.
+3. Display the module's annual simple rate, the account's saved balance and its cumulative collected interest. The [display example](#validated-display-and-hypothetical-projection) keeps these units separate.
+4. Fetch `/savings/core/activity/:account` for recent deposits, withdrawals and interest collections. Label this as recent activity: the endpoint returns at most 1000 records with no documented exhaustive pagination.
+5. Use [wallet contract reads](wallet-integration.md#displaying-savings) to add pending interest, which is not part of the API's cumulative collected-interest field.
+
+An absent module or an empty response is not a confirmed zero on-chain balance. For complete account history, reconcile an independent block-paginated event index.
 
 ## Schemas and units
 
@@ -37,7 +45,7 @@ The API exposes no tested exhaustive activity pagination recipe. Reconcile an in
 
 Account `interest` is cumulative indexed **collected** interest, not a live pending-interest quote. The indexed gross interest total need not equal the net amount credited to the saver after referral fees. Referrer endpoints differ from core endpoints: referral balances and earnings are scaled numbers, and `referrerFee` is PPM. Do not apply the core raw-string conversion to them.
 
-Captured `/core/balance/:account` response from 18 September 2026:
+Example `/core/balance/:account` response (historical values):
 
 ```json
 {
@@ -60,13 +68,21 @@ Captured `/core/balance/:account` response from 18 September 2026:
 
 ## Rates, accrual and module selection
 
-The rate is set through governance proposals and changes, not automatically calculated from reserve metrics. For `rate=40000`, the annual simple fraction is `40000 / 1000000 = 0.04`, or 4%. The captured mainnet modules reported `35000` and `10000`: 3.5% and 1%, respectively. Select the chain **and exact module address**; do not select the first result of `Object.values`.
+The rate is set through governance proposals and changes, not automatically calculated from reserve metrics. For `rate=40000`, the annual simple fraction is `40000 / 1000000 = 0.04`, or 4%. Select the chain **and exact module address**; do not select the first result of `Object.values` or assume that every module has the same rate.
 
 The contract accrues simple interest using rate ticks. Collecting interest through a state-changing refresh adds net interest to the saved balance, after which that balance can earn interest. APY therefore depends on refresh frequency, changing rates, entry delays, fees and integer rounding. The API's `rate` is not an automatically compounded APY.
 
 For a hypothetical unchanged rate and an already interest-eligible balance, gross interest in base units is `floor(principal * ratePPM * seconds / 1000000 / 31536000)`. This is an estimate, not the live contract calculation across rate changes or delayed entry. Read `accruedInterest` for current gross pending interest on the chosen module. With a nonzero referrer, the inspected referral-capable contract deducts `floor(gross * referralFeePPM / 1000000)`; the remainder is net interest.
 
-The captured mainnet API lists modules `0x27d9ad987bde08a0d083ef7e0e4043c857a17b38` and `0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae`. Module presence does not identify its ABI or version. Configure those explicitly. The [wallet guide](wallet-integration.md) distinguishes referral-capable modules from older interfaces.
+Module presence does not identify its ABI or version. Configure those explicitly. The [wallet guide](wallet-integration.md) distinguishes referral-capable modules from older interfaces and explains how to deposit, collect interest and withdraw.
+
+### Follow rate changes
+
+Use `/savings/leadrate/info` to show current approved rates alongside proposed changes. Its `rate`, `proposed` and `open` maps are each keyed by chain and module. Keep a proposal separate from the active rate until the corresponding change takes effect. `/savings/leadrate/rates` and `/savings/leadrate/proposals` provide the indexed records for rate-history and proposal views; `approvedRate` also uses PPM.
+
+### Track referral earnings
+
+Pass the referrer's address to `/savings/referrer/:referrer/mapping` to find referred accounts, grouped by chain, module and account. Join those identities to `/savings/referrer/:referrer/earnings` for an earnings breakdown, or use its `chains` and `total` fields for summaries. Referral balances and earnings are already scaled ZCHF numbers. `referrerFee` is PPM, not a ZCHF amount.
 
 ## Validated display and hypothetical projection
 

@@ -1,0 +1,137 @@
+{
+  "base": "56555dce5a57a674fcc9046caeee548f266f36d6",
+  "original": "598be69c450550a5b64d3c01a242901cf1d23fcb",
+  "pages": {
+    "api-docs/README.md": {
+      "base_sha256": "c7c2a303dab97c7b1e2d68ded3df16a12362ccae1bf12f8ca47e3f95629cd9c4",
+      "original_sha256": "91ce221c06124ce6485c467a4dad8b4aad148b090ded61c2f0f2fba783379dbe",
+      "anchors": [
+        "api-documentation",
+        "controllers",
+        "versions-and-data-conventions",
+        "executable-examples",
+        "shared-validation-and-exact-display-formatting"
+      ],
+      "fence_sha256": [
+        "88a8c11f70bf963ca2760a53c71eb4d373e12e68b7f77817046b37d5dabd185b"
+      ]
+    },
+    "api-docs/analytics.md": {
+      "base_sha256": "ad79ecfcf3c0578b4bf41bc01417bc234978fe272f4c8475fe4f7cacf6bdbbc4",
+      "original_sha256": "74a8dbd4d8789a6dfe612dd81d13ac00512a00e0ed4287930293cc7fb45a3683",
+      "anchors": [
+        "analytics-api",
+        "endpoints-and-limits",
+        "financial-fields",
+        "export-completeness"
+      ],
+      "fence_sha256": []
+    },
+    "api-docs/challenges.md": {
+      "base_sha256": "21f47b2e306341096e918bfa56037f06a3c60af7b62e2e01616be4ffbb3d9d12",
+      "original_sha256": "b5f491280a04799c0fdcbf4ba2ecb515331339322a1a69ca1cf02e7bcb41b7cd",
+      "anchors": [
+        "challenges-api",
+        "endpoints-and-identifiers",
+        "units-and-outcome-fields",
+        "challenge-and-bid-mechanics"
+      ],
+      "fence_sha256": []
+    },
+    "api-docs/ecosystem.md": {
+      "base_sha256": "a063086c0a7c2d6c24d8a4e97981895a5a3a41fbe2a8e75e699edd8b16f0d773",
+      "original_sha256": "c71242a3f34eb0371cd4136e2d6f6387f94a4ca2b9970fe78cae5ccf5f949930",
+      "anchors": [
+        "ecosystem-api",
+        "frankencoin-and-legacy-fps",
+        "minter-proposals",
+        "collateral-catalogue"
+      ],
+      "fence_sha256": []
+    },
+    "api-docs/fcs.md": {
+      "base_sha256": "b7e1ba4f2e9e3952dfbeb9e868b5ff7b21b03a793cdde3e7aee64c0d7a372cd1",
+      "original_sha256": null,
+      "anchors": [
+        "fcs-api",
+        "get-fcsinfo",
+        "get-fcsdiscount",
+        "contract-reads-and-transactions",
+        "source-and-version-boundary"
+      ],
+      "fence_sha256": [
+        "c95b17ec62efbbef5fb87f93d2a6d8f22c5e1050e707f0e9f0bcad435a1822a0",
+        "115367fac6fcceb7252e4a3eb9b57cccf6a729bc10c5eb0473d02f84d845adc2"
+      ]
+    },
+    "api-docs/positions.md": {
+      "base_sha256": "763bd1d87583e971d0699e31de9ac08a71034e577e0db9e790378976da923462",
+      "original_sha256": "3f9456f67ea9776280cd56e1222dac4ca4dfc91ac054a41a4aba96950b6b3cec",
+      "anchors": [
+        "positions-api",
+        "endpoints",
+        "fields-and-units",
+        "state-and-history"
+      ],
+      "fence_sha256": []
+    },
+    "api-docs/prices.md": {
+      "base_sha256": "a1496c83b269071b446c99cadd00d2531af900952441232b3befca26bc67eaa0",
+      "original_sha256": "35a134415e786b6a273c4eb3e0e0e55f334c4c9773bd9925fec9c45e31f7f546",
+      "anchors": [
+        "prices-api",
+        "endpoints",
+        "currencies-units-and-freshness",
+        "aggregate-collateral-ratios",
+        "indicative-position-valuation"
+      ],
+      "fence_sha256": [
+        "94f44426c77f76ba64ef700acdad805988f42cbc9978613061927e9797f7400e"
+      ]
+    },
+    "api-docs/savings.md": {
+      "base_sha256": "bf1beba4695bc0b968698cc6061bc6c421ce4f29a5cedd45866785e663233f87",
+      "original_sha256": "b51a5a01bd5813ea3384bbfec04396b889a4c249a6110aa8dc7d8208a7049af8",
+      "anchors": [
+        "savings-api",
+        "endpoints",
+        "schemas-and-units",
+        "rates-accrual-and-module-selection",
+        "validated-display-and-hypothetical-projection"
+      ],
+      "fence_sha256": [
+        "0d2d90bb6381261cb9df26749f7837f6820b5309c6b7dc854fe255d8f5bae3cd",
+        "b560e117772b8774ffbd021f940d37029dc3b022c2a968f0ea2f2a7c492cde66"
+      ]
+    },
+    "api-docs/transfers.md": {
+      "base_sha256": "0cf0ec398239630918ffca26f8ea2384c509028de43bc6fb52bd5d0347554b47",
+      "original_sha256": "2051de6b6abde07457fce6d7263fe85dd451ef6504fff848742be02f963cceec",
+      "anchors": [
+        "transfers-api",
+        "endpoints-and-response-shapes",
+        "time-ranges-and-errors",
+        "counter-and-completeness-limitations",
+        "record-fields",
+        "invoice-integration-boundary",
+        "candidate-lookup-example"
+      ],
+      "fence_sha256": [
+        "e044ba0788688be1d6653b6dc4d9196d73e00dc0a9558141bd043e3adbf4a2f7",
+        "0b25249d91cb7b4792d53d8744247820b6d3156b5002ff136984d579eeca7045"
+      ]
+    },
+    "api-docs/wallet-integration.md": {
+      "base_sha256": "19d92c8f586767d5ed86706d5972f82d2daf915002706481005523bc4f50d873",
+      "original_sha256": "eeae4be626ab881933264bf762f6fbbccde07c56dc28b0148f8b28019292c8a4",
+      "anchors": [
+        "wallet-integration",
+        "chain-token-and-module-selection",
+        "savings-contract-interface",
+        "displaying-savings",
+        "indexed-activity-and-other-integrations"
+      ],
+      "fence_sha256": []
+    }
+  }
+}

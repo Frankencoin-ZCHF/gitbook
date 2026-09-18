@@ -246,5 +246,13 @@
     "captured_at": "2026-09-18T07:43:18.279416+00:00",
     "status": 200,
     "sha256": "5973048dede5814f90fc9126aad032f0554e056c11eeb5f2da7127ae66ef89f3"
+  },
+  {
+    "file": "23.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/analytics/dailyLog/json?limit=1",
+    "captured_at": "2026-09-18T07:40:29.901578+00:00",
+    "status": 200,
+    "sha256": "e6b0cd6efc6a09ea5d61619eee33bb4b4c95f073611add3f68371133ae42efc9"
   }
 ]

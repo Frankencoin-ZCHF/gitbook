@@ -10,5 +10,8 @@ Requirements: Python standard library and Node.js 18+. No package installation, 
 - `routes.json` is a projection of the captured API specification's GET paths. It records the hash of the extracted specification, not a newly generated service response.
 - `test_snapshots.py` checks captured schemas, printed JSON provenance and the evidence behind documented endpoint limitations.
 - `test_checker.py` verifies that the checker rejects malformed/duplicate-key JSON and missing files/anchors.
+- `test_reader_docs.py` checks all ten pages against the editorial manifest, preserves original anchors and fenced examples, validates evidence links and executes the added curl commands with an offline argument recorder.
+
+[Verification evidence](EVIDENCE.md) contains the dated cursor, counter, schema and source observations that support the public guidance. Keep test chronology here rather than in the feature explanations. [Reader coverage](reader-coverage.json) records what each page restores and what inaccurate original claims remain excluded.
 
 Payment examples produce candidates only. Tests do not certify settlement, receipt finality, complete API histories or deployed-contract equivalence. The tests are deterministic documentation regression tests; they do not run transactions or fix the service.

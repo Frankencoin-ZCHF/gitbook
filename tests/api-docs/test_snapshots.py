@@ -1,6 +1,7 @@
 """Point-in-time evidence tests, separate from synthetic example behaviour tests."""
 import hashlib
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 import re
 import unittest
@@ -21,7 +22,7 @@ def examples(page):
 class CapturedEvidence(unittest.TestCase):
     def test_every_captured_fixture_matches_its_provenance(self):
         manifest = json.loads((FIXTURES / 'manifest.json').read_text())
-        self.assertEqual(len(manifest), 31)
+        self.assertEqual(len(manifest), 32)
         self.assertEqual(len({x['file'] for x in manifest}), len(manifest))
         for entry in manifest:
             self.assertEqual(entry['kind'], 'captured-public-response')
@@ -110,6 +111,21 @@ class CapturedEvidence(unittest.TestCase):
         self.assertIsInstance(first['logs'][0]['amount'], str)
         for absent in ['totalSupply', 'interestRate', 'mintingTotalV1', 'mintingTotalV2']:
             self.assertNotIn(absent, first['logs'][0])
+
+    def test_daily_rows_ignore_limit_and_use_seconds_with_missing_dates(self):
+        daily = body(23)
+        self.assertEqual(daily['num'], len(daily['logs']))
+        self.assertEqual(daily['num'], 818)
+        self.assertNotIn('pageInfo', daily)
+        timestamps = [int(row['timestamp']) for row in daily['logs']]
+        self.assertEqual(timestamps, sorted(timestamps))
+        self.assertTrue(any(b - a > 86400 for a, b in zip(timestamps, timestamps[1:])))
+        for row, timestamp in zip(daily['logs'], timestamps):
+            self.assertEqual(datetime.fromtimestamp(timestamp, timezone.utc).date().isoformat(), row['date'])
+        source = json.loads((ROOT / 'tests/api-docs/reader-source-evidence.json').read_text())
+        self.assertEqual(source['commit'], '9013d8fadf2bcc251d236c78328958ebcfbe1c26')
+        quotes = [quote for entry in source['sources'] for quote in entry['quotes']]
+        self.assertIn('analyticDailyLogs(orderBy: "timestamp", orderDirection: "asc", limit: 1000)', quotes)
 
 
 if __name__ == '__main__':

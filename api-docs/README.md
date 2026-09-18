@@ -1,8 +1,10 @@
 # API documentation
 
+The Frankencoin API supplies indexed data for wallets, position explorers, payment-reference searches and financial dashboards. Query token information, account activity and historical observations over HTTP without building an indexer for each view.
+
 Base URL: `https://api.frankencoin.com`. The [interactive specification](https://api.frankencoin.com/) lists routes and parameters. These pages describe read-only HTTP GET requests. They do not create positions, place bids, deposit savings or transfer tokens; those actions use the relevant contracts.
 
-[FCS](../pool-shares.md) is Frankencoin's canonical governance and share token. Start with the [FCS controller](fcs.md) for its supply, reference prices and discount data. FPS routes remain the source for the underlying equity token's data; their identifiers and units do not change with FCS's reader-facing role.
+[FCS](../pool-shares.md) is Frankencoin's canonical governance and share token. Start with the [FCS controller](fcs.md) for its supply, reference prices and discount data. FPS routes remain the source for the underlying equity token's data; use those fields for FPS, not FCS.
 
 ## Controllers
 
@@ -18,7 +20,7 @@ Base URL: `https://api.frankencoin.com`. The [interactive specification](https:/
 
 ## Versions and data conventions
 
-The response examples and limitations below were checked on 18 September 2026 against API version `0.4.2`, saved public responses and the linked source. API releases, position V1/V2, savings module versions and the FCS audit revision are separate version systems. A cached API result can lag chain state; `/status` reports service/indexer health, not finality for each record.
+These pages describe API version `0.4.2`. API releases, position V1/V2, savings module versions and the FCS audit revision are separate version systems. A cached API result can lag chain state; `/status` reports service/indexer health, not finality for each record.
 
 | Field family | Encoding and unit |
 | --- | --- |
@@ -34,11 +36,21 @@ The response examples and limitations below were checked on 18 September 2026 ag
 
 There is no global “all amounts are wei” or “all timestamps are seconds” rule. Keep raw quantities as integer strings/`BigInt`. JSON numbers may already have lost precision; do not use display totals to construct transaction amounts. Validate field types and units for each endpoint. Missing, null or malformed data is distinct from zero.
 
+## Make a first request
+
+Fetch the ZCHF overview for a supply and TVL dashboard:
+
+```bash
+curl --fail 'https://api.frankencoin.com/ecosystem/frankencoin/info'
+```
+
+Read `erc20` for token metadata, `chains` for chain-specific data, `token` for ZCHF metrics and `tvl` for CHF and USD totals. Use the [ecosystem field guide](ecosystem.md#frankencoin-and-legacy-fps) to interpret the response. Add `/fcs/info` for the canonical share token's supply and reference prices.
+
+Most routes return JSON, but their wrappers differ: a list may use `{num, list}`, an address lookup may use `{num, owners, map}`, and an account response may be nested by chain and module. Read the endpoint's shape before iterating it. A successful HTTP status can still contain an error object; check both status and payload before displaying results.
+
 ## Executable examples
 
-The JavaScript blocks are ES modules for Node.js 18+ or a compatible browser. Save each page's JavaScript block as its page name plus `.mjs`, keeping them in one directory (`README.mjs`, `transfers.mjs`, `savings.mjs`, `prices.mjs`). Imports below refer to those files. Functions only perform GET requests when called; tests use recorded responses or explicitly labelled synthetic fixtures.
-
-From a repository checkout, run `python3 scripts/check-api-docs.py`. It extracts these exact blocks, checks JSON examples and local links, and runs the offline tests without installing dependencies.
+The JavaScript blocks are ES modules for Node.js 18+ or a compatible browser. Save each page's JavaScript block as its page name plus `.mjs`, keeping them in one directory (`README.mjs`, `transfers.mjs`, `savings.mjs`, `prices.mjs`). Imports below refer to those files. Functions only perform GET requests when called. The shared helpers below handle transport, type checks and exact amount formatting; the feature pages show how to interpret their results.
 
 ### Shared validation and exact display formatting
 
@@ -97,3 +109,10 @@ export async function getJson(path, fetchImpl = fetch) {
 ```
 
 The address helper validates syntax, not EIP-55 checksum or contract identity. Use a chain-aware address registry and the selected contract's ABI when moving from indexed data to contract calls.
+
+## Packages and source
+
+- [Interactive API specification](https://api.frankencoin.com/): request parameters and response schemas.
+- [API source](https://github.com/Frankencoin-ZCHF/frankencoin-api) and [API types package](https://www.npmjs.com/package/@frankencoin/api): service implementation and types for a pinned release.
+- [Contract repository](https://github.com/Frankencoin-ZCHF/FrankenCoin) and [contract SDK](https://www.npmjs.com/package/@frankencoin/zchf): contract interfaces and deployment references.
+- [Documentation validation](../tests/api-docs/README.md): example provenance, saved responses and offline test instructions.
