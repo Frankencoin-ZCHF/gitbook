@@ -68,7 +68,7 @@ The [FCS reference](fcs.md) and [migration guide](fcs-migration.md) describe the
 * **Legacy vote destruction:** while binding, permissionless `shoot` destroys accumulated FPS votes without burning the target's FPS balance. Repeated calls can delay recovery of legacy redemption eligibility.
 * **Cross-chain snapshots:** stale or selectively updated votes can change effective qualification. Late execution of old failed messages can overwrite newer state; synchronisation can overwrite local delegations.
 * **Proposal monitoring:** stale minter announcements can leave gaps in bypass enforcement. The audit assumes active monitoring and no malicious majority of FCS voting power after binding.
-* **Underlying contracts and CCIP:** the wrapper depends on their behaviour. A code assessment does not establish the identity or configuration of a deployment.
+* **Underlying contracts and CCIP:** the wrapper uses the underlying contracts for pricing, vote accounting and redemption, and CCIP for cross-chain messages.
 
 The report records code corrections, specification changes, acknowledgements and accepted risks; these are not all equivalent to code fixes. Sources: [trust model, SC1–SC5 and findings #005, #006, #010, #012, #025 and #028](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=9).
 
@@ -94,7 +94,7 @@ An unchallenged bad proposal can authorise unsound collateral or a minting modul
 
 ### Regulatory Risks
 
-The existing [compliance material](https://www.frankencoin.com/compliance#compliance-summary) addresses ZCHF and legacy FPS. The FPS2 code assessment does not classify FCS legally. The [report tool](https://app.frankencoin.com/report) records holdings and income; it does not determine their tax treatment.
+The [compliance page](https://www.frankencoin.com/compliance#compliance-summary) provides regulatory information. The [report tool](https://app.frankencoin.com/report) records holdings and income.
 
 ### Unknown Risks
 

@@ -59,10 +59,10 @@ The seven-day recovery applies absent further redemptions; further activity can 
 
 ## Contract reads and transactions
 
-For a size-specific quote, use the selected deployment's `previewDeposit`, `previewMint`, `previewWithdraw` or `previewRedeem`. Read the corresponding `maxDeposit`, `maxMint`, `maxWithdraw` or `maxRedeem` and applicable holder/wrapper conditions. A preview is not an execution guarantee. `convertToAssets` is a reference conversion, not discounted redemption proceeds. `withdraw` takes assets; `redeem` takes shares, and their limits differ.
+For a size-specific quote, use the selected deployment's `previewDeposit`, `previewMint`, `previewWithdraw` or `previewRedeem`. Read the corresponding `maxDeposit`, `maxMint`, `maxWithdraw` or `maxRedeem` and applicable holder/wrapper conditions. Previews calculate amounts; limits and eligibility determine whether the operation is available. `convertToAssets` is a reference conversion, not discounted redemption proceeds. `withdraw` takes assets; `redeem` takes shares, and their limits differ.
 
 This controller neither reports per-holder voting eligibility nor submits transactions. Direct FPS wrapping carries votes; fresh ZCHF entry and WFPS migration do not supply immediate votes. Internal wrapper quorum and the wrapper's legacy FPS quorum are separate. These conditions belong to contract state, not a price field.
 
 ## Source and version boundary
 
-The [ChainSecurity FPS2 report](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf), final V3 at `c1f229e3b26050367aafcb55da294342b4cae382` (14 July 2026), is the source for the mechanics above. It calls the wrapper FPS2. It does not establish that the API-reported deployment matches that code. API field conversions and fallback behaviour come from [FCS service source at `9013d8f`](https://github.com/Frankencoin-ZCHF/frankencoin-api/blob/9013d8fadf2bcc251d236c78328958ebcfbe1c26/src/modules/fcs/fcs.service.ts).
+The [ChainSecurity FPS2 report](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf), final V3 at `c1f229e3b26050367aafcb55da294342b4cae382` (14 July 2026), is the source for the versioned contract mechanics above. It calls the wrapper FPS2. Deployment fields are captured API responses. Field conversions and fallback behaviour come from [FCS service source at `9013d8f`](https://github.com/Frankencoin-ZCHF/frankencoin-api/blob/9013d8fadf2bcc251d236c78328958ebcfbe1c26/src/modules/fcs/fcs.service.ts).

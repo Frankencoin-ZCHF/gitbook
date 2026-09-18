@@ -10,7 +10,7 @@ FCS adds a governance layer to the existing Frankencoin Pool Shares (FPS). Each 
 
 This page describes the final V3 design in ChainSecurity's [14 July 2026 assessment](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf), at commit `c1f229e3b26050367aafcb55da294342b4cae382`. The report and reviewed code call the wrapper **FPS2** and the underlying FPS **FPS1**. This documentation uses **Frankencoin Share Token (FCS)** for the wrapper, retaining `FPS2` in source identifiers. The audited token's `name()` and `symbol()` still return `Frankencoin Pool Shares 2` and `FPS2`.
 
-These are versioned mechanics, not a deployment directory. The audit does not identify a current FCS deployment or establish deployed-code equivalence. Contract addresses and supported routes come from the selected application and chain. The continuing Ethereum [FPS contract](https://etherscan.io/address/0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2) remains FPS, including in price and supply data.
+The contract mechanics below refer to that reviewed version. The [FCS API reference](api-docs/fcs.md) documents the API-reported deployment and fields separately. The continuing Ethereum [FPS contract](https://etherscan.io/address/0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2) remains FPS, including in price and supply data.
 
 ## Entry paths
 
@@ -81,7 +81,7 @@ The withheld ZCHF returns to Equity. Weighted recent redemptions decay to zero o
 
 A single `withdraw`, which specifies ZCHF output, may burn at most **10% of total FCS supply**. This is not 10% of the holder's balance or a daily quota. The share-denominated `redeem` path has no such cap.
 
-For sufficiently large redemptions, burning more shares can return **less ZCHF** because of the discount. The audit retains this as accepted risk #012 and describes splitting large redemptions in SC5. Splitting also changes fees, state and timing, so each transaction needs its own quote. `redeemExpected` adds a minimum-proceeds condition; an ordinary `redeem` does not. A positive preview alone does not establish eligibility or available balance. [Audit pp11, 26.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=26)
+For sufficiently large redemptions, burning more shares can return **less ZCHF** because of the discount. Splitting a redemption changes fees, state and timing, so each transaction has its own quote. `redeemExpected` adds a minimum-proceeds condition; an ordinary `redeem` does not. Eligibility and available balance are separate from the preview calculation. [Audit pp11, 26.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=26)
 
 ## Accounting and ERC-4626 views
 

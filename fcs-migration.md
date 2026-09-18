@@ -24,7 +24,7 @@ WFPS on another chain first needs a supported route to the underlying Ethereum F
 3. Review the allowance, recipient, amount and quoted output. The reviewed `depositExpected` variant accepts a minimum share output.
 4. After confirmation, read the received share balance and holder votes. Separately read the wrapper's underlying FPS votes, binding state and redemption limits.
 
-This sequence describes contract operations, not a claim that every application exposes every operation. The [API reference](api-docs/fcs.md) distinguishes indexed data from transactions.
+These are contract operations; application interfaces expose their supported subset. The [API reference](api-docs/fcs.md) distinguishes indexed data from transactions.
 
 ## Two voting records
 
@@ -32,7 +32,7 @@ This sequence describes contract operations, not a claim that every application 
 
 The wrapper can therefore fail the underlying FPS quorum even when an FCS holder has more than 1% of internal votes. Legacy `kamikaze` can also reduce the wrapper's FPS votes below that quorum. Binding has a separate threshold: more than two thirds of underlying FPS votes.
 
-ChainSecurity's SC4 describes gradual migration by large legacy voters as a way to retain a legacy veto backstop while the wrapper accumulates FPS voting power. This is a transition property, not evidence that a particular deployment has completed migration. [Audit p11.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=11)
+Gradual migration by large legacy voters can retain a legacy veto backstop while the wrapper accumulates FPS voting power, as described in ChainSecurity's SC4. [Audit p11.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=11)
 
 ## Returning to FPS or exiting into ZCHF
 
