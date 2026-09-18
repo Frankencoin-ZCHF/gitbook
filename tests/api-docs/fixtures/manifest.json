@@ -1,0 +1,250 @@
+[
+  {
+    "file": "02.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/ecosystem/frankencoin/info",
+    "captured_at": "2026-09-18T07:40:28.902530+00:00",
+    "status": 200,
+    "sha256": "5f27c395ef343c41a73bdcb6125c102b31181f51ad4a6203f5374641bf80f7f4"
+  },
+  {
+    "file": "03.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/ecosystem/fps/info",
+    "captured_at": "2026-09-18T07:40:28.911267+00:00",
+    "status": 200,
+    "sha256": "ef6cdb83d6303eb38c4c8560cd535d0eb565d4ad6d859fde570886683402ee20"
+  },
+  {
+    "file": "04.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/prices/erc20/fps",
+    "captured_at": "2026-09-18T07:40:29.063182+00:00",
+    "status": 200,
+    "sha256": "a36a40f6a80bdaa1ca8cc4426a48764ff620e3220cc73feb341ff6230aa5b4c3"
+  },
+  {
+    "file": "05.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/savings/core/info",
+    "captured_at": "2026-09-18T07:40:29.065188+00:00",
+    "status": 200,
+    "sha256": "6689e006398ec1c64feb89eae2fc32dca04ed301b1d74bb49fddc4a22f4affd3"
+  },
+  {
+    "file": "06.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/savings/core/balance/0x963eC454423CD543dB08bc38fC7B3036B425b301",
+    "captured_at": "2026-09-18T07:40:29.067908+00:00",
+    "status": 200,
+    "sha256": "654f382a964bf8f9bb07793e4d6dd975f136dd39dd5fe9ab417d8e3437bee60d"
+  },
+  {
+    "file": "07.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/savings/core/activity/0x963eC454423CD543dB08bc38fC7B3036B425b301",
+    "captured_at": "2026-09-18T07:40:29.174540+00:00",
+    "status": 200,
+    "sha256": "a95c1a2b06387ee63b64066bcc70c08d337b5824a989958b7b161593a3acf0ee"
+  },
+  {
+    "file": "08.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/savings/leadrate/info",
+    "captured_at": "2026-09-18T07:40:29.175588+00:00",
+    "status": 200,
+    "sha256": "74ca2428371d48dc07cac842e7316c93479d7267f1f83a3a8a3e4552d6fd7857"
+  },
+  {
+    "file": "09.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/prices/mapping",
+    "captured_at": "2026-09-18T07:40:29.193481+00:00",
+    "status": 200,
+    "sha256": "4d8e49eaa9e192b03f12e9d4336e44a0b504dd8272fc2de328c5c2c2746d973d"
+  },
+  {
+    "file": "11.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/positions/owners",
+    "captured_at": "2026-09-18T07:40:29.306314+00:00",
+    "status": 200,
+    "sha256": "ef8072e36f7c454eaf206ee025398657ffce2908ce59eae8343af7ccb81f8caa"
+  },
+  {
+    "file": "14.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/challenges/list",
+    "captured_at": "2026-09-18T07:40:29.427281+00:00",
+    "status": 200,
+    "sha256": "fe9ec3000ecfe3fef2c4b2f581c4c91870a95f7e2607e0e01f5f00a1f0b35bc6"
+  },
+  {
+    "file": "15.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/challenges/bids/mapping",
+    "captured_at": "2026-09-18T07:40:29.465113+00:00",
+    "status": 200,
+    "sha256": "990ee36fc5c79daf373f9b9aacd5e17cabc18686e56dd5f05e1cd7eb95d7a306"
+  },
+  {
+    "file": "16.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/counter",
+    "captured_at": "2026-09-18T07:40:29.527200+00:00",
+    "status": 200,
+    "sha256": "40510175845988f13f6162ed8526f0b09f73384467fa855e1e79b44a56562a58"
+  },
+  {
+    "file": "17.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301",
+    "captured_at": "2026-09-18T07:40:29.535796+00:00",
+    "status": 200,
+    "sha256": "04f3720435ebff93cb1b411c93a8e0d1e0190bef3511820b332c1961360a94a8"
+  },
+  {
+    "file": "18.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?start=1704067200&end=1735689600",
+    "captured_at": "2026-09-18T07:40:29.574607+00:00",
+    "status": 200,
+    "sha256": "b4a9cff9a09eef8231ebd68e808efec4a0abd04d3ef9ad6672a5c33b863a16fb"
+  },
+  {
+    "file": "20.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/analytics/fps/exposure",
+    "captured_at": "2026-09-18T07:40:29.641407+00:00",
+    "status": 200,
+    "sha256": "4a534c3c50d299fee7f7e6253bfa60e90d3c37bf36315fa42e535375fa4fb534"
+  },
+  {
+    "file": "21.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/analytics/fps/earnings",
+    "captured_at": "2026-09-18T07:40:29.746249+00:00",
+    "status": 200,
+    "sha256": "b0a43ca9dad1533a7d1de1ec9aae9e2e454fa42877a494c1151ea88210b5a5b8"
+  },
+  {
+    "file": "22.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/analytics/transactionLog/json?limit=1",
+    "captured_at": "2026-09-18T07:40:29.775100+00:00",
+    "status": 200,
+    "sha256": "a969c7ed8aa5ff999b7663220d2670ab0219bc7f02b5823c6790dbecac5acdf6"
+  },
+  {
+    "file": "24.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/ecosystem/minter/list/1",
+    "captured_at": "2026-09-18T07:40:30.143822+00:00",
+    "status": 200,
+    "sha256": "3ae9ae23bc6dd0aeb2383d3d623b2c5a06c517ab8cce6f88928a25c9b25d2313"
+  },
+  {
+    "file": "25.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/ecosystem/collateral/list",
+    "captured_at": "2026-09-18T07:40:30.207909+00:00",
+    "status": 200,
+    "sha256": "cdb29588a9da487e928c1042113021ddee6e09276e53f9a669040fc4683cc44d"
+  },
+  {
+    "file": "27.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/list",
+    "captured_at": "2026-09-18T07:41:17.090223+00:00",
+    "status": 200,
+    "sha256": "8bca4500bd84708ccace4ee3aa5b2393ae085d7e27c7ece8248d29e6ab8a2e2f"
+  },
+  {
+    "file": "28.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/by/count/1001",
+    "captured_at": "2026-09-18T07:41:17.254618+00:00",
+    "status": 200,
+    "sha256": "cc2893658b894b510b14c122bdded39fb95ffc5286081d70c3d78d887bcb85ae"
+  },
+  {
+    "file": "29.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301",
+    "captured_at": "2026-09-18T07:41:17.265493+00:00",
+    "status": 200,
+    "sha256": "41133938ae9ab96b246929636d56e110fff481d02ab5970b1792a4a7e179bc0c"
+  },
+  {
+    "file": "33.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/fcs/info",
+    "captured_at": "2026-09-18T07:42:09.577169+00:00",
+    "status": 200,
+    "sha256": "50d4d87da63a622dc776b07ceeb86da6312866aa17167e8f908fb191ca615add"
+  },
+  {
+    "file": "34.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/fcs/discount",
+    "captured_at": "2026-09-18T07:42:09.577878+00:00",
+    "status": 200,
+    "sha256": "6800c7548e01ecedb4e245e2eec10a8e34a2573e81c59f1b6288795ce9c95aff"
+  },
+  {
+    "file": "35.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/status",
+    "captured_at": "2026-09-18T07:42:09.711294+00:00",
+    "status": 200,
+    "sha256": "73a6536910bad9fbf510fef5ef69d931d9597a45213d0525c76e8c334dcbd211"
+  },
+  {
+    "file": "36.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/analytics/transactionLog/json?limit=1&after=eyJqc29uIjp7ImNvdW50IjoiNDM4NSIsImNoYWluSWQiOjEsInRpbWVzdGFtcCI6IjE3ODk3MTY0MTkiLCJraW5kIjoiRXF1aXR5Okxvc3MifSwibWV0YSI6eyJ2YWx1ZXMiOnsiY291bnQiOlsiYmlnaW50Il0sInRpbWVzdGFtcCI6WyJiaWdpbnQiXX0sInYiOjF9fQ%3D%3D",
+    "captured_at": "2026-09-18T07:42:09.711510+00:00",
+    "status": 200,
+    "sha256": "b8b48a7d6b24c872a43ab71a7f217ad66a246dfb47c2bb17dbb7efc1999c978b"
+  },
+  {
+    "file": "37.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?start=2024-01-01&end=2025-01-01",
+    "captured_at": "2026-09-18T07:42:09.819340+00:00",
+    "status": 200,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  {
+    "file": "49.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?reference=12%20months",
+    "captured_at": "2026-09-18T07:43:18.130373+00:00",
+    "status": 200,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  {
+    "file": "50.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?reference=12%20months%20loan",
+    "captured_at": "2026-09-18T07:43:18.157218+00:00",
+    "status": 200,
+    "sha256": "80ee8107780a1b58f6a4cd16b0b1479b9bf498fbfbf8c8254c99ec74e2961d28"
+  },
+  {
+    "file": "51.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/transfer/reference/counter",
+    "captured_at": "2026-09-18T07:43:18.261278+00:00",
+    "status": 200,
+    "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  {
+    "file": "52.body",
+    "kind": "captured-public-response",
+    "url": "https://api.frankencoin.com/challenges/prices",
+    "captured_at": "2026-09-18T07:43:18.279416+00:00",
+    "status": 200,
+    "sha256": "5973048dede5814f90fc9126aad032f0554e056c11eeb5f2da7127ae66ef89f3"
+  }
+]

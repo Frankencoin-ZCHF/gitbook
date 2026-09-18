@@ -1,116 +1,46 @@
 # Positions API
 
-The Positions API provides comprehensive access to all collateralized lending positions in the Frankencoin ecosystem. Positions represent borrowing contracts where users lock collateral to mint ZCHF stablecoins.
+Read indexed collateralised lending positions and their history. GET requests do not create, clone, adjust or close positions.
 
-## Overview
+## Endpoints
 
-A **position** is a smart contract that holds collateral and allows the owner to mint ZCHF against it. The Positions API enables you to:
+| GET path | Purpose |
+| --- | --- |
+| `/positions/list` | Position list |
+| `/positions/mapping` | Positions keyed by address |
+| `/positions/open` | Indexed open positions |
+| `/positions/requests` | Indexed position requests |
+| `/positions/owners` | `{num, owners, map}` with lowercase owner-address keys and arrays of positions |
+| `/positions/mintingupdates/list` | Recent minting updates |
+| `/positions/mintingupdates/mapping` | Updates grouped by position |
+| `/positions/mintingupdates/position/:version/:address` | Updates for a position version/address |
+| `/positions/mintingupdates/owner/:address` | Owner's minting updates |
+| `/positions/owner/:address/fees` | Owner fee history |
+| `/positions/owner/:address/debt` | Owner debt history |
+| `/positions/owner/:address/history` | Position ownership history |
+| `/positions/owner/:address/transfers` | Ownership transfers |
 
-- Query all positions and their current state
-- Filter positions by status (open, closed, pending)
-- Track position ownership and transfers
-- Monitor minting activity and history
-- Analyze owner debt and fee payments over time
+There is no bare `/positions/owner/:address` lookup in the reviewed API. Use `/positions/owners` and a validated, lowercase address key. The [prices example](prices.md#indicative-position-valuation) does this without treating malformed maps as empty portfolios.
 
-## Key Concepts
+## Fields and units
 
-### Position Types
+| Fields | Meaning |
+| --- | --- |
+| `position`, `owner`, `original`, `collateral`, `zchf` | Contract or owner addresses |
+| `version`, `isOriginal`, `isClone` | Lending-contract version and position type |
+| `denied`, `closed` | Indexed state flags, not a full transaction-eligibility check |
+| `minted`, ZCHF limits/capacities | Raw ZCHF integer strings, 18 decimals |
+| `collateralBalance`, `minimumCollateral` | Raw collateral integer strings; use `collateralDecimals` |
+| `price` | Contract price scaling, not a fiat display quote: raw price times collateral base units divided by `1e18` yields ZCHF base units |
+| `annualInterestPPM`, `reserveContribution` | Integer PPM; the latter is a fraction, not an annual rate |
+| `created`, `start`, `expiration`, `challengePeriod` | Seconds; `cooldown` may contain a large sentinel rather than a usable calendar date |
 
-- **Original Positions**: Newly proposed positions that undergo a voting period before activation
-- **Clone Positions**: Fast-tracked positions based on existing approved collateral types
-- **Version 1 vs Version 2**: The protocol has evolved, with V2 positions including additional risk parameters
+For collateral with `d` decimals, the displayed contract price in ZCHF per whole collateral token is `rawPrice * 10^d / 10^36`. Do not divide all balances or all prices by `1e18`. See [prices](prices.md) for separate off-chain CHF/USD valuations.
 
-### Position States
+## State and history
 
-- **Open**: Active positions available for minting
-- **Closed**: Positions that have been terminated
-- **Denied**: Positions rejected during the voting period
-- **Pending**: Newly requested positions awaiting approval (typically within 5 days of creation)
+Original positions have a proposal period; clones derive parameters from an existing original position and remain subject to their own conditions. An indexed “open” position may still be unable to mint because of cooldown, expiry, a challenge or another contract constraint. Read the selected version's state before constructing a transaction.
 
-### Minting Updates
+Minting updates and owner history queries can return up to 1000 recent records. These are indexed observations, not a promised complete event ledger. No exhaustive pagination recipe is established here. For complete accounting, reconcile a block-paginated contract-event index against chain state and ownership changes.
 
-Every time a position is adjusted (minting, burning, collateral changes, price adjustments), a **minting update** event is recorded. These provide a complete audit trail of position activity.
-
-## Main Endpoints
-
-### Position Queries
-
-- `GET /positions/list` - Retrieve all positions with complete details
-- `GET /positions/mapping` - Get positions as an address-keyed object for efficient lookup
-- `GET /positions/open` - Filter for only active, open positions
-- `GET /positions/requests` - View recently requested positions awaiting approval
-- `GET /positions/owners` - Group positions by owner address
-
-### Minting History
-
-- `GET /positions/mintingupdates/list` - Get latest minting update events across all positions
-- `GET /positions/mintingupdates/mapping` - Map minting updates by position address
-- `GET /positions/mintingupdates/position/:version/:address` - Get history for a specific position
-- `GET /positions/mintingupdates/owner/:address` - Get all minting activity for an owner
-
-### Owner Analytics
-
-- `GET /positions/owner/:address/fees` - Track fee payments over time
-- `GET /positions/owner/:address/debt` - View historical debt evolution
-- `GET /positions/owner/:address/history` - See which positions were owned when
-- `GET /positions/owner/:address/transfers` - Monitor position ownership transfers
-
-## Use Cases
-
-### Portfolio Monitoring
-
-Track all positions owned by a specific address to monitor collateralization ratios, debt levels, and fees paid:
-
-```
-GET /positions/mintingupdates/owner/0x963eC454423CD543dB08bc38fC7B3036B425b301
-```
-
-### Position Discovery
-
-Find positions available for cloning by filtering for open original positions with specific collateral types:
-
-```
-GET /positions/open
-```
-
-### Risk Analysis
-
-Monitor newly requested positions to assess protocol risk and participate in governance:
-
-```
-GET /positions/requests
-```
-
-### Historical Analysis
-
-Track how a position has evolved over time by reviewing all minting updates:
-
-```
-GET /positions/mintingupdates/position/2/0x826C54287c0C1E2A4D0fbF81E2e734c85C48d3f4
-```
-
-## Data Structure
-
-### Position Object
-
-Each position includes:
-- **Identification**: position address, version, owner
-- **Collateral Details**: collateral token, balance, decimals, name, symbol
-- **Minting Parameters**: limits, available capacity, amount minted, interest rate, fees
-- **Status Flags**: isOriginal, isClone, denied, closed
-- **Timestamps**: creation, start, cooldown, expiration, challenge period
-
-### Minting Update Object
-
-Each update event contains:
-- **Position Info**: position address, owner, collateral details
-- **Adjustment Data**: size changed, price adjusted, amount minted/burned
-- **Fee Information**: fees paid, timeframe, annual interest rate
-- **Metadata**: transaction hash, timestamp, version
-
-## Notes
-
-- All amounts are represented as strings in wei (1e18 for 18-decimal tokens)
-- Interest rates are in PPM (parts per million): 20000 PPM = 2% annual
-- The API returns up to 1000 most recent records for minting updates and historical queries
-- Position addresses are unique identifiers and can be used across endpoints
+See [position mechanics](../positions/README.md) and [challenges](challenges.md). V1/V2 refers to lending contracts, not API releases or the FCS wrapper.

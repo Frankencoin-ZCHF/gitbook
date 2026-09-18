@@ -1,183 +1,33 @@
 # Analytics API
 
-The Analytics API provides comprehensive ecosystem-wide metrics, financial analytics, and historical data for the Frankencoin protocol. This controller aggregates data from across the ecosystem to provide insights into protocol performance, FPS token economics, and system health.
+Read indexed financial logs and legacy FPS metrics. These routes do not report FCS supply or holder voting power; use [FCS](fcs.md) for its controller.
 
-## Overview
+## Endpoints and limits
 
-The Analytics API enables you to:
+| GET path | Response and limit |
+| --- | --- |
+| `/analytics/profitLossLog` | Recent profit/loss observations, limited to 1000 records |
+| `/analytics/transactionLog/json` | `{num, logs, pageInfo}`; default 50 rows; supports `firstItem`, `limit`, `after` |
+| `/analytics/transactionLog/csvE18` | Scaled CSV transaction-log page; default 50 rows, not a full export |
+| `/analytics/dailyLog/json` | `{num, logs}` of available daily snapshots |
+| `/analytics/dailyLog/csvE18` | Scaled CSV daily snapshots |
+| `/analytics/fps/exposure` | `{general, exposures}` for legacy FPS |
+| `/analytics/fps/earnings` | Scaled earnings/expense categories for legacy FPS |
 
-- Track profit and loss across the ecosystem
-- Monitor transaction logs with full financial context
-- Analyze daily aggregated metrics
-- Understand FPS token collateral exposure
-- Break down FPS earnings sources
-- Generate historical reports and charts
+`firstItem=false` orders transaction logs newest first; `true` requests oldest first. `after` takes the previous `pageInfo.endCursor`. CSV accepts `pageInfo=true`, which appends pagination JSON and thus is not a plain CSV-only document. Daily routes expose no pagination parameters in the reviewed specification; adding `limit=1` did not limit a saved daily response.
 
-## Key Concepts
+## Financial fields
 
-### Profit & Loss Tracking
+Transaction-log rows include `chainId`, `count`, `timestamp`, `kind`, `amount`, `txHash`, `totalInflow`, `totalOutflow`, `totalEquity`, `totalSavings`, `fpsTotalSupply`, `fpsPrice`, `realizedNetEarnings` and `earningsPerFPS`. Quantities are raw decimal strings with 18 decimals: ZCHF amounts, FPS quantities or ZCHF per FPS as named. `count` is an identifier, not an amount; `timestamp` is Unix seconds. Daily snapshots contain `date` and the available financial totals, not every transaction field.
 
-The protocol tracks all gains (profits) and losses from various sources:
-- **Profits**: Minting fees, position fees, investment fees, trade fees
-- **Losses**: Liquidation losses, interest paid on savings, redemption costs
+The reviewed transaction schema does **not** include total ZCHF supply, V1/V2 minting totals or interest rates. Use [ecosystem info](ecosystem.md), [positions](positions.md) and [savings](savings.md) for those current data sources. Do not infer unavailable historical series from current values.
 
-These are tracked cumulatively and per FPS token, providing transparency into protocol economics.
+Earnings categories such as `minterProposalFees`, `investFees`, `redeemFees`, `positionProposalFees`, `savingsInterestCosts` and `otherLossClaims` are already scaled ZCHF numbers. For example, the captured `minterProposalFees` value `25000` means 25,000 ZCHF, not 25,000 base units. Exposure values are also scaled: `mint.interestAverage` and ratios are fractions, `positions` fields are counts, and monetary values use their named ZCHF units. Neither family follows a universal raw-string rule.
 
-### Transaction Logs
+## Export completeness
 
-Every significant event affecting the Frankencoin supply, equity, or FPS is logged with complete financial metrics at that moment in time. This creates an immutable audit trail of the protocol's financial state.
+One saved transaction-log request advanced from count `4385` to `4384`, but both responses contained the same abbreviated cursor text `eyJqc2...F9fQ==`. That evidence does not establish a working full-history traversal. An application must reject missing, repeated or non-progressing cursors, deduplicate rows and reconcile totals before describing an export as complete.
 
-### Daily Aggregations
+A page with `hasNextPage=true` needs a valid next cursor. Reaching a page with `hasNextPage=false` only completes that indexer's available traversal, not independent reconciliation with the chain. These docs do not claim to repair cursor behaviour. For complete accounting, use a separately validated indexer or block-range contract logs with receipt and reorg reconciliation.
 
-End-of-day snapshots provide clean time-series data for charting trends without processing thousands of individual transactions.
-
-## Main Endpoints
-
-### Profit & Loss
-
-- `GET /analytics/profitLossLog` - Complete log of all profit and loss events (limited to 1000 most recent)
-
-Returns cumulative totals and per-event breakdown of gains and losses.
-
-### Transaction Logs
-
-- `GET /analytics/transactionLog/json` - Paginated transaction history with full metrics
-- `GET /analytics/transactionLog/csvE18` - Transaction log formatted as CSV with decimal conversion
-
-Transaction logs include:
-- Event type (Mint, Burn, Position creation, etc.)
-- Total supply, equity, and savings at that moment
-- FPS price and supply
-- Interest rates and projected earnings
-- Minting totals for V1 and V2 positions
-
-### Daily Aggregations
-
-- `GET /analytics/dailyLog/json` - Daily aggregated metrics in JSON format
-- `GET /analytics/dailyLog/csvE18` - Daily metrics as CSV with decimal conversion
-
-Daily logs provide end-of-day snapshots of:
-- Supply and equity evolution
-- FPS pricing over time
-- Cumulative inflows and outflows
-- Interest rate trends
-
-### FPS Analytics
-
-- `GET /analytics/fps/exposure` - Detailed collateral exposure analysis for FPS token
-- `GET /analytics/fps/earnings` - Complete breakdown of FPS earnings sources
-
-## Use Cases
-
-### Protocol Health Monitoring
-
-Track cumulative profits and losses to ensure protocol sustainability:
-
-```
-GET /analytics/profitLossLog
-```
-
-### Historical Charts
-
-Generate time-series charts of key metrics using daily aggregated data:
-
-```
-GET /analytics/dailyLog/json
-```
-
-### FPS Valuation
-
-Understand FPS token value by analyzing collateral backing and earnings:
-
-```
-GET /analytics/fps/exposure
-GET /analytics/fps/earnings
-```
-
-### Financial Reporting
-
-Export complete transaction history in CSV format for external analysis:
-
-```
-GET /analytics/transactionLog/csvE18
-```
-
-### Risk Assessment
-
-Analyze collateral exposure to understand concentration risk:
-
-```
-GET /analytics/fps/exposure
-```
-
-## Data Structure
-
-### Profit/Loss Log Entry
-
-- Event details: timestamp, count, event type
-- Financial impact: amount gained/lost
-- Cumulative totals: running profit and loss totals
-- Per-FPS metrics: gains/losses per token
-
-### Transaction Log Entry
-
-- Event identification: timestamp, type, transaction hash
-- Supply metrics: total supply, equity, savings
-- FPS data: price, supply, market cap
-- Minting data: V1 and V2 totals, limits
-- Interest rates: current rates, projected earnings
-- Borrowing rates: annual rates for V1 and V2
-
-### Daily Log Entry
-
-Similar to transaction logs but aggregated once per day, providing cleaner time-series data.
-
-### FPS Exposure Analysis
-
-- **General Metrics**: FPS price, supply, market cap, earnings, P/E ratio
-- **Per-Collateral Exposure**:
-  - Collateral details (address, name, symbol)
-  - Position counts (open, original, clones)
-  - Minting totals and interest averages
-  - Risk metrics and loss scenarios
-
-### FPS Earnings Breakdown
-
-Detailed accounting of all revenue sources:
-- Minter proposal fees
-- Position proposal fees
-- Investment and redemption fees
-- Other profit claims and contributions
-- Savings interest costs (expenses)
-- Other loss claims
-
-## Notes
-
-### Data Formats
-
-- **JSON endpoints**: Return structured data for programmatic access
-- **CSV endpoints**: Return comma-separated values with all amounts converted from wei to decimal (÷ 1e18)
-- Pagination is available on transaction logs using `firstItem`, `limit`, and `after` parameters
-
-### Precision
-
-- All amounts in JSON are in wei (strings)
-- CSV exports automatically convert to human-readable decimals
-- Interest rates are in wei representation (divide by 1e18 for percentage)
-
-### Performance
-
-- Daily logs are more efficient than transaction logs for charting
-- Transaction logs support pagination for managing large datasets
-- Profit/loss logs and FPS analytics are limited to relevant recent data
-
-## Example Workflow
-
-### Building a Dashboard
-
-1. Fetch daily logs for historical charts
-2. Get FPS exposure for current risk assessment
-3. Pull profit/loss log for income statement
-4. Use FPS earnings for detailed revenue breakdown
-
-This provides a complete picture of protocol performance and health.
+Daily logs are available observations, not a guarantee of one row for every calendar day. Preserve missing dates as missing data rather than inventing zero values.
