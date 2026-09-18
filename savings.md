@@ -8,7 +8,7 @@ The [savings application](https://app.frankencoin.com/savings) lets users deposi
 
 ## Contract versions
 
-These Ethereum addresses were listed in the documentation reviewed on 18 September 2026. The linked source is pinned to `8b4c4ab67bb361b91d58c474b87f4608fc4c0566`; this table separates source behaviour from address identification. It does not establish which implementation the application currently selects or deployed-bytecode equivalence.
+Etherscan's published source and ABI for these Ethereum addresses were checked on 18 September 2026. They confirm the withdrawal-lock distinction and public methods below. Repository references are pinned to `8b4c4ab67bb361b91d58c474b87f4608fc4c0566`; the application may select a different module. The first explorer labels its contract `Savings`, despite the repository's later `SavingsV2.sol` naming.
 
 | Version | Existing address reference | Source behaviour |
 | --- | --- | --- |

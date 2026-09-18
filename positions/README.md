@@ -20,4 +20,4 @@ The implementation matters. This guide distinguishes the newer `contracts/mintin
 * [Position.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/Position.sol)
 * [MintingHub.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/MintingHub.sol)
 
-A source commit is not proof of the implementation used by a particular deployed position. Before borrowing, check the chain, position address, originating hub, verified code and transaction quote. The FCS audit does not assess these minting contracts. Never assume that an existing position automatically gains the terms of a newer version.
+The chain, position address and originating hub identify a deployed position; its verified code and transaction quote determine its terms. The pinned source describes a version, not every existing position. Existing positions do not automatically gain a newer implementation's terms.

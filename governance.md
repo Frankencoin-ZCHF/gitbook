@@ -68,7 +68,7 @@ Legacy cross-chain governance sends an address's underlying votes and total vote
 
 Anyone can trigger these synchronisations and pay the CCIP fee, in the native asset or LINK. The destination needs both messages delivered and the relevant stored voting state. FCS tokens remain on mainnet in this design: **vote snapshots, not tokens, cross the bridge**.
 
-Snapshots are not live mainnet balances. A selective sync can update total votes without updating every holder. A mainnet sync also overwrites local sidechain delegation for each included address. Old failed messages can later execute and overwrite a newer corrective sync; restoring state may require processing outstanding messages before sending fresh snapshots. CCIP delivery, message ordering and complete updates therefore affect destination qualification. [Audit pp7–10 and finding #006](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=20).
+Snapshots are not live mainnet balances. A selective sync can update total votes without updating every holder. A mainnet sync also overwrites local sidechain delegation for each included address. Old failed messages can later execute and overwrite a newer corrective sync; restoring state may require processing outstanding messages before sending fresh snapshots. CCIP delivery, message ordering and complete updates therefore affect destination qualification. [Audit pp7–10 and finding #006, pp22–23](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=22).
 
 ## Exceptional Efficiency
 

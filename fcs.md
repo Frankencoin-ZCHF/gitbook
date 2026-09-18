@@ -75,13 +75,13 @@ ZCHF proceeds = underlying FPS redemption proceeds × d
 
 All three inputs use share units. A factor of 1 means no extra discount; a lower factor reduces proceeds. The underlying FPS curve and fee still apply. For example, with `S = 1,000`, `q = 100` and `R = 0`, the factor is `0.81450625`. This is an illustrative calculation, not a quote.
 
-The withheld ZCHF returns to Equity. Weighted recent redemptions decay to zero over seven days **absent further redemptions**. Continuing redemptions reset the decay anchor and can prolong recovery. New investment can offset the tracked redemption volume. A planned redemption still incurs its own size-dependent discount even when recent volume has decayed to zero. [Audit pp6, 23, finding #010.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=23)
+The withheld ZCHF returns to Equity. Weighted recent redemptions decay to zero over seven days **absent further redemptions**. Continuing redemptions reset the decay anchor and can prolong recovery. New investment can offset the tracked redemption volume. A planned redemption still incurs its own size-dependent discount even when recent volume has decayed to zero. [Audit pp6, 25, finding #010.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=25)
 
 ### Withdraw and redeem are different
 
 A single `withdraw`, which specifies ZCHF output, may burn at most **10% of total FCS supply**. This is not 10% of the holder's balance or a daily quota. The share-denominated `redeem` path has no such cap.
 
-For sufficiently large redemptions, burning more shares can return **less ZCHF** because of the discount. The audit retains this as accepted risk #012 and describes splitting large redemptions in SC5. Splitting also changes fees, state and timing, so each transaction needs its own quote. `redeemExpected` adds a minimum-proceeds condition; an ordinary `redeem` does not. A positive preview alone does not establish eligibility or available balance. [Audit pp11, 25.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=25)
+For sufficiently large redemptions, burning more shares can return **less ZCHF** because of the discount. The audit retains this as accepted risk #012 and describes splitting large redemptions in SC5. Splitting also changes fees, state and timing, so each transaction needs its own quote. `redeemExpected` adds a minimum-proceeds condition; an ordinary `redeem` does not. A positive preview alone does not establish eligibility or available balance. [Audit pp11, 26.](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=26)
 
 ## Accounting and ERC-4626 views
 
@@ -95,7 +95,7 @@ It measures the equity fraction attributable to the issued wrapper shares, in ZC
 
 `convertToAssets(shares)` uses the underlying marginal FPS price and excludes the exit discount, fees and curve slippage. It is not `previewRedeem`. `maxRedeem(owner)` is denominated in shares; `maxWithdraw(owner)` is denominated in ZCHF. Both return zero when redemptions are disabled.
 
-The audit records remaining ERC-4626 deviations and rounding behaviour: `previewWithdraw` retains the 10%-of-supply cap, `withdraw` can return slightly more ZCHF than requested, and `previewMint(0)` can be non-zero. Integrations must handle these behaviours rather than assume exact standard rounding. [Audit findings #007 and #011](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=21); [reviewed accounting code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2MintRedeem.sol).
+The audit records remaining ERC-4626 deviations and rounding behaviour: `previewWithdraw` retains the 10%-of-supply cap, `withdraw` can return slightly more ZCHF than requested, and `previewMint(0)` can be non-zero. Integrations must handle these behaviours rather than assume exact standard rounding. [Audit findings #005, #021 and #011](https://reports.chainsecurity.com/Frankencoin/ChainSecurity_Frankencoin_FPS2_Audit.pdf#page=20); [reviewed accounting code](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2MintRedeem.sol).
 
 ## Related pages
 
