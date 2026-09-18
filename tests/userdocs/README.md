@@ -19,4 +19,6 @@ The checker validates owned Markdown links, local assets, heading fragments, cod
 
 Unit tests include negative link, anchor and format fixtures, numerical examples, stored source comparisons and public savings ABI checks. The FCS story tests check canonical framing, navigation hierarchy, underlying FPS identities, cross-page connections and holder journeys. `story-baseline.json` records the starting revision's Markdown anchors and API code-block hashes: moving background material must preserve deep links and must not relabel the tested API examples.
 
+`test_walkthroughs.py` guards practical input choices, transaction sequences, confirmation steps and preserved historical images. `instructional-evidence.json` records pinned source excerpts for target-versus-delta inputs, creation deposits, clone expiry, challenge phases and savings operations. These regression guards support a human review of instructional quality; phrase checks alone do not prove that a guide teaches the task well.
+
 Temporary test trees and numerical illustrations are synthetic, not reported live observations. `source-evidence.json` contains actual retrieved source excerpts, explorer ABIs and indexed token references with their stated provenance. These checks validate documentation; they do not execute Solidity or establish a current deployment's state.

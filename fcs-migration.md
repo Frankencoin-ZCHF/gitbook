@@ -27,6 +27,14 @@ WFPS on another chain first needs a supported route to the underlying Ethereum F
 
 These are contract operations; application interfaces expose their supported subset. The [API reference](api-docs/fcs.md) distinguishes indexed data from transactions.
 
+### If you already hold FPS
+
+Choose how much FPS to move rather than treating migration as an all-or-nothing account change. For example, wrapping 10 FPS issues 10 FCS and reduces your FPS balance by 10. It does not spend 10 ZCHF. For aged FPS, read the internal FCS votes credited by the transfer as well as the token balance. A partial wrap moves only the selected shares and the legacy votes lost on that transfer.
+
+### If you hold WFPS
+
+Complete the supported WFPS unwrap and any required route to Ethereum first. Confirm the underlying FPS token and amount actually received before approving the FCS wrapper. Wrap that received FPS balance, then confirm the FCS receipt. WFPS holding time is not carried into FCS: the intermediate FPS arrives without accumulated votes. The two token conversions are not a promise of immediate voting eligibility or ZCHF redemption.
+
 ## Two voting records
 
 **Holder votes inside FCS** and **the wrapper's votes in FPS** are separate records. Wrapping aged FPS credits the holder's internal FCS votes, but the wrapper receives FPS as an ordinary FPS holder. Those credited internal votes do not give the wrapper the same accumulated legacy age.
@@ -42,6 +50,8 @@ Gradual migration by large legacy voters can retain a legacy veto backstop while
 * **Sell:** transfer existing shares through a market route. Its liquidity and quote are separate from contract redemption.
 
 Waiting 90 days as an individual FCS holder does not, by itself, enable redemption. `maxRedeem` and `maxWithdraw` reflect the wrapper-level gate; a preview can still return a value while the gate is closed.
+
+For an unwrap, read your current FCS holding duration and the holder average, choose the shares to unwrap, then confirm the same number of FPS arrived after the transaction. For ZCHF proceeds, follow the [share guide's exit walkthrough](pool-shares.md#exit-an-fcs-holding) instead. That route needs a size-specific quote and the wrapper-level gate, not the unwrap duration check.
 
 ## Remaining outside the wrapper
 

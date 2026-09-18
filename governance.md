@@ -25,6 +25,14 @@ The [Frankencoin thesis](https://www.zora.uzh.ch/id/eprint/259657/1/259657.pdf) 
 
 The module table below identifies the available actions. You do not need FCS votes to submit a new minter application, but qualified actions such as position vetoes and rate proposals require them.
 
+### Choose between acting and delegating
+
+To act yourself, identify the proposal by its chain, module and proposal or position address. Read the proposed change and the time in which that module allows a veto. Include valid delegation helpers where the selected operation requires them, then check qualification for that action. Holding FCS does not by itself satisfy either voting threshold.
+
+If another participant will examine proposals for you, choose their address and submit `delegateVoteTo()` with that delegate. After confirmation, read the delegation record. Delegation does not transfer your FCS, cast a veto or prevent you from acting yourself. On a target chain, also check the local delegation state after vote synchronisation, which can overwrite it.
+
+For a proposal you submit, check its recorded parameters and activation conditions after confirmation. A proposal with a grace period is not active merely because its submission succeeded. Follow its state until it is vetoed or can be enacted under the module's rules. Rate-limit changes are an exception to a general waiting-period assumption: the audited CCIP design applies them immediately.
+
 ## Immutable Modularity
 
 The core contracts use separate modules for collateralised minting, savings, stablecoin conversion and cross-chain transfers. Parameters can change under their governance rules; an approved new module does not rewrite an old contract. Minting modules can mint, move and burn ZCHF. The [application's governance page](https://app.frankencoin.com/governance) lists proposals and module state; there is no fixed count of active modules in this guide.

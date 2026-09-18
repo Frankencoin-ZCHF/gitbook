@@ -24,7 +24,15 @@ The [equity application](https://app.frankencoin.com/equity) provides investment
 
 Use the preview for the intended operation and amount, rather than dividing by a displayed reference price. A preview estimates output; eligibility and transaction limits are separate checks. The [entry reference](fcs.md#entry-paths) defines the contract paths.
 
-To invest ZCHF, connect the wallet holding the funds and select the chain and FCS contract used by the interface. Enter the ZCHF amount to deposit or the FCS amount to mint. Read the expected shares, fees, recipient and allowance. If an approval is needed, approve the specified spender, then submit the investment transaction. After confirmation, check the received FCS balance and votes. Approval alone does not create shares.
+For a new ZCHF investment:
+
+1. **Identify the contract.** Connect the wallet holding the ZCHF and check the chain and FCS contract used by the interface. The audited design uses Ethereum mainnet. Keep native currency for gas. These are contract paths; an application may expose only a subset.
+2. **Choose what to fix.** Use `deposit` if you have a ZCHF budget and want the resulting shares, or `mint` if you want a specified FCS amount and need to know its ZCHF cost. Direct FPS wrapping is a different operation, covered by [migration](fcs-migration.md).
+3. **Read the quote and limits.** Enter the chosen amount, read `previewDeposit` or `previewMint`, and check `maxDeposit` or `maxMint`. Review the expected input, shares, fees and recipient. A reference price multiplied by an amount omits curve and fee effects. If using the reviewed `depositExpected` variant, its minimum-share input can reject an output below your chosen threshold.
+4. **Approve and invest.** If an allowance is needed, approve the specified spender for ZCHF, then submit the investment transaction. Approval alone does not create shares.
+5. **Confirm ownership.** Check the received FCS balance and ZCHF spent. The new shares start without immediate votes; the governance section below explains what to check before acting.
+
+For a secondary-market purchase, instead review the venue's FCS token address, input asset, expected output and trading costs. Confirm receipt of FCS after settlement. Buying underlying FPS through an older route leaves you with FPS until you wrap it; buying FCS does not transfer the seller's voting age.
 
 ### Participate in governance
 
@@ -40,7 +48,14 @@ Qualified actions need more than 1% of internal FCS voting power, including vali
 
 There is no separate personal 90-day FCS redemption wait. Binding depends on the FCS contract's share of underlying FPS votes, and the 90-day condition applies to that contract as an FPS holder. The [exit reference](fcs.md#exit-paths-and-eligibility) defines these gates and the different limits of `withdraw` and `redeem`.
 
-For a ZCHF exit, choose the amount in shares or ZCHF, read the corresponding preview and `maxRedeem` or `maxWithdraw`, then review the expected proceeds. Submit the chosen transaction and confirm both the burned FCS and received ZCHF. If redemption is disabled, a preview is not permission to execute it. An unwrap instead requires the holder-duration check and delivers FPS to the wallet.
+For a ZCHF exit:
+
+1. **Choose the result you need.** Use `redeem` to burn a specified FCS amount, or `withdraw` to request a specified ZCHF amount. A market sale and an unwrap do not use the same quote or eligibility rules.
+2. **Check availability.** Read `maxRedeem` in shares or `maxWithdraw` in ZCHF. A zero limit can reflect the wrapper-level redemption gate. If redemption is disabled, a preview is not permission to execute it, and waiting as an individual holder does not alone open that gate.
+3. **Review proceeds for that size.** Read `previewRedeem` or `previewWithdraw`, including the current discount. A single `withdraw` can burn at most 10% of total FCS supply; `redeem` has no such cap. For a large `redeem`, more shares can produce less ZCHF. The reviewed `redeemExpected` variant adds a minimum-proceeds condition; ordinary `redeem` does not.
+4. **Submit and confirm.** Check the share amount, recipient and transaction conditions, then submit. After confirmation, verify both the FCS burned and ZCHF received. A changed discount or other intervening activity can change the result from an earlier preview.
+
+To unwrap instead, compare your FCS holding duration with the holder average before choosing the share amount. If eligible, submit `unwrap` and confirm the matching FPS receipt. This delivers FPS, not ZCHF, and does not carry your FCS voting age back into the underlying FPS record.
 
 ## Economics
 

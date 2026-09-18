@@ -19,6 +19,14 @@ Etherscan's published source and ABI for these Ethereum addresses were checked o
 
 A savings deposit transfers ZCHF to the selected module and credits the account. An old deposit remains in its original contract. Moving to a different module requires withdrawing under the old module's rules and depositing into the new one; it is not an automatic upgrade. The new deposit uses the new module's delay and referral terms.
 
+To start saving:
+
+1. **Select the account and module.** Connect the wallet holding your ZCHF and choose the intended network in the savings application. Identify the module address and its version; the table above covers the two checked Ethereum contracts. If you already have savings, locate the module holding that balance rather than assuming the application's selected module is the same one.
+2. **Read the terms.** Check the annual rate, interest delay, withdrawal conditions and any referrer and referral fee. The quoted rate is an annual simple rate, not an automatically compounded APY. A referral fee reduces the interest you receive, not your deposited principal.
+3. **Choose the amount.** Decide how much ZCHF to add and keep native currency for gas. A `save(amount)` transaction adds that amount; `adjust(targetAmount)` sets a target saved balance after collecting interest. They are not interchangeable inputs.
+4. **Approve and deposit.** If needed, approve the chosen savings module to transfer the ZCHF, then submit the deposit transaction. Approval alone leaves the funds in your wallet; it does not start earning interest.
+5. **Confirm the account credit.** After confirmation, read the saved balance, delay and referral terms on that same module. Check the wallet debit as well. A read-only API response or an unconfirmed transaction is not a completed deposit.
+
 ### Delay
 
 Both source versions use a three-day delay before a fresh deposit earns interest. Adding funds to an existing account produces a weighted delay rather than restarting the full delay on the entire balance.
@@ -28,6 +36,18 @@ In **SavingsV2**, `withdraw` reverts with `FundsLocked` while the account's stor
 ### Interest
 
 The rate can change through [governance](governance.md#proposal-submission). Interest accrues on the stored principal. Uncollected interest does not compound; collection adds the user's interest to principal, after which it can earn interest too. Deposits and withdrawals refresh accrued interest as part of their operation.
+
+### Collecting interest
+
+Read `accruedInterest(account)` on your savings module to see gross pending interest. If a referrer is set, subtract its fee to find the net amount added to your savings. The API's historical collected-interest field is not this pending amount.
+
+You can wait until your next deposit or withdrawal to collect, or submit `refreshMyBalance()` as a separate transaction. Collection adds net interest to the saved balance, not to the spending balance in your wallet. Afterwards, check the increased savings balance and any referral payment. Merely reading or simulating the method does not collect interest.
+
+### Withdrawing savings
+
+Return to the module that holds your savings and choose the ZCHF amount and recipient. The public `withdraw(target, amount)` operation collects interest and transfers funds to that recipient. Check the refreshed available balance and the version's withdrawal conditions before submitting. In SavingsV2, a remaining ticks-based delay can block the withdrawal; in the referral-enabled version, the interest delay alone does not lock principal.
+
+After confirmation, check both the reduced saved balance and the recipient's ZCHF balance. To move to a different savings module, confirm this receipt before approving and depositing into the new one. That new deposit starts under the destination module's interest-delay and referral rules.
 
 ## Referral Module
 
@@ -64,6 +84,8 @@ The account holder can use `refreshMyBalance()`. A referrer or another caller ca
 An integration supplies the amount, referrer and fee to a supported method of the selected contract. It displays the gross rate, referral share and net rate separately. The maximum fee is a protocol limit, not a default fee.
 
 The account holder can remove the referral by calling **`dropReferrer()`** on the referral-enabled contract through an interface exposing its verified ABI. This first collects accrued interest and settles the accrued referral fee, then clears the referrer and sets the fee to zero. Future interest has no referral deduction unless a later transaction sets a referrer again. Removal does not reverse fees already earned.
+
+To remove it, select the module holding your account, read the current referrer and fee, then submit `dropReferrer()` from the account-owning wallet. After confirmation, read the account again: the referrer must be the zero address and the fee zero. Check later deposit or adjustment transactions as well, since a referral-enabled interface can supply referral terms again. These are contract operations, not a claim that every wallet exposes a removal button.
 
 ### Integration Details
 
