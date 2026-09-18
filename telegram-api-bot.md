@@ -4,7 +4,7 @@ description: Bot subscriptions, confirmation and the scope of position alerts.
 
 # 🤖 Notification Bot
 
-The [Frankencoin API Telegram Bot](https://t.me/FrankencoinApiBot), **@FrankencoinApiBot**, reports proposals, position activity and other indexed events.
+The [Frankencoin API Telegram Bot](https://t.me/FrankencoinApiBot), **@FrankencoinApiBot**, reports proposals, position activity and other indexed events. FCS holders can use governance alerts to follow proposals; borrowers can follow their positions. Receiving an alert does not submit a transaction or establish voting eligibility. The [FCS governance guide](governance.md#taking-part-with-fcs) explains how to act on a proposal.
 
 ## How to find it?
 

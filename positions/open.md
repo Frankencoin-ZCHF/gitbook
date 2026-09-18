@@ -10,7 +10,7 @@ A new position is an advanced-user proposal. The [creation page](https://app.fra
 
 ## Proposal terms
 
-In the pinned source, opening a position costs 1,000 ZCHF and the initialisation period is at least three days. The fee is not returned after a veto. A qualified holder can veto the position during this period. This is separate from the FCS minter-application rule of 1,200 ZCHF and 60 days.
+In the pinned source, opening a position costs 1,000 ZCHF and the initialisation period is at least three days. The fee is not returned after a veto. A qualified holder can veto the position during this period. [FCS governance](../governance.md#veto-process) explains the holder and underlying-contract qualification checks. Position creation is separate from the FCS minter-application rule of 1,200 ZCHF and 60 days.
 
 <figure><img src="../.gitbook/assets/kuva (30).png" alt="Historical position proposal terms"><figcaption><p>Historical proposal form.</p></figcaption></figure>
 

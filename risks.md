@@ -42,7 +42,7 @@ A position becomes economically challengeable when market value falls below its 
 
 ### Third Line Bailout
 
-If the affected position's reserve and equity do not cover a loss, shared minter reserves can absorb it. Another borrower's otherwise sound position may then have less assigned reserve available for repayment. [Governance](governance.md#veto-process) determines how holders can veto new proposals: legacy FPS uses its underlying quorum, while FCS adds a separate internal quorum and wrapper-level qualification.
+If the affected position's reserve and equity do not cover a loss, shared minter reserves can absorb it. Another borrower's otherwise sound position may then have less assigned reserve available for repayment. Qualified FCS holders can veto new proposals through [governance](governance.md#veto-process); qualification needs internal FCS voting power and the FCS contract meeting the underlying FPS quorum.
 
 ### Swiss Franc Appreciation
 
@@ -62,6 +62,7 @@ Leverage can amplify price falls when forced sellers enter a falling market. Eve
 
 The [FCS reference](fcs.md) and [migration guide](fcs-migration.md) describe the final V3 mechanics assessed by ChainSecurity on 14 July 2026. The relevant dependencies are:
 
+* **Equity exposure:** FCS participates in the reserve's gains and losses through underlying FPS. Savings expense, losses and new capital change the economics; an FCS market sale and protocol redemption can have different proceeds.
 * **Two voting layers:** credited holder votes do not create the wrapper's underlying FPS age. A legacy `kamikaze` can reduce wrapper votes below the underlying quorum.
 * **Binding and exits:** ZCHF redemption needs binding and the wrapper's FPS holding-duration eligibility. V3 unwrapping has a holder-average duration condition and remains possible while binding.
 * **Discounted exits:** proceeds depend on size and recent activity. The 10% cap applies to `withdraw`, not `redeem`. Large `redeem` calls can burn more shares for less ZCHF; finding #012 remains accepted rather than code-corrected.

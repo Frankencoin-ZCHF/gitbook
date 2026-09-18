@@ -13,6 +13,8 @@ There are two entry paths:
 * [Open a new position](open.md): an advanced-user proposal with configurable parameters and a veto period. The application provides a [creation route](https://app.frankencoin.com/mint/create).
 * [Clone an existing position](clone.md): use an accepted position's terms, subject to available capacity and its expiry. This is usually the simpler path.
 
+FCS holders oversee new proposals through [veto-based governance](../governance.md). Borrowing fees and liquidation results feed into the [reserve](../reserve.md), connecting minting to the equity in which FCS holders participate. Borrowers do not need FCS to open or clone a position.
+
 ## Contract versions
 
 The implementation matters. This guide distinguishes the newer `contracts/minting/` source from historical screenshots and legacy terms. The source references are pinned to commit `8b4c4ab67bb361b91d58c474b87f4608fc4c0566`:

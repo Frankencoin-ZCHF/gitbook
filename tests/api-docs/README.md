@@ -1,6 +1,6 @@
 # API documentation tests
 
-Run `python3 -B scripts/check-api-docs.py` from the repository root. Until the sibling FCS user pages are integrated, use `--sibling-root /tmp/gitbook-build-userdocs` to read those two agreed pages for link validation. No other missing file is waived.
+Run `python3 -B scripts/check-api-docs.py` from the repository root. FCS user pages are integrated, so no sibling worktree or missing-page waiver is needed.
 
 Requirements: Python standard library and Node.js 18+. No package installation, credentials, RPC calls or API network requests are needed.
 

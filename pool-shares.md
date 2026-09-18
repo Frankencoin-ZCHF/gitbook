@@ -1,60 +1,60 @@
 ---
-description: Legacy FPS, the underlying equity curve and a simplified economic model.
+description: FCS ownership, acquisition, governance, equity economics and exits.
 ---
 
-# 📈 Investing and Pool Shares
+<a id="investing-and-pool-shares"></a>
+
+# 📈 FCS: Investing and Pool Shares
 
 ## Reserve Pool Shares
 
-Frankencoin Pool Shares (FPS) represent the equity capital of the system. Net fees and liquidation results change that capital and the protocol's FPS price. Losses reduce it. FPS also accumulates time-weighted governance votes under the legacy rules.
+Frankencoin Share Token (FCS) is Frankencoin's canonical governance and share token. Holding FCS gives economic exposure to the system's equity capital and builds time-weighted voting power. Net fees and liquidation results change that capital; losses reduce it.
 
-This page describes **legacy FPS and the underlying Equity curve**, not an interchangeable FCS investment path. [FCS](fcs.md) wraps FPS one to one, but uses different voting and exit rules. The [migration guide](fcs-migration.md) covers FPS and WFPS.
+FCS connects these two roles: holders bear the economic results of the system and can veto proposals through [governance](governance.md). It is a share token, not a Swiss franc stablecoin or a savings deposit paying a set rate.
 
 ## Usage
 
-The [equity application](https://app.frankencoin.com/equity) provides investment interfaces. A transaction may be a protocol mint, redemption, wrap or secondary-market trade; these are distinct operations. Legacy FPS redemption burns FPS and returns ZCHF under the Equity curve. It requires the holder's **average holding duration of at least 90 days**, rather than an age attached to individual transferable tokens. Balance changes and vote destruction can affect that duration.
+### Acquire FCS
 
-The following screenshots are historical FPS interface examples. Their prices, balances, routes and controls are not current quotes or FCS instructions.
+The [equity application](https://app.frankencoin.com/equity) provides investment interfaces. The FCS design has three distinct acquisition routes:
 
-<figure><img src=".gitbook/assets/kuva (44).png" alt="Historical FPS investment interface"><figcaption><p>Historical FPS entry and redemption view.</p></figcaption></figure>
+* **Invest ZCHF:** `deposit` specifies the ZCHF input; `mint` specifies the FCS output. The contract buys underlying equity and issues FCS. The exchange rate is not one FCS per ZCHF.
+* **Buy existing FCS:** a secondary-market trade transfers shares from another holder. Its quote and availability depend on the venue and liquidity.
+* **Migrate existing shares:** FPS holders can wrap their balance one to one into FCS. WFPS holders first unwrap into FPS. The [migration guide](fcs-migration.md) explains the different voting effects.
 
-A marginal FPS price does not determine the exact output of a finite purchase: fees and the curve also apply. WFPS is a separate wrapper, not another name for FCS.
+Use the preview for the intended operation and amount, rather than dividing by a displayed reference price. A preview estimates output; eligibility and transaction limits are separate checks. The [entry reference](fcs.md#entry-paths) defines the contract paths.
 
-<figure><img src=".gitbook/assets/kuva (45).png" alt="Historical FPS statistics"><figcaption><p>Historical FPS statistics, retaining the FPS unit and supply.</p></figcaption></figure>
+To invest ZCHF, connect the wallet holding the funds and select the chain and FCS contract used by the interface. Enter the ZCHF amount to deposit or the FCS amount to mint. Read the expected shares, fees, recipient and allowance. If an approval is needed, approve the specified spender, then submit the investment transaction. After confirmation, check the received FCS balance and votes. Approval alone does not create shares.
 
-| Metric | Meaning |
-| --- | --- |
-| FPS reference valuation | FPS supply multiplied by the underlying marginal FPS price |
-| Total reserve | ZCHF held in the reserve, including minter reserve and equity |
-| Equity capital | Reserve capital after the minter-reserve allocation |
-| Minter reserve | Reserve attributed to outstanding positions, subject to loss sharing |
-| Income and losses | Historical flows over the displayed period, not a future return |
+### Participate in governance
 
-An FPS statistic does not become an FCS statistic because an interface also offers FCS. See [reserve accounting](reserve.md).
+FCS votes depend on balance and average holding duration, not balance alone. Holders can delegate votes while retaining their own ability to act. Fresh ZCHF investment, WFPS migration and purchases from another holder do not carry immediate voting power; direct wrapping of aged FPS credits the legacy votes lost on transfer.
+
+Qualified actions need more than 1% of internal FCS voting power, including valid delegation, and the FCS contract meeting the underlying FPS quorum. These checks are separate from the binding threshold used for ZCHF exits. See [FCS governance](governance.md) for proposals and vetoes, and [voting mechanics](fcs.md#voting) for accumulation, capping and vote destruction.
+
+### Exit an FCS holding
+
+* **Redeem into ZCHF:** `redeem` fixes the shares burned; `withdraw` fixes the ZCHF output. Both need the FCS contract to be binding and eligible to redeem its underlying FPS, and both apply the redemption discount.
+* **Sell existing FCS:** a market sale has its own quote and liquidity. It is not a redemption against the reserve.
+* **Unwrap into FPS:** receive one underlying FPS per FCS. The caller's FCS holding duration must be at least the average across FCS holders, whether binding or unbound. This leaves the holder with FPS, not ZCHF.
+
+There is no separate personal 90-day FCS redemption wait. Binding depends on the FCS contract's share of underlying FPS votes, and the 90-day condition applies to that contract as an FPS holder. The [exit reference](fcs.md#exit-paths-and-eligibility) defines these gates and the different limits of `withdraw` and `redeem`.
+
+For a ZCHF exit, choose the amount in shares or ZCHF, read the corresponding preview and `maxRedeem` or `maxWithdraw`, then review the expected proceeds. Submit the chosen transaction and confirm both the burned FCS and received ZCHF. If redemption is disabled, a preview is not permission to execute it. An unwrap instead requires the holder-duration check and delivers FPS to the wallet.
 
 ## Economics
 
+FCS participates in one equity pool, not a second reserve. Each FCS wraps one FPS; the underlying Equity contract holds the capital and prices FPS. ZCHF investment through FCS adds capital to Equity. Income benefits that shared capital, and losses reduce it. FCS does not promise a fixed yield or a separate cash distribution.
+
 ### Proportional Capital Valuation
 
-The underlying curve is inspired by [The Continuous Capital Corporation](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4189472). For equity capital `K` in ZCHF and outstanding FPS supply `s`, its marginal reference valuation and price are:
+The underlying curve sets a marginal FPS reference valuation of three times equity capital. FCS uses the underlying FPS price for its `ask()` reference and applies a redemption discount to `bid()`. Neither value is a size-specific execution quote or an FCS market price.
 
-```text
-V(K) = 3 × K
-p = 3 × K / s
-```
-
-For positive capital and supply, the continuous model gives the following change after adding net capital `ΔK`, before implementation fees and integer rounding:
-
-```text
-s_new = s × ((K + ΔK) / K)^(1/3)
-p_new = p × ((K + ΔK) / K)^(2/3)
-```
-
-For example, equity of 1,000,000 ZCHF and supply of 10,000 FPS imply a marginal reference price of 300 ZCHF per FPS. This is not a guaranteed execution price. Finite transactions move along the curve; FCS ZCHF exits also apply the [wrapper's redemption discount](fcs.md#prices-and-redemption-discount). Secondary-market prices depend on trading liquidity and orders.
+The [underlying FPS reference](fps-reference.md#proportional-capital-valuation) gives the formula and numerical example in FPS units. The [FCS pricing reference](fcs.md#prices-and-redemption-discount) explains previews, fees and the size- and activity-dependent discount. An API field reporting FPS supply or price remains an underlying metric, even when displayed beside FCS.
 
 ### Equilibrium
 
-A simplified model considers 30,000,000 ZCHF of outstanding mints at 5% annual interest: gross annual borrowing income is 1,500,000 ZCHF. If investors require a 5% return, and if that income continues without expenses or losses, capitalising it gives a valuation of 30,000,000 ZCHF. The FPS curve reaches that reference valuation at 10,000,000 ZCHF of equity.
+A simplified model considers 30,000,000 ZCHF of outstanding mints at 5% annual interest: gross annual borrowing income is 1,500,000 ZCHF. If investors require a 5% return, and if that income continues without expenses or losses, capitalising it gives a valuation of 30,000,000 ZCHF. The underlying FPS curve reaches that reference valuation at 10,000,000 ZCHF of equity. This is a model of the shared equity pool, not a valuation of FCS supply alone.
 
 Savings changes the income available to equity holders:
 
@@ -65,8 +65,12 @@ savings expense = interest-bearing savings balance × applicable savings rate
 
 For example, an average interest-bearing savings balance of 10,000,000 ZCHF at 2% costs 200,000 ZCHF a year. With the borrowing income above, no other income and no losses, net equity income is 1,300,000 ZCHF. At the same assumed 5% required return, that would support a model valuation of 26,000,000 ZCHF, not 30,000,000 ZCHF. Actual accrual timing, changing rates, referrals and losses affect realised flows. Referral fees divide savings interest between the user and referrer; they are not an extra payment on top of that gross interest.
 
-The one-third equity relationship is therefore a model result under assumptions, not a reserve requirement enforced by the contracts. Borrowing to buy equity exposes the holder to fees, losses, price changes and redemption conditions; a spread between quoted rates is not a risk-free arbitrage. Nor does comparing FPS reference valuation with ZCHF supply uniquely reveal expected growth.
+The one-third equity relationship is a model result under assumptions, not a reserve requirement enforced by the contracts. Borrowing to buy FCS exposes the holder to fees, losses, price changes and redemption conditions; a spread between quoted rates is not a risk-free arbitrage. Comparing the underlying FPS reference valuation with ZCHF supply does not uniquely reveal expected growth.
 
 ### Limits to Capital Efficiency
 
-Lower equity means a smaller buffer before losses reach shared minter reserves. More equity provides a larger buffer but changes the returns available per share. Neither the curve nor a proposed equilibrium ensures a particular reserve ratio or market price.
+Lower equity means a smaller buffer before losses reach shared minter reserves. More equity provides a larger buffer but changes the returns available per share. Neither the curve nor a proposed equilibrium ensures a particular reserve ratio or market price. [Reserve accounting](reserve.md) explains the flows; [FCS mechanisms and dependencies](risks.md#fcs-mechanisms-and-dependencies) describes how voting state and redemption activity affect holders.
+
+## Underlying FPS
+
+FPS remains the backing token and retains its own supply, address and legacy governance records. It is not a second name for FCS. The [underlying FPS reference](fps-reference.md) contains the Equity curve, direct FPS redemption rules and historical interface examples. The [FCS mechanics reference](fcs.md#version-and-terminology) maps the reader-facing FCS name to the audited `FPS2` identifiers.

@@ -2,16 +2,18 @@
 
 Base URL: `https://api.frankencoin.com`. The [interactive specification](https://api.frankencoin.com/) lists routes and parameters. These pages describe read-only HTTP GET requests. They do not create positions, place bids, deposit savings or transfer tokens; those actions use the relevant contracts.
 
+[FCS](../pool-shares.md) is Frankencoin's canonical governance and share token. Start with the [FCS controller](fcs.md) for its supply, reference prices and discount data. FPS routes remain the source for the underlying equity token's data; their identifiers and units do not change with FCS's reader-facing role.
+
 ## Controllers
 
-- [Ecosystem](ecosystem.md): ZCHF, legacy FPS, minter proposals and collateral catalogues.
-- [FCS](fcs.md): Frankencoin Share Token information and redemption discount.
+- [FCS](fcs.md): canonical share-token information and redemption discount.
+- [Ecosystem](ecosystem.md): ZCHF, underlying FPS, minter proposals and collateral catalogues.
 - [Positions](positions.md): indexed lending positions and owner histories.
 - [Challenges](challenges.md): indexed challenges, bids and current challenge prices.
 - [Prices](prices.md): display prices, currencies, sources and indicative valuations.
 - [Savings](savings.md): balances, rates, activity and referrals.
 - [Transfers](transfers.md): reference-bearing transfers and candidate matching.
-- [Analytics](analytics.md): legacy FPS metrics and financial logs.
+- [Analytics](analytics.md): underlying FPS metrics and shared equity financial logs.
 - [Wallet integration](wallet-integration.md): module selection and contract read/write boundaries.
 
 ## Versions and data conventions

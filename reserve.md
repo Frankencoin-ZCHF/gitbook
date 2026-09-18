@@ -4,7 +4,9 @@ description: Reserve and equity accounting, with explicit example assumptions.
 
 # 🏦 Reserve
 
-The reserve consists of ZCHF held for minter reserves and equity. External stablecoins in conversion bridges are separate assets. Collateral remains in individual positions; the stylised balance sheet below records the associated repayment obligations rather than adding the collateral a second time.
+The reserve consists of ZCHF held for minter reserves and equity. [FCS holders](pool-shares.md) participate in the equity through the token's underlying FPS backing. Protocol income increases that shared capital, while savings expense and losses reduce it. FCS does not create a separate reserve.
+
+External stablecoins in conversion bridges are separate assets. Collateral remains in individual positions; the stylised balance sheet below records the associated repayment obligations rather than adding the collateral a second time.
 
 ## Balance Sheet Diagram
 
@@ -31,7 +33,7 @@ This gross presentation includes reserve-held ZCHF within total supply. It is an
 
 * **Total ZCHF supply (`z`):** issued ZCHF, including reserve holdings in this model.
 * **Minter reserve (`b`):** the reserve allocation associated with minted debt. It can absorb losses and is not unconditionally recoverable by each minter.
-* **Equity (`e`):** the residual reserve capital. FPS represents this capital; [FCS](fcs.md) wraps FPS rather than creating a second equity pool.
+* **Equity (`e`):** the residual reserve capital in which FCS holders participate. The underlying Equity contract accounts for this capital and issues the FPS backing each FCS.
 
 ## Example Scenarios
 

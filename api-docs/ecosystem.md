@@ -1,6 +1,6 @@
 # Ecosystem API
 
-These GET endpoints report indexed token information, minter proposals and collateral used in positions. See [API conventions](README.md) for units and [FCS](fcs.md) for the separate wrapper controller.
+These GET endpoints report indexed token information, minter proposals and collateral used in positions. For Frankencoin's canonical governance and share token, use the [FCS controller](fcs.md). The FPS fields here describe its underlying equity token. See [API conventions](README.md) for units.
 
 ## Frankencoin and legacy FPS
 

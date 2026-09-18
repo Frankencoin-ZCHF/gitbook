@@ -1,6 +1,6 @@
 # Analytics API
 
-Read indexed financial logs and legacy FPS metrics. These routes do not report FCS supply or holder voting power; use [FCS](fcs.md) for its controller.
+Read indexed financial logs for the shared equity pool and underlying FPS metrics. [FCS](../pool-shares.md) is the canonical governance and share token, but these routes retain their FPS units and identifiers. They do not report FCS supply or holder voting power; the [FCS controller](fcs.md) reports share-token information and discount data, not per-holder votes.
 
 ## Endpoints and limits
 

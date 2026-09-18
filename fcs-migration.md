@@ -4,7 +4,7 @@ description: Entry and exit paths for FPS and WFPS holders in the audited FCS de
 
 # Migrating from FPS and WFPS
 
-FCS wraps FPS one to one. Migration changes which token an address holds and how it exercises governance; it does not replace the underlying Equity contract. The [FCS reference](fcs.md#version-and-terminology) identifies the audited version and terminology used here.
+Use this guide to move an existing FPS or WFPS holding into Frankencoin Share Token (FCS), the canonical governance and share token. FCS wraps FPS one to one. Migration changes the token you hold and how you exercise governance; it does not replace the underlying Equity contract. For a new investment with ZCHF, start with [acquiring FCS](pool-shares.md#acquire-fcs). The [FCS reference](fcs.md#version-and-terminology) identifies the audited version and terminology used here.
 
 ## Identify the starting token
 
@@ -21,8 +21,9 @@ WFPS on another chain first needs a supported route to the underlying Ethereum F
 
 1. Identify the chain, starting token, wrapper address and underlying FPS address. The audited `FPS1` and `asset()` views identify the backing FPS and ZCHF asset respectively.
 2. Choose the operation by input: `wrap` for FPS, `deposit` for a fixed ZCHF input, or `mint` for a fixed share output. For ZCHF entry, read the corresponding preview rather than dividing by a displayed marginal price.
-3. Review the allowance, recipient, amount and quoted output. The reviewed `depositExpected` variant accepts a minimum share output.
-4. After confirmation, read the received share balance and holder votes. Separately read the wrapper's underlying FPS votes, binding state and redemption limits.
+3. If starting with WFPS, complete its unwrap route first and confirm receipt of FPS on Ethereum. Then approve the FCS contract for the intended FPS amount. For ZCHF entry, approve the required ZCHF amount instead. Approval alone does not migrate the holding.
+4. Review the recipient, input, output and fees, then submit the chosen wrap or investment transaction. The reviewed `depositExpected` variant accepts a minimum share output.
+5. After confirmation, read the received FCS balance and holder votes. Separately read the FCS contract's underlying FPS votes, binding state and redemption limits. A successful migration need not make a governance action or ZCHF exit immediately available.
 
 These are contract operations; application interfaces expose their supported subset. The [API reference](api-docs/fcs.md) distinguishes indexed data from transactions.
 

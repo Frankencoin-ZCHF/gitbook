@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Offline links and source-format checks for user docs. Standard library only.
 
-API pages are read only when resolving a user-doc link, never validated or edited.
-Use --allow-pending-api only before integrating the API sibling's fcs.md page.
+Root-level pages (including the underlying FPS reference) and positions/ are
+validated here. API pages have their own checker. The historical
+--allow-pending-api option only defers an absent api-docs/fcs.md page.
 """
 import argparse
 import html

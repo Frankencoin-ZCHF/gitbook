@@ -1,6 +1,6 @@
 # FCS API
 
-The Frankencoin Share Token (FCS) has its own controller. Legacy FPS supply, prices, reserve data and earnings remain under the FPS routes; they are not FCS metrics. See [FCS mechanics](../fcs.md) and [migration](../fcs-migration.md) for the token and voting model.
+Frankencoin Share Token (FCS) is the canonical governance and share token. This controller reports its supply, reference prices and redemption discount. Start with the [share guide](../pool-shares.md) for the holder journey, [FCS mechanics](../fcs.md) for contract rules or [migration](../fcs-migration.md) for existing holdings. Underlying FPS supply, prices, reserve data and earnings remain under the FPS routes; they are not FCS metrics.
 
 ## GET /fcs/info
 

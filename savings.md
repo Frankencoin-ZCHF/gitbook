@@ -4,7 +4,7 @@ description: Version-specific savings, interest collection and referral terms.
 
 # 💰 Savings
 
-The [savings application](https://app.frankencoin.com/savings) lets users deposit ZCHF and earn a governance-set rate. Interest comes from the system's equity; borrowing and savings rates are separate parameters. Deposited ZCHF remains attributed to the savings account rather than being lent out to borrowers.
+The [savings application](https://app.frankencoin.com/savings) lets users deposit ZCHF and earn a rate set through [FCS governance](governance.md). Interest comes from the system's equity, reducing the net income available to [FCS holders](pool-shares.md#economics); borrowing and savings rates are separate parameters. Depositing ZCHF in savings does not acquire FCS or voting power. Deposited ZCHF remains attributed to the savings account rather than being lent out to borrowers.
 
 ## Contract versions
 

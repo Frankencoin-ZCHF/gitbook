@@ -38,4 +38,4 @@ Rate limits, message execution errors and chain conditions can delay delivery. A
 
 ## FCS votes are not bridged tokens
 
-The audited FCS design keeps shares on mainnet. It sends the wrapper's underlying FPS votes and individual holders' FCS votes as snapshots. [Cross-chain governance](governance.md#cross-chain-governance) describes both synchronisation steps. A voting snapshot is not a spendable FCS balance on the destination chain.
+[FCS](pool-shares.md) is the governance and share token; the audited design keeps those shares on mainnet. To take part in governance on another chain, synchronise the FCS contract's underlying FPS votes and the individual holders' FCS votes. [Cross-chain governance](governance.md#cross-chain-governance) guides both steps. A voting snapshot is not a spendable FCS balance on the destination chain, and the ZCHF transfer sequence above does not migrate FCS.

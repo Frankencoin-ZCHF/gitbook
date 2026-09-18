@@ -1,10 +1,14 @@
 ---
-description: Frankencoin Share Token, its FPS backing, governance and redemption mechanics.
+description: Contract mechanics for FCS, Frankencoin's canonical governance and share token.
 ---
 
-# Frankencoin Share Token (FCS)
+<a id="frankencoin-share-token-fcs"></a>
 
-FCS adds a governance layer to the existing Frankencoin Pool Shares (FPS). Each share wraps one FPS. The underlying Equity contract continues to hold the system's equity capital and to price FPS. FCS is not a renamed FPS balance: the tokens have separate supplies, voting records and contract interfaces.
+# FCS Mechanics
+
+Frankencoin Share Token (FCS) is the canonical governance and share token. It combines participation in the system's equity with time-weighted voting. The [investing and pool shares guide](pool-shares.md) explains the holder journey; this page defines the entry, voting and exit mechanics.
+
+Each FCS wraps one underlying Frankencoin Pool Share (FPS). The Equity contract continues to hold the system's equity capital and to price FPS. FCS and FPS have separate supplies, voting records and contract interfaces.
 
 ## Version and terminology
 
@@ -16,10 +20,10 @@ The contract mechanics below refer to that reviewed version. The [FCS API refere
 
 | Path | What happens | Initial FCS votes |
 | --- | --- | --- |
-| Wrap existing FPS | `wrap(amount)` transfers FPS into the wrapper and issues the same number of shares | Credits the FPS votes lost by the sender on that transfer |
 | Invest ZCHF | `deposit` fixes the ZCHF input; `mint` fixes the share output. The wrapper invests in FPS and issues FCS | No immediate votes from the new investment |
-| Migrate WFPS | Unwrap WFPS into FPS, then wrap FPS into FCS | No carried votes from WFPS; the received FPS starts without accumulated votes |
 | Buy from another holder | A secondary-market trade transfers existing shares | A market purchase does not carry the seller's accumulated votes |
+| Wrap existing FPS | `wrap(amount)` transfers FPS into the wrapper and issues the same number of shares | Credits the FPS votes lost by the sender on that transfer |
+| Migrate WFPS | Unwrap WFPS into FPS, then wrap FPS into FCS | No carried votes from WFPS; the received FPS starts without accumulated votes |
 
 The one-to-one ratio applies to **FPS wrapping**, not ZCHF investment. ZCHF is the ERC-4626 vault asset; FPS is the token backing each share. See the [migration guide](fcs-migration.md) for the distinction between holder votes and wrapper votes.
 
@@ -45,12 +49,11 @@ While binding, anyone can call `shoot(target)`. The wrapper spends an equal numb
 
 | Operation | Output | Conditions in the reviewed design |
 | --- | --- | --- |
-| Legacy FPS redemption | ZCHF from Equity | The FPS holder's average holding duration must be at least 90 days; other Equity checks still apply |
 | FCS `redeem` or `withdraw` | ZCHF, with the redemption discount | The wrapper must be binding and its own FPS holding duration must satisfy `FPS1.canRedeem(address(this))` |
 | FCS `unwrap` | One FPS per share | The caller's FCS holding duration must be at least the average across FCS holders; allowed while binding or unbound |
 | Transfer or secondary-market sale | Shares to another address, or the market's quoted asset | Separate from protocol redemption; proceeds depend on the available route and liquidity |
 
-There is no new personal 90-day FCS redemption wait. The relevant 90-day check belongs to the wrapper as an FPS holder. Receiving FPS after an unwrap changes the recipient's FPS holding duration; FCS age is not transferred back as legacy votes.
+There is no new personal 90-day FCS redemption wait. The relevant 90-day check belongs to the wrapper as an FPS holder. Receiving FPS after an unwrap changes the recipient's FPS holding duration; FCS age is not transferred back as legacy votes. [Direct FPS redemption](fps-reference.md#direct-fps-redemption) then follows the underlying contract's rules.
 
 The final V3 source resolves two inconsistent descriptions in the report: `unwrap` rejects durations **below** the holder average, so equality passes; `Equity.canRedeem` uses **at least** 90 days. See [FPS2.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2.sol#L68-L114) and [Equity.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/Equity.sol#L114-L119). The earlier p6 statement that unwrapping resumes only after unbinding is superseded by the V3 change on p8.
 
@@ -101,6 +104,7 @@ The audit records remaining ERC-4626 deviations and rounding behaviour: `preview
 
 * [Migration from FPS and WFPS](fcs-migration.md)
 * [Governance and cross-chain vote snapshots](governance.md)
-* [Legacy FPS economics](pool-shares.md)
+* [Investing and equity economics](pool-shares.md)
+* [Underlying FPS reference](fps-reference.md)
 * [Concrete FCS failure modes](risks.md#fcs-mechanisms-and-dependencies)
 * [FCS API reference](api-docs/fcs.md)

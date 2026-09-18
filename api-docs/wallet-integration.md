@@ -43,6 +43,6 @@ The entry delay, weighted tick adjustment and withdrawal conditions depend on th
 
 `/savings/core/activity/:account` returns at most 1000 recent records. Several events can share a transaction hash, so the hash alone is not a unique event key. A complete history requires an independent event traversal and reconciliation; a capped response cannot establish it.
 
-For reference-bearing payments, use the [candidate-only transfer example](transfers.md#candidate-lookup-example). For FCS, distinguish [reference prices, previews and transaction limits](fcs.md#contract-reads-and-transactions). Neither endpoint family supplies a transaction approval or settlement decision.
+For reference-bearing payments, use the [candidate-only transfer example](transfers.md#candidate-lookup-example). For the canonical share token FCS, distinguish [reference prices, previews and transaction limits](fcs.md#contract-reads-and-transactions). Use FCS-specific supply and contract references; the underlying FPS fields are not substitutes. Neither endpoint family supplies a transaction approval or settlement decision.
 
 The [API package](https://www.npmjs.com/package/@frankencoin/api) can provide types for a pinned release. TypeScript types do not validate runtime JSON; retain HTTP, schema and unit checks.

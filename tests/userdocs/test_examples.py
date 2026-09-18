@@ -32,7 +32,9 @@ class NumericalExamples(unittest.TestCase):
 
     def test_legacy_valuation(self):
         self.assertEqual(D(300), D(3) * 1_000_000 / 10_000)
-        self.assertIn('300 ZCHF per FPS', page('pool-shares.md'))
+        # The unchanged FPS example now lives in the underlying reference.
+        self.assertIn('300 ZCHF per FPS', page('fps-reference.md'))
+        self.assertIn('fps-reference.md#proportional-capital-valuation', page('pool-shares.md'))
         # The idealised continuous curve preserves V = p*s = 3*K.
         old_k, old_s, growth = D(1_000_000), D(10_000), D(8)
         new_s = old_s * 2
@@ -79,8 +81,9 @@ class NumericalExamples(unittest.TestCase):
 
     def test_legacy_vote_example(self):
         self.assertGreater(10 * 730, 1000 * 7)
-        self.assertIn('7,300 FPS-days', page('governance.md'))
-        self.assertIn('7,000 FPS-days', page('governance.md'))
+        self.assertIn('7,300 FPS-days', page('fps-reference.md'))
+        self.assertIn('7,000 FPS-days', page('fps-reference.md'))
+        self.assertIn('fps-reference.md#legacy-votes-and-quorum', page('governance.md'))
 
     def test_referral_ppm(self):
         gross, ppm, denominator = D(100), D(200000), D(1000000)
@@ -137,7 +140,8 @@ class SourceAndCopyBoundaries(unittest.TestCase):
 
     def test_user_page_style_invariants(self):
         files = list(ROOT.glob('*.md')) + list((ROOT / 'positions').glob('*.md'))
-        self.assertEqual(18, len(files))
+        self.assertEqual(19, len(files))
+        self.assertIn(ROOT / 'fps-reference.md', files)
         for file in files:
             text = file.read_text()
             self.assertNotIn('\u2014', text, file.name)

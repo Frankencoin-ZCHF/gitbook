@@ -1,6 +1,6 @@
 # Prices API
 
-Price endpoints supply display observations with currency and source information. They are not a uniform protocol oracle and do not set a position's challenge price. Legacy FPS price routes remain FPS routes; see [FCS](fcs.md) for the wrapper's reference prices.
+Price endpoints supply display observations with currency and source information. They are not a uniform protocol oracle and do not set a position's challenge price. For the canonical share token's reference prices, use [FCS](fcs.md). FPS price routes here report the underlying FPS token, not an FCS market price.
 
 ## Endpoints
 
