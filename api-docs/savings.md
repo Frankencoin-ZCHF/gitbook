@@ -67,3 +67,52 @@ The contract accrues simple interest using rate ticks. Collecting interest throu
 For a hypothetical unchanged rate and an already interest-eligible balance, gross interest in base units is `floor(principal * ratePPM * seconds / 1000000 / 31536000)`. This is an estimate, not the live contract calculation across rate changes or delayed entry. Read `accruedInterest` for current gross pending interest on the chosen module. With a nonzero referrer, the inspected referral-capable contract deducts `floor(gross * referralFeePPM / 1000000)`; the remainder is net interest.
 
 The captured mainnet API lists modules `0x27d9ad987bde08a0d083ef7e0e4043c857a17b38` and `0x3bf301b0e2003e75a3e86ab82bd1eff6a9dfb2ae`. Module presence does not identify its ABI or version. Configure those explicitly. The [wallet guide](wallet-integration.md) distinguishes referral-capable modules from older interfaces.
+
+## Validated display and hypothetical projection
+
+Fetch `/savings/core/info` and `/savings/core/balance/:account` with `getJson` from the [shared example](README.md#executable-examples), then pass the parsed responses to `savingsDisplay`. Missing data throws rather than displaying zero. `estimateSimple` uses already eligible seconds and a constant rate; it is not a substitute for the contract's tick calculation.
+
+```javascript
+import {object, uint, address, formatUnits} from './README.mjs';
+
+function integer(value, maximum) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > maximum) {
+    throw new TypeError('Invalid integer parameter');
+  }
+  return BigInt(value);
+}
+
+export function savingsDisplay(info, balances, chainId, moduleAddress, account) {
+  object(info); object(balances);
+  if (!Number.isSafeInteger(chainId) || chainId <= 0) throw new TypeError('Invalid chain');
+  const module = address(moduleAddress), owner = address(account);
+  for (const field of ['totalBalance', 'totalInterest', 'ratioOfSupply']) {
+    if (typeof info[field] !== 'number' || !Number.isFinite(info[field]) || info[field] < 0) {
+      throw new TypeError(`Invalid ${field}`);
+    }
+  }
+  const status = object(object(object(info.status)[String(chainId)])[module]);
+  const balance = object(object(balances[String(chainId)])[module]);
+  for (const row of [status, balance]) {
+    if (row.chainId !== chainId || address(row.module) !== module) throw new TypeError('Module mismatch');
+    for (const field of ['balance', 'save', 'withdraw', 'interest']) uint(row[field]);
+  }
+  if (address(balance.account) !== owner) throw new TypeError('Account mismatch');
+  integer(status.rate, 16777215); // uint24 PPM, not a base-unit ZCHF amount.
+  return {
+    annualSimplePercent: formatUnits(String(status.rate), 4),
+    savedZCHF: formatUnits(balance.balance, 18),
+    collectedInterestZCHF: formatUnits(balance.interest, 18)
+  };
+}
+
+export function estimateSimple(principal, ratePPM, eligibleSeconds, referralFeePPM, hasReferrer) {
+  const rate = integer(ratePPM, 16777215);
+  const seconds = integer(eligibleSeconds, Number.MAX_SAFE_INTEGER);
+  const feeRate = integer(referralFeePPM, 250000);
+  if (typeof hasReferrer !== 'boolean') throw new TypeError('Expected referrer state');
+  const gross = uint(principal) * rate * seconds / 1000000n / 31536000n;
+  const fee = hasReferrer ? gross * feeRate / 1000000n : 0n;
+  return {gross: gross.toString(), fee: fee.toString(), net: (gross - fee).toString()};
+}
+```

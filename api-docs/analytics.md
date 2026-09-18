@@ -26,8 +26,8 @@ Earnings categories such as `minterProposalFees`, `investFees`, `redeemFees`, `p
 
 ## Export completeness
 
-One saved transaction-log request advanced from count `4385` to `4384`, but both responses contained the same abbreviated cursor text `eyJqc2...F9fQ==`. That evidence does not establish a working full-history traversal. An application must reject missing, repeated or non-progressing cursors, deduplicate rows and reconcile totals before describing an export as complete.
+A saved two-page transaction-log check advanced from count `4385` to `4384` using the first response's full `endCursor`. The second response returned a distinct cursor. This verifies one pagination step, not full-history traversal. Reject missing, repeated or non-progressing cursors, deduplicate rows and reconcile totals before describing an export as complete.
 
-A page with `hasNextPage=true` needs a valid next cursor. Reaching a page with `hasNextPage=false` only completes that indexer's available traversal, not independent reconciliation with the chain. These docs do not claim to repair cursor behaviour. For complete accounting, use a separately validated indexer or block-range contract logs with receipt and reorg reconciliation.
+A page with `hasNextPage=true` needs a valid next cursor. Reaching a page with `hasNextPage=false` only completes that indexer's available traversal, not independent reconciliation with the chain. For complete accounting, use a separately validated indexer or block-range contract logs with receipt and reorg reconciliation.
 
 Daily logs are available observations, not a guarantee of one row for every calendar day. Preserve missing dates as missing data rather than inventing zero values.

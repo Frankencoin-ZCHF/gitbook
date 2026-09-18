@@ -40,7 +40,7 @@ From a repository checkout, run `python3 scripts/check-api-docs.py`. It extracts
 
 ### Shared validation and exact display formatting
 
-`getJson` rejects HTTP errors, error envelopes and malformed JSON. Endpoint functions must also check the expected schema. It propagates failures rather than treating them as empty results. `formatUnits` retains fractional base units without converting to `Number`.
+`getJson` rejects HTTP errors, error envelopes and malformed JSON. This helper accepts object/array endpoints; scalar endpoints need a separate validator. Endpoint functions must also check the expected schema. It propagates failures rather than treating them as empty results. `formatUnits` retains fractional base units without converting to `Number`.
 
 ```javascript
 export function object(value, label = 'object') {

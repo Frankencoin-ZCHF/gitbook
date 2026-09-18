@@ -37,4 +37,4 @@ Dates and application periods are seconds; `applicationFee` is a raw ZCHF string
 
 Metadata includes `chainId`, `address`, `name`, `symbol` and `decimals`. Catalogue membership records use in indexed positions, not approval of a new position or a collateral whitelist. Original positions and clones have their own conditions.
 
-Position V1/V2 identifies a lending-contract version. It does not identify the FCS governance migration, API version or savings module version. Resolve chain, address and ABI from the [contract repository](https://github.com/Frankencoin-ZCHF/FrankenCoin) and [SDK registry](https://github.com/Frankencoin-ZCHF/zchf), pinned to the deployment used by the application.
+Position V1/V2 identifies a lending-contract version. It does not identify the FCS governance migration, API version or savings module version. Resolve chain, address and ABI from the [contract repository](https://github.com/Frankencoin-ZCHF/FrankenCoin) and [published SDK](https://www.npmjs.com/package/@frankencoin/zchf), pinned to the deployment used by the application.

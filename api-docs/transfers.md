@@ -39,7 +39,7 @@ For a complete ledger, use a separately validated indexer or the relevant contra
 | `amount` | Decimal integer string in ZCHF base units (18 decimals) |
 | `chainId` | Number: source EIP-155 chain ID |
 | `count`, `created` | Observed decimal integer strings; Swagger also describes numbers. `created` is Unix seconds. Preserve count without floating-point coercion |
-| `from`, `sender`, `to` | Addresses; `from` and original `sender` can differ. Validate before case-normalized comparison |
+| `from`, `sender`, `to` | Addresses; `from` and original `sender` can differ. Validate before case-normalised comparison |
 | `reference` | Exact public reference string, possibly empty |
 | `targetChain` | Decimal string: `0` is the same-chain sentinel; otherwise a CCIP chain selector, **not** an EIP-155 ID |
 | `txHash` | Full source-chain transaction hash |
@@ -48,7 +48,7 @@ Keep CCIP selectors as strings or `BigInt`; some exceed JavaScript's safe intege
 
 ## Invoice integration boundary
 
-A reference/amount match is only a **candidate for verification**. This API record does not supply the token-emitting address, log index, receipt success, confirmations, or destination settlement proof needed to authorize delivery.
+A reference/amount match is only a **candidate for verification**. This API record does not supply the token-emitting address, log index, receipt success, confirmations, or destination settlement proof needed to authorise delivery.
 
 Before crediting a payment:
 
