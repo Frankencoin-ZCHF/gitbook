@@ -1,0 +1,1207 @@
+{
+  "kind": "Extracted public-source evidence, not simulated on-chain observations",
+  "fcs_commit": "c1f229e3b26050367aafcb55da294342b4cae382",
+  "source_checks": [
+    {
+      "id": "unwrap_comparison",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2.sol",
+      "source_sha256": "e9b5507df59e48a97d067bef61fd272bb5f51db7cc5100a77850fd5a454e9570",
+      "quote": "if (holdingDuration(msg.sender) < averageHoldingDuration()) revert NotFIFO();"
+    },
+    {
+      "id": "binding_comparison",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2.sol",
+      "source_sha256": "e9b5507df59e48a97d067bef61fd272bb5f51db7cc5100a77850fd5a454e9570",
+      "quote": "return FPS1.relativeVotes(address(this)) * 3 > 2e18;"
+    },
+    {
+      "id": "redemption_gate",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2.sol",
+      "source_sha256": "e9b5507df59e48a97d067bef61fd272bb5f51db7cc5100a77850fd5a454e9570",
+      "quote": "return isBinding() && FPS1.canRedeem(address(this));"
+    },
+    {
+      "id": "legacy_age",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/Equity.sol",
+      "source_sha256": "72b6f820fa242d0e373370ed3fda976151a2dbe56e81883fb3b47a3cd0bb8629",
+      "quote": "return _anchorTime() - voteAnchor[owner] >= MIN_HOLDING_DURATION;"
+    },
+    {
+      "id": "total_assets",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2MintRedeem.sol",
+      "source_sha256": "065c33d54659220e7014f7c3995334678226ce69860c1eff94bda7b34460226b",
+      "quote": "return ZCHF.equity() * totalSupply() / FPS1.totalSupply();"
+    },
+    {
+      "id": "withdraw_cap",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2MintRedeem.sol",
+      "source_sha256": "065c33d54659220e7014f7c3995334678226ce69860c1eff94bda7b34460226b",
+      "quote": "uint256 cap = totalSupply() / 10;"
+    },
+    {
+      "id": "redeem_limit",
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/c1f229e3b26050367aafcb55da294342b4cae382/contracts/equity/fps2/FPS2MintRedeem.sol",
+      "source_sha256": "065c33d54659220e7014f7c3995334678226ce69860c1eff94bda7b34460226b",
+      "quote": "return redemptionsEnabled() ? balanceOf(owner) : 0;"
+    }
+  ],
+  "savings_abis": {
+    "savings-v2-explorer.html": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract IFrankencoin",
+            "name": "zchf_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "initialRatePPM",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "name": "ChangeNotReady",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint40",
+            "name": "remainingSeconds",
+            "type": "uint40"
+          }
+        ],
+        "name": "FundsLocked",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "ModuleDisabled",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "NoPendingChange",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "interest",
+            "type": "uint256"
+          }
+        ],
+        "name": "InterestCollected",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint24",
+            "name": "newRate",
+            "type": "uint24"
+          }
+        ],
+        "name": "RateChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "who",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint24",
+            "name": "nextRate",
+            "type": "uint24"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint40",
+            "name": "nextChange",
+            "type": "uint40"
+          }
+        ],
+        "name": "RateProposed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "Saved",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "Withdrawn",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "INTEREST_DELAY",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "accountOwner",
+            "type": "address"
+          }
+        ],
+        "name": "accruedInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "accountOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "accruedInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "targetAmount",
+            "type": "uint192"
+          }
+        ],
+        "name": "adjust",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "applyChange",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint192",
+                "name": "saved",
+                "type": "uint192"
+              },
+              {
+                "internalType": "uint64",
+                "name": "ticks",
+                "type": "uint64"
+              }
+            ],
+            "internalType": "struct Savings.Account",
+            "name": "account",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "ticks",
+            "type": "uint64"
+          }
+        ],
+        "name": "calculateInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "currentRatePPM",
+        "outputs": [
+          {
+            "internalType": "uint24",
+            "name": "",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "currentTicks",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "equity",
+        "outputs": [
+          {
+            "internalType": "contract IReserve",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextChange",
+        "outputs": [
+          {
+            "internalType": "uint40",
+            "name": "",
+            "type": "uint40"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextRatePPM",
+        "outputs": [
+          {
+            "internalType": "uint24",
+            "name": "",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint24",
+            "name": "newRatePPM_",
+            "type": "uint24"
+          },
+          {
+            "internalType": "address[]",
+            "name": "helpers",
+            "type": "address[]"
+          }
+        ],
+        "name": "proposeChange",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "name": "refreshBalance",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refreshMyBalance",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "save",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "save",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "savings",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "saved",
+            "type": "uint192"
+          },
+          {
+            "internalType": "uint64",
+            "name": "ticks",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "ticks",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "withdraw",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "zchf",
+        "outputs": [
+          {
+            "internalType": "contract IERC20",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "savings-referral-explorer.html": [
+      {
+        "inputs": [
+          {
+            "internalType": "contract IFrankencoin",
+            "name": "zchf_",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "initialRatePPM",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [],
+        "name": "ChangeNotReady",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint40",
+            "name": "remainingSeconds",
+            "type": "uint40"
+          }
+        ],
+        "name": "FundsLocked",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "ModuleDisabled",
+        "type": "error"
+      },
+      {
+        "inputs": [],
+        "name": "NoPendingChange",
+        "type": "error"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint32",
+            "name": "fee",
+            "type": "uint32"
+          }
+        ],
+        "name": "ReferralFeeTooHigh",
+        "type": "error"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "interest",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "referrerFee",
+            "type": "uint256"
+          }
+        ],
+        "name": "InterestCollected",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "uint24",
+            "name": "newRate",
+            "type": "uint24"
+          }
+        ],
+        "name": "RateChanged",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": false,
+            "internalType": "address",
+            "name": "who",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint24",
+            "name": "nextRate",
+            "type": "uint24"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint40",
+            "name": "nextChange",
+            "type": "uint40"
+          }
+        ],
+        "name": "RateProposed",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "Saved",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "account",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "Withdrawn",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "INTEREST_DELAY",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "ZCHF",
+        "outputs": [
+          {
+            "internalType": "contract IFrankencoin",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "accountOwner",
+            "type": "address"
+          }
+        ],
+        "name": "accruedInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "accountOwner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "accruedInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "targetAmount",
+            "type": "uint192"
+          },
+          {
+            "internalType": "address",
+            "name": "referrer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "referralFeePPM",
+            "type": "uint24"
+          }
+        ],
+        "name": "adjust",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "targetAmount",
+            "type": "uint192"
+          }
+        ],
+        "name": "adjust",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "applyChange",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint192",
+                "name": "saved",
+                "type": "uint192"
+              },
+              {
+                "internalType": "uint64",
+                "name": "ticks",
+                "type": "uint64"
+              },
+              {
+                "internalType": "address",
+                "name": "referrer",
+                "type": "address"
+              },
+              {
+                "internalType": "uint32",
+                "name": "referralFeePPM",
+                "type": "uint32"
+              }
+            ],
+            "internalType": "struct AbstractSavings.Account",
+            "name": "account",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "ticks",
+            "type": "uint64"
+          }
+        ],
+        "name": "calculateInterest",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "pure",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "currentRatePPM",
+        "outputs": [
+          {
+            "internalType": "uint24",
+            "name": "",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "currentTicks",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "dropReferrer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "equity",
+        "outputs": [
+          {
+            "internalType": "contract IGovernance",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextChange",
+        "outputs": [
+          {
+            "internalType": "uint40",
+            "name": "",
+            "type": "uint40"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextRatePPM",
+        "outputs": [
+          {
+            "internalType": "uint24",
+            "name": "",
+            "type": "uint24"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint24",
+            "name": "newRatePPM_",
+            "type": "uint24"
+          },
+          {
+            "internalType": "address[]",
+            "name": "helpers",
+            "type": "address[]"
+          }
+        ],
+        "name": "proposeChange",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          }
+        ],
+        "name": "refreshBalance",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "refreshMyBalance",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "",
+            "type": "uint192"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "save",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "save",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          },
+          {
+            "internalType": "address",
+            "name": "referrer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "referralFeePPM",
+            "type": "uint24"
+          }
+        ],
+        "name": "save",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "savings",
+        "outputs": [
+          {
+            "internalType": "uint192",
+            "name": "saved",
+            "type": "uint192"
+          },
+          {
+            "internalType": "uint64",
+            "name": "ticks",
+            "type": "uint64"
+          },
+          {
+            "internalType": "address",
+            "name": "referrer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint32",
+            "name": "referralFeePPM",
+            "type": "uint32"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "ticks",
+        "outputs": [
+          {
+            "internalType": "uint64",
+            "name": "",
+            "type": "uint64"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "target",
+            "type": "address"
+          },
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          }
+        ],
+        "name": "withdraw",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint192",
+            "name": "amount",
+            "type": "uint192"
+          },
+          {
+            "internalType": "address",
+            "name": "referrer",
+            "type": "address"
+          },
+          {
+            "internalType": "uint24",
+            "name": "referralFeePPM",
+            "type": "uint24"
+          }
+        ],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  },
+  "zchf_instances_observed": {
+    "1": {
+      "chainId": 1,
+      "updated": 1789717091,
+      "address": "0xb58e61c3098d85632df34eecfb899a1ed80921cb",
+      "supply": 31957769.564962346,
+      "counter": {
+        "mint": 2565,
+        "burn": 2169,
+        "balance": 137541
+      }
+    },
+    "10": {
+      "chainId": 10,
+      "updated": 1789717047,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 387803.1504372143,
+      "counter": {
+        "mint": 119,
+        "burn": 21,
+        "balance": 2519
+      }
+    },
+    "100": {
+      "chainId": 100,
+      "updated": 1789716535,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 1572828.2513783243,
+      "counter": {
+        "mint": 16023,
+        "burn": 786,
+        "balance": 107645
+      }
+    },
+    "137": {
+      "chainId": 137,
+      "updated": 1787071624,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 1132.9185,
+      "counter": {
+        "mint": 25,
+        "burn": 24,
+        "balance": 177
+      }
+    },
+    "146": {
+      "chainId": 146,
+      "updated": 1779113661,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 2,
+      "counter": {
+        "mint": 12,
+        "burn": 12,
+        "balance": 49
+      }
+    },
+    "8453": {
+      "chainId": 8453,
+      "updated": 1789716701,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 1463841.5380808467,
+      "counter": {
+        "mint": 2359,
+        "burn": 1078,
+        "balance": 40135
+      }
+    },
+    "42161": {
+      "chainId": 42161,
+      "updated": 1788767318,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 15584.199951831051,
+      "counter": {
+        "mint": 25,
+        "burn": 28,
+        "balance": 419
+      }
+    },
+    "43114": {
+      "chainId": 43114,
+      "updated": 1780053211,
+      "address": "0xd4dd9e2f021bb459d5a5f6c24c12fe09c5d45553",
+      "supply": 16.67408398168284,
+      "counter": {
+        "mint": 17,
+        "burn": 17,
+        "balance": 70
+      }
+    }
+  }
+}

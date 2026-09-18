@@ -1,39 +1,54 @@
 ---
-description: Introducing the two tokens and the overall structure of the system.
+description: Frankencoin (ZCHF), Frankencoin Share Token (FCS) and the structure of the system.
 ---
 
 # 🧀 Overview
 
 ## Structure and Purpose
 
-The purpose of this page is to provide potential users of the Frankencoin system with everything they need to know to meaningfully interact with it. For a deeper analysis of its economic properties, we refer to [the research publication](https://app.frankencoin.com/thesis-frankencoin.pdf) and for actually interacting with the system, there is a standard [frontend](https://frankencoin.com). The name Frankencoin hints at its self-governing nature, but also the risks associated with releasing an artificial machinery into the wild. If you encounter errors or if things are not clear to you, you can [reach out to us in the Telegram group](https://t.me/frankencoinzchf) or [file a suggestion for improving this page on GitHub](https://github.com/Frankencoin-ZCHF/frankencoin-dapp/issues).
+Frankencoin is a collateral-backed Swiss franc stablecoin system. This documentation explains minting, savings, equity and governance. The [application](https://app.frankencoin.com) provides transaction interfaces; the [research publication](https://app.frankencoin.com/thesis-frankencoin.pdf) examines the economic model. Documentation feedback belongs in the [Frankencoin Telegram group](https://t.me/frankencoinzchf); the source is the [GitBook repository](https://github.com/Frankencoin-ZCHF/gitbook).
 
-## Frankencoin (ZCHF) and Frankencoin Pool Shares (FPS)
+<a id="frankencoin-zchf-and-frankencoin-pool-shares-fps"></a>
 
-The Frankencoin system comes with two ERC-20 tokens, a stablecoin called [Frankencoin (ZCHF)](https://etherscan.io/address/0xB58E61C3098d85632Df34EecfB899A1Ed80921cB) and a governance token called [Frankencoin Pool Shares (FPS)](https://etherscan.io/address/0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2). Unlike other collateralized stablecoins, Frankencoin does not depend on external oracles, making it less susceptible to certain attacks and also more versatile with regard to the used collateral. The disadvantage of that approach is its speed, performing liquidations over the course of days whereas oracle-based systems might react within minutes.
+## Frankencoin (ZCHF) and Frankencoin Share Token (FCS)
 
-The Frankencoin is a collateralized stablecoin that tracks the value of the Swiss franc. There is no hard peg to the Swiss franc, but a set of economic constraints that incentivizes the market to softly push it towards parity from two sides. Most importantly, the system is [over-collateralized](positions/): for each Frankencoin in circulation, there must be other tokens worth at least one Frankencoin backing it. Furthermore, FPS holders have a number of ways to influence the long-term price of the Frankencoin by making it more or less expensive to mint Frankencoins, similarly to how a central bank keeps the exchange rate of its own currency in balance. The underlying assumption here is that the FPS holders recognize that the system (and therefore also their tokens) is the most valuable when the Frankencoin tracks the Swiss franc as reliably as possible, and that they use their power to govern the system accordingly.
+| Token | Role |
+| --- | --- |
+| [Frankencoin (ZCHF)](https://etherscan.io/address/0xB58E61C3098d85632Df34EecfB899A1Ed80921cB) | Stablecoin intended to track the Swiss franc |
+| [Frankencoin Share Token (FCS)](pool-shares.md) | Canonical governance and share token, representing participation in the system's equity |
 
-Frankencoin Pool Shares are the [governance](governance.md) token of the system. Anyone can obtain newly minted FPS by providing equity capital to the system (or later return them again to get their share of capital back). The FPS holders benefit from the earned fees and liquidation profits, but they are also the ones that carry the residual risk of liquidations, similar to the shareholders of a bank. Therefore, FPS holders have an incentive to grow the system and ensure its stability. The governance process is veto-based: anyone can propose new types of collateral or even completely new methods to bring Frankencoin into circulation, but already 2% of the voting power suffices to veto such proposals.
+FCS holders participate in [governance](governance.md) and share the economic gains and losses of the reserve's equity capital. Start with [investing and pool shares](pool-shares.md) for acquisition, voting and exits, then use the [FCS mechanics reference](fcs.md) for contract rules. Existing FPS and WFPS holders can use the [migration guide](fcs-migration.md).
+
+FPS continues as the underlying equity token: each FCS wraps one FPS. The Equity contract holds capital and prices that underlying token. Its [Ethereum address](https://etherscan.io/address/0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2), supply and prices remain FPS identities, not FCS data. The mechanics reference identifies the audited `FPS2` version behind the FCS design.
+
+ZCHF has no fixed redemption promise for Swiss francs. Collateral, reserves, borrowing costs and market activity support its exchange rate. Auctions test the value of collateral without an external price oracle. They can take days, so their response differs from oracle-triggered liquidations. [Positions](positions/README.md) describe the mechanism; [Risks](risks.md) describes its failure modes.
+
+Net fees and liquidation results change equity capital; losses reduce it. FCS governance uses vetoes, with time-weighted votes rather than token balances alone. A qualified action needs more than 1% of internal FCS voting power and the FCS contract meeting the underlying FPS quorum.
 
 ## Use Cases
 
-Like other stablecoins, the Frankencoin primarily serves three use-cases. The only use-case described extensively in this documentation is that of borrowing as it is embedded in the system. To fully leverage the other use-cases, further tools and services such as exchanges and wallets are necessary that are not described herein.
-
 ### Payments
 
-The Frankencoin (ZCHF) can be used to make payments in Swiss francs. Please consult the [landing page](https://frankencoin.com) for a list of apps and services that help in using the Frankencoin as a means of payment, as well as a list of bridged Frankencoin token on other networks than Ethereum mainnet. Payments typically concern small amounts and therefore a layer two instance of the token might be preferred over the mainnet instance.
+ZCHF can be transferred between addresses or used through payment services. The [Frankencoin website](https://frankencoin.com) lists services. On another chain, the token address, network and transfer route identify the asset; see [cross-chain transfers](bridge-to-other-chains.md).
 
 ### Store of Wealth
 
-The Swiss franc has an excellent track record of stability relative to other fiat currencies. For example, over the last 50 years, the US Dollar has lost more than 70% of its value against the Swiss Franc. It is often considered a safe haven when the world is in turmoil. So far, crypto investors could not get significant Swiss franc exposure without going off-chain. For this use-case, it is important to be able to trade the ZCHF in high volumes at narrow spreads.
+ZCHF provides Swiss franc-denominated exposure on-chain. Its market price can diverge from one Swiss franc. [Savings](savings.md) pays a governance-set rate to deposited ZCHF, with terms that depend on the savings contract version.
 
 ### Borrowing / Seignorage
 
-Anyone can mint new Frankencoins against a collateral using the built-in borrowing mechanism. All borrowing is based on what we refer to as _positions_. In Liquity, these are called _troves_ and in the Maker system _vaults_. They all refer to the account of a user within the system that holds a positive balance of a collateral asset and a negative balance of Frankencoins that must be repaid in order to get the collateral back. The Frankencoin system charges a non-refundable interest rate up front when minting new Frankencoins. Some of the minted Frankencoins are also held back as a reserve in case the position has to be liquidated.
+Users can mint ZCHF against collateral in a position. The position records collateral and an amount to repay. A mint deducts the applicable up-front fee and retains a minter reserve, so the wallet receives less than the gross minted amount. The [opening](positions/open.md), [cloning](positions/clone.md) and [adjustment](positions/adjust.md) guides explain the terms.
 
 ## Technical Architecture
 
-The Frankencoin system consists of a set of smart contracts on the Ethereum mainnet. The two token contracts serve as a foundation for everything else. The ZCHF can have an arbitrary number of contracts that have the power to mint and burn ZCHF. Anyone can propose new such contracts and once they passed the governance process, they can start minting and burning ZCHF. Today, there are two such contracts. One is a simple bridge to bootstrap the Frankencoin based on the existing CryptoFranc (XCHF). The other is a contract named minting hub that serves as the central point to manage all debt positions. The FPS token has built-in governance features and holds the equity capital of the system.
+| Component | Function |
+| --- | --- |
+| ZCHF token and approved minting modules | Create, move and burn ZCHF under each module's rules |
+| MintingHub and positions | Manage collateral-backed minting, challenges and settlement |
+| FCS and governance modules | Provide the share-token interface, time-weighted voting and ZCHF entry and exit paths |
+| Underlying Equity / FPS | Hold equity capital, price the FPS backing and maintain the underlying votes used by FCS |
+| Savings | Pay interest from the system to deposited ZCHF |
+| Stablecoin-conversion bridges | Exchange ZCHF against a specified external stablecoin under a limit and expiry |
+| Cross-chain bridges | Transfer ZCHF between supported chains; distinct modules send voting snapshots |
 
-<figure><img src=".gitbook/assets/architecture.png" alt=""><figcaption><p>Components of the Frankencoin System</p></figcaption></figure>
+The [governance application](https://app.frankencoin.com/governance) lists proposed modules and their state. The early architecture used an XCHF bootstrap bridge; that historical example is not a statement about today's module count or bridge availability.

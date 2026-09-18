@@ -1,0 +1,65 @@
+{
+  "scope": "Every api-docs/*.md page, compared in full with 598be69 and 56555dc where present; reader-facing rewrite only",
+  "pages": {
+    "api-docs/README.md": {
+      "workflow_anchor": "make-a-first-request",
+      "restored": "Purpose-led API introduction, first GET request, response navigation and package/source links",
+      "preserved": "FCS-first controller order, one shared GET/transaction boundary, field-specific units, exact shared ES module",
+      "not_restored": "Comprehensive/all-data claims, uniform amount/timestamp rules or an unverified no-rate-limit promise"
+    },
+    "api-docs/analytics.md": {
+      "workflow_anchor": "query-a-page",
+      "restored": "Financial-event and point-in-time metric explanation, cursor request sequence, daily chart use, income/exposure interpretation and paged CSV export guidance",
+      "preserved": "Actual field names, FPS units, raw/scaled distinction, opaque cursors and incomplete-history limits",
+      "not_restored": "Every-event/immutable/complete-metrics claims, nonexistent historical fields or full CSV export promise; sampled cursor history moved to evidence"
+    },
+    "api-docs/challenges.md": {
+      "workflow_anchor": "build-an-auction-view",
+      "restored": "Purpose of a challenge and an auction view joining challenge records, active price map, bid history and position metadata",
+      "preserved": "Distinct challenge/bid IDs, collateral price scale, version-specific V2 immediate purchases and status-label limits",
+      "not_restored": "Success equals liquidation, high raw price proves undercollateralisation or end-of-auction batch settlement"
+    },
+    "api-docs/ecosystem.md": {
+      "workflow_anchor": "build-a-token-overview",
+      "restored": "ZCHF overview workflow, minter-proposal interpretation and collateral explorer endpoint selection",
+      "preserved": "Canonical FCS versus underlying FPS, proposal/denial fields, chain IDs and collateral decimals",
+      "not_restored": "Active-minter enum, collateral whitelist, unavailable FPS fields or uniform version labels"
+    },
+    "api-docs/fcs.md": {
+      "workflow_anchor": "contract-reads-and-transactions",
+      "restored": "FCS overview purpose, field display instructions and size-specific preview/limit workflow",
+      "preserved": "Exact historical JSON, scaled FCS units, FPS distinction, fallback ambiguity, redemption/holder boundaries and pinned audited source",
+      "not_restored": "No FCS API page existed at 598be69; current controller reviewed in full, not replaced with legacy FPS prose"
+    },
+    "api-docs/positions.md": {
+      "workflow_anchor": "build-an-owners-portfolio",
+      "restored": "What a position is, owner portfolio lookup, original/clone discovery and history attribution",
+      "preserved": "Owner map, exact price scaling, PPM, sentinel dates, V1/V2 meaning and history caps",
+      "not_restored": "Open equals mintable, generic owner route or complete adjustment ledger"
+    },
+    "api-docs/prices.md": {
+      "workflow_anchor": "look-up-a-price-and-build-a-chart",
+      "restored": "Price lookup, chart workflow and same-currency portfolio valuation inputs/results",
+      "preserved": "Exact rational JavaScript, source/freshness checks, chain/address identity, token decimals and FPS units",
+      "not_restored": "Oracle/liquidation thresholds, invented safe bands, USD collateral against CHF debt or unspecified chart denomination"
+    },
+    "api-docs/savings.md": {
+      "workflow_anchor": "build-a-savings-view",
+      "restored": "Savings feature and account-view workflow, approved-versus-proposed rates and referral earnings use",
+      "preserved": "Exact historical JSON and ES module, explicit chain/module selection, PPM, collected-versus-pending interest and history caps",
+      "not_restored": "Automatic APY, automatically calculated leadrate, first-module selection or complete account history"
+    },
+    "api-docs/transfers.md": {
+      "workflow_anchor": "find-transfers-for-an-account",
+      "restored": "Reference feature explanation, latest-versus-history selection, encoded exact-reference request and candidate result handling",
+      "preserved": "Unchanged candidate-only JavaScript, recipient/payer/chain/amount validation, ISO windows, CCIP selector distinction and settlement verification",
+      "not_restored": "Partial-reference matches, numeric dates, counter polling, complete ledger claims or API-only paid decisions; dated counter/error chronology moved to evidence"
+    },
+    "api-docs/wallet-integration.md": {
+      "workflow_anchor": "deposit-zchf",
+      "restored": "Liquid ERC-20 balance/allowance use, deposit sequence, interest collection and withdrawal/adjustment flow",
+      "preserved": "Module/ABI selection, read/write distinction, net-versus-gross interest, referral terms and receipt checks",
+      "not_restored": "Mutating refresh as view, universal lock periods, incorrect basis-point rate labels or assumed deployment equivalence"
+    }
+  }
+}

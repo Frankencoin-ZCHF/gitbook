@@ -1,295 +1,142 @@
 # Transfers API
 
-The Transfers API provides access to ZCHF transfer data with custom reference messages. This enables users to attach metadata to their transfers, such as invoice numbers, payment purposes, or notes, creating an on-chain payment reference system.
+A transfer reference is public text attached to a ZCHF transfer, such as an invoice number, order ID or payment purpose. The Transfers API indexes reference-bearing transfers so an application can find recent activity and identify payments to verify against an invoice.
 
-## Overview
+Ordinary ERC-20 transfers without references are outside this dataset. An indexed match is a candidate, not proof of payment settlement; the [invoice workflow](#invoice-integration-boundary) explains the checks needed before crediting it.
 
-The Transfer Reference system allows ZCHF transfers to include custom string messages that are:
-- Stored on-chain and indexed by the API
-- Searchable by sender, recipient, reference text, or timestamp
-- Useful for accounting, invoicing, and payment tracking
-- Supported across all chains where ZCHF is deployed
+## Endpoints and response shapes
 
-The Transfers API enables you to:
+| GET path | Response | Boundary |
+| --- | --- | --- |
+| `/transfer/reference/list` | `{num, list}` | Cached observations, not a complete ledger or reliable cursor |
+| `/transfer/reference/counter` | Number | Not a reliable high-water mark |
+| `/transfer/reference/by/count/:count` | One record or an error | A missing record is not proof of no transfer |
+| `/transfer/reference/by/from/:from` | Array | Cached outgoing matches |
+| `/transfer/reference/by/to/:to` | Array | Cached incoming matches |
+| `/transfer/reference/history/by/from/:from` | Array | Indexed history, capped at 100 rows, no exposed cursor |
+| `/transfer/reference/history/by/to/:to` | Array | Same cap and completeness limitation |
 
-- Query recent transfers with reference messages
-- Search transfers by sender or recipient address
-- Filter transfers by reference text (partial matching)
-- Track transfers within specific time ranges
-- Build complete transfer histories for addresses
+The opposite-party filter is `to` on sender routes and `from` on recipient routes. `reference` is an **exact, case-sensitive** match, not substring search. Encode query parameters with `URLSearchParams`. Do not interpolate reference text into a URL. References are public, untrusted text; render them as text, not HTML, and never include secrets.
 
-## Key Concepts
+### Find transfers for an account
 
-### Transfer References
+For a recent-activity view, choose `/by/from/:from` for outgoing transfers or `/by/to/:to` for incoming transfers. For an invoice search, add the other party and the exact reference string. The history routes add a time window, but cap the result at 100 records without a cursor.
 
-A transfer reference is a custom string attached to a ZCHF transfer transaction. Common uses include:
-- Invoice numbers: `"Invoice #12345"`
-- Payment purposes: `"Salary - December 2024"`
-- Order IDs: `"Order-ABC-789"`
-- Notes: `"Thanks for the coffee!"`
+For example, this request searches indexed outgoing history for one exact reference:
 
-### Cross-Chain Support
-
-Transfer references work across all chains where ZCHF is deployed:
-- The `chainId` field indicates the source chain
-- The `targetChain` field indicates the destination chain
-- This enables tracking of bridge transfers
-
-### Sequential Counting
-
-Each transfer reference is assigned a unique `count` number, which:
-- Increments sequentially for each referenced transfer
-- Can be used to retrieve specific transfers by ID
-- Helps track the total number of referenced transfers
-
-## Main Endpoints
-
-### List and Count
-
-- `GET /transfer/reference/list` - Get the most recent transfer references
-- `GET /transfer/reference/counter` - Get the current count (total number of transfers with references)
-- `GET /transfer/reference/by/count/:count` - Retrieve a specific transfer by its count number
-
-### Query by Address
-
-- `GET /transfer/reference/by/from/:from` - Latest transfers sent from an address
-- `GET /transfer/reference/by/to/:to` - Latest transfers received by an address
-- `GET /transfer/reference/history/by/from/:from` - Complete transfer history sent from an address
-- `GET /transfer/reference/history/by/to/:to` - Complete transfer history received by an address
-
-### Query Parameters
-
-All address-based endpoints support optional query parameters:
-- `to` / `from` - Filter by the other party in the transaction
-- `reference` - Search for transfers containing specific text in the reference
-- `start` - Unix timestamp for the beginning of the time range (default: 0)
-- `end` - Unix timestamp for the end of the time range (default: current time)
-
-## Use Cases
-
-### Payment Tracking
-
-Track all payments sent or received by an address with reference messages:
-
-```
-GET /transfer/reference/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301
+```bash
+curl --fail --get 'https://api.frankencoin.com/transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301' \
+  --data-urlencode 'reference=12 months loan'
 ```
 
-### Invoice Verification
+Read each row's recipient, source chain, amount and `targetChain` as well as its reference. The [candidate lookup](#candidate-lookup-example) adds an expected recipient and time window and checks the response against the invoice requirements.
 
-Verify that an invoice was paid by searching for the invoice number:
+### Time ranges and errors
 
-```
-GET /transfer/reference/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?reference=Invoice%20%2312345
-```
+Use ISO dates or explicit UTC ISO timestamps for history `start` and `end`. The range has an inclusive start and exclusive end after the API converts the dates to seconds. Whole-second UTC boundaries avoid rounding ambiguity.
 
-### Account Reconciliation
-
-Build a complete payment history for accounting purposes:
-
-```
-GET /transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?start=1704067200&end=1735689600
+```text
+GET /transfer/reference/history/by/from/0x963eC454423CD543dB08bc38fC7B3036B425b301?start=2024-01-01T00%3A00%3A00.000Z&end=2025-01-01T00%3A00%3A00.000Z
 ```
 
-### Payment Explorer
+Numeric Unix-second query strings can produce an error payload even with HTTP 200; use the ISO form above and check the payload shape. An error, timeout, null row or malformed response means **data unavailable**, never “no payments”. An empty valid array means no indexed matches in that response, not a complete absence of payments.
 
-Build a transfer explorer showing recent payments with references:
+### Counter and completeness limitations
 
-```
-GET /transfer/reference/list
-```
+The counter is not a reliable high-water mark. Do not use counter increases, ordering or `count > lastCount` as a notification/payment cursor. Refresh the relevant account query for a recent-activity display and retain its incomplete-history status. Latest caches and capped history can omit records; splitting time ranges alone cannot prove completeness when 100 events share a boundary.
 
-### Counterparty Search
+For a complete ledger, use a separately validated indexer or the relevant contracts' logs via an RPC with explicit block-range pagination, persisted checkpoints, reorg handling and reconciliation against receipts. Verify each supported chain, contract deployment block and event ABI. Do not label an API-only export complete.
 
-Find all transfers between two specific addresses:
+## Record fields
 
-```
-GET /transfer/reference/by/from/0xabc...?to=0xdef...
-```
+| Field | Type and meaning |
+| --- | --- |
+| `amount` | Decimal integer string in ZCHF base units (18 decimals) |
+| `chainId` | Number: source EIP-155 chain ID |
+| `count`, `created` | Decimal integer strings; the specification also allows numbers. `created` is Unix seconds. Preserve count without floating-point coercion |
+| `from`, `sender`, `to` | Addresses; `from` and original `sender` can differ. Validate before case-normalised comparison |
+| `reference` | Exact public reference string, possibly empty |
+| `targetChain` | Decimal string: `0` is the same-chain sentinel; otherwise a CCIP chain selector, **not** an EIP-155 ID |
+| `txHash` | Full source-chain transaction hash |
 
-## Data Structure
+Keep CCIP selectors as strings or `BigInt`; some exceed JavaScript's safe integer range. Resolve nonzero selectors against the maintained CCIP configuration for the relevant deployment. Never compare `chainId !== targetChain` to detect destination settlement. A source-chain reference event does not establish receipt on the destination chain.
 
-### Transfer Reference Object
+## Invoice integration boundary
 
-```json
-{
-  "amount": "1000000000000000000000",
-  "chainId": 1,
-  "count": 5234,
-  "created": 1768914604,
-  "from": "0x963eC454423CD543dB08bc38fC7B3036B425b301",
-  "sender": "0x963eC454423CD543dB08bc38fC7B3036B425b301",
-  "to": "0x6a4a629d14EC0fc8e2b7DB41949FefaA4F63327F",
-  "amount": "1000000000000000000000",
-  "reference": "Invoice #12345",
-  "targetChain": "1",
-  "txHash": "0x1234567890abcdef..."
-}
-```
+A reference/amount match is only a **candidate for verification**. This API record does not supply the token-emitting address, log index, receipt success, confirmations, or destination settlement proof needed to authorise delivery.
 
-### Field Descriptions
+Before crediting a payment:
 
-- **amount**: Transfer amount (as string in wei, typically 1e18 for ZCHF)
-- **chainId**: Source blockchain chain ID
-- **count**: Sequential counter for this transfer reference
-- **created**: Unix timestamp of the transfer
-- **from**: Immediate sender address (may differ from original sender for bridged transfers)
-- **sender**: Original sender address
-- **to**: Recipient address
-- **reference**: Custom reference message (can be empty string)
-- **targetChain**: Destination chain ID (for bridge transfers)
-- **txHash**: Transaction hash on the source chain
+1. Require the intended recipient, payer policy, exact invoice identifier, chain, token contract and integer amount. Reject underpayment; handle partial/overpayments under an explicit business policy.
+2. Fetch and validate the successful transaction receipt on the expected chain. Decode the correct contract's reference and token events and bind them to each other; matching a hash alone is insufficient.
+3. Apply a chain-specific finality/reorg policy. For bridges, verify destination token, recipient and settlement independently.
+4. Deduplicate by `(chainId, txHash, logIndex)`, persist allocation to the invoice atomically, and prevent reuse for another invoice. API `count` is not a substitute for a verified event identity.
+5. Keep unavailable, no-indexed-match, candidate and verified-settlement states distinct. No API-only path in this guide returns `paid`.
 
-## Understanding Latest vs History
+## Candidate lookup example
 
-### Latest Endpoints (`/by/from`, `/by/to`)
-
-- Return only the most recent matching transfers
-- Optimized for quick lookups
-- Useful for displaying recent activity
-- Limited results
-
-### History Endpoints (`/history/by/from`, `/history/by/to`)
-
-- Return complete transfer history
-- Can be filtered by time range
-- Useful for full accounting and reconciliation
-- May return larger datasets
-
-## Integration Examples
-
-### Payment Notification System
+This example accepts only same-chain candidates and never reports `paid`. It matches one transfer against the full invoice amount; it does not aggregate partial payments. Duplicate API rows are collapsed for display only. Receipt-level event deduplication and invoice allocation remain separate.
 
 ```javascript
-// Poll for new incoming payments
-let lastCount = await fetch('https://api.frankencoin.com/transfer/reference/counter')
-  .then(r => r.json());
+import {object, uint, address, getJson} from './README.mjs';
 
-setInterval(async () => {
-  const currentCount = await fetch('https://api.frankencoin.com/transfer/reference/counter')
-    .then(r => r.json());
+function invoiceFields(invoice) {
+  object(invoice);
+  const from = address(invoice.from), to = address(invoice.to);
+  if (!Number.isSafeInteger(invoice.chainId) || invoice.chainId <= 0 ||
+      typeof invoice.reference !== 'string' || invoice.reference.length === 0 ||
+      uint(invoice.amount) === 0n) throw new TypeError('Invalid invoice requirements');
+  return {...invoice, from, to};
+}
 
-  if (currentCount > lastCount) {
-    // New transfer(s) occurred
-    const transfers = await fetch(`https://api.frankencoin.com/transfer/reference/by/to/${myAddress}`)
-      .then(r => r.json());
-
-    transfers.forEach(transfer => {
-      if (transfer.count > lastCount) {
-        notifyUser(`New payment received: ${transfer.amount / 1e18} ZCHF - ${transfer.reference}`);
-      }
-    });
-
-    lastCount = currentCount;
+export function matchCandidates(rows, invoice) {
+  const expected = invoiceFields(invoice);
+  if (!Array.isArray(rows)) throw new TypeError('Expected transfer array');
+  const candidates = new Map();
+  for (const row of rows) {
+    object(row, 'transfer');
+    const from = address(row.from), to = address(row.to);
+    address(row.sender);
+    const amount = uint(row.amount);
+    uint(row.targetChain);
+    for (const field of ['count', 'created']) {
+      if (typeof row[field] === 'number') {
+        if (!Number.isSafeInteger(row[field]) || row[field] < 0) throw new TypeError(field);
+      } else uint(row[field]);
+    }
+    if (!Number.isSafeInteger(row.chainId) || row.chainId <= 0 ||
+        typeof row.reference !== 'string' || typeof row.txHash !== 'string' ||
+        !/^0x[0-9a-fA-F]{64}$/.test(row.txHash)) throw new TypeError('Invalid transfer');
+    if (from === expected.from && to === expected.to && row.chainId === expected.chainId &&
+        row.targetChain === '0' && row.reference === expected.reference &&
+        amount >= uint(expected.amount)) {
+      // Candidate display key only: the API does not expose a receipt logIndex.
+      const key = JSON.stringify([row.chainId, row.txHash.toLowerCase(), String(row.count),
+        from, to, row.amount, row.reference]);
+      candidates.set(key, row);
+    }
   }
-}, 10000); // Check every 10 seconds
-```
+  return {status: candidates.size ? 'unverified-candidates' : 'no-indexed-match',
+    complete: false, candidates: [...candidates.values()]};
+}
 
-### Invoice Status Checker
-
-```javascript
-async function checkInvoicePayment(invoiceNumber, expectedFrom, expectedAmount) {
-  const transfers = await fetch(
-    `https://api.frankencoin.com/transfer/reference/by/from/${expectedFrom}?reference=${invoiceNumber}`
-  ).then(r => r.json());
-
-  const payment = transfers.find(t =>
-    t.reference.includes(invoiceNumber) &&
-    BigInt(t.amount) >= BigInt(expectedAmount)
-  );
-
-  return payment ? 'paid' : 'pending';
+export async function historyCandidates(invoice, start, end, fetchImpl = fetch) {
+  const expected = invoiceFields(invoice);
+  const dates = [start, end].map(value => {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/.test(value)) {
+      throw new TypeError('Use whole-second UTC ISO timestamps');
+    }
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime()) || date.toISOString() !== value) throw new TypeError('Invalid date');
+    return date;
+  });
+  if (dates[0] >= dates[1]) throw new RangeError('start must precede end');
+  const query = new URLSearchParams({to: expected.to, reference: expected.reference, start, end});
+  const rows = await getJson(`/transfer/reference/history/by/from/${expected.from}?${query}`, fetchImpl);
+  return matchCandidates(rows, expected);
 }
 ```
 
-### Account Statement Generator
+Pass an invoice object containing `from`, `to`, `chainId`, `reference` and a decimal integer-string `amount` in ZCHF base units to `historyCandidates`, along with whole-second UTC ISO start and end timestamps. It returns `unverified-candidates` when rows meet those requirements, or `no-indexed-match` when none do. Both results have `complete: false`; malformed or unavailable responses throw. Send candidates to the receipt-verification stage, not directly to order fulfilment.
 
-```javascript
-async function generateStatement(address, startDate, endDate) {
-  const startTimestamp = Math.floor(startDate.getTime() / 1000);
-  const endTimestamp = Math.floor(endDate.getTime() / 1000);
-
-  const sent = await fetch(
-    `https://api.frankencoin.com/transfer/reference/history/by/from/${address}?start=${startTimestamp}&end=${endTimestamp}`
-  ).then(r => r.json());
-
-  const received = await fetch(
-    `https://api.frankencoin.com/transfer/reference/history/by/to/${address}?start=${startTimestamp}&end=${endTimestamp}`
-  ).then(r => r.json());
-
-  return {
-    sent: sent.map(t => ({
-      date: new Date(t.created * 1000),
-      to: t.to,
-      amount: t.amount / 1e18,
-      reference: t.reference,
-      txHash: t.txHash
-    })),
-    received: received.map(t => ({
-      date: new Date(t.created * 1000),
-      from: t.from,
-      amount: t.amount / 1e18,
-      reference: t.reference,
-      txHash: t.txHash
-    }))
-  };
-}
-```
-
-## Notes
-
-### Reference Text Handling
-
-- References can be empty strings (not all transfers include references)
-- Reference search is case-sensitive
-- Partial matching is supported (searching "Invoice" will match "Invoice #123")
-- Special characters should be URL-encoded in query parameters
-
-### Performance Considerations
-
-- Latest endpoints are faster than history endpoints
-- Consider caching transfer data for known count ranges
-- History endpoints may return large datasets for very active addresses
-- Use time range filters to limit result sizes
-
-### Cross-Chain Transfers
-
-- `from` and `sender` may differ for bridged transfers
-- `chainId` and `targetChain` indicate bridge operations when they differ
-- Same-chain transfers will have identical `chainId` and `targetChain`
-
-### Best Practices
-
-1. **URL Encode**: Always URL-encode reference text in queries
-2. **Time Ranges**: Use time ranges to limit history queries
-3. **Pagination**: For very active addresses, combine count-based pagination with time ranges
-4. **Validation**: Validate address formats before querying
-5. **Error Handling**: Handle "Not found" responses gracefully when querying by count
-6. **Amount Display**: Always convert amounts from wei (divide by 1e18) for display
-7. **Timestamp Conversion**: Convert Unix timestamps to human-readable dates in UI
-
-## Common Patterns
-
-### Finding Payments Between Two Parties
-
-```
-GET /transfer/reference/by/from/0xABC...?to=0xDEF...
-```
-
-### Searching by Invoice Number
-
-```
-GET /transfer/reference/by/from/0xABC...?reference=INV-2024-001
-```
-
-### Time-Bound Queries
-
-```
-GET /transfer/reference/history/by/from/0xABC...?start=1704067200&end=1735689600
-```
-
-### Retrieving Specific Transfer
-
-```
-GET /transfer/reference/by/count/5234
-```
+See [API conventions](README.md) for units and shared validation.

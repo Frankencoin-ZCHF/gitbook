@@ -1,0 +1,134 @@
+{
+  "kind": "Excerpts of previously retrieved pinned public source; not simulated state or deployed-code execution",
+  "commit": "8b4c4ab67bb361b91d58c474b87f4608fc4c0566",
+  "sources": {
+    "Position.sol": {
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/Position.sol",
+      "source_sha256": "a0eba1049955d4f54324c1cbf276132a9cdf041bad044e69471007c644eb2031",
+      "line_ranges": {
+        "rate": [
+          366,
+          368
+        ],
+        "fee": [
+          373,
+          379
+        ],
+        "clone_expiry": [
+          189,
+          195
+        ],
+        "adjust_order": [
+          288,
+          309
+        ],
+        "phase_duration": [
+          523,
+          525
+        ],
+        "withdrawal_and_closure": [
+          491,
+          515
+        ]
+      },
+      "excerpts": {
+        "rate": "    function annualInterestPPM() public view returns (uint24) {\n        return IHub(hub).rate().currentRatePPM() + riskPremiumPPM;\n    }",
+        "fee": "    function calculateFee(uint256 exp) public view returns (uint24) {\n        uint256 time = block.timestamp < start ? start : block.timestamp;\n        uint256 timePassed = exp - time;\n        // Time resolution is in the range of minutes for typical interest rates.\n        uint256 feePPM = (timePassed * annualInterestPPM()) / 365 days;\n        return uint24(feePPM > 1000000 ? 1000000 : feePPM); // fee cannot exceed 100%\n    }",
+        "clone_expiry": "    function initialize(address parent, uint40 _expiration) external onlyHub {\n        if (expiration != 0) revert AlreadyInitialized();\n        if (_expiration < block.timestamp || _expiration > Position(original).expiration()) revert InvalidExpiration(); // expiration must not be later than original\n        expiration = _expiration;\n        price = Position(parent).price();\n        _setOwner(hub);\n    }",
+        "adjust_order": "    function adjust(uint256 newMinted, uint256 newCollateral, uint256 newPrice) external onlyOwner {\n        uint256 colbal = _collateralBalance();\n        if (newCollateral > colbal) {\n            collateral.transferFrom(msg.sender, address(this), newCollateral - colbal);\n        }\n        // Must be called after collateral deposit, but before withdrawal\n        if (newMinted < minted) {\n            zchf.burnFromWithReserve(msg.sender, minted - newMinted, reserveContribution);\n            _notifyRepaid(minted - newMinted);\n        }\n        if (newCollateral < colbal) {\n            _withdrawCollateral(msg.sender, colbal - newCollateral);\n        }\n        // Must be called after collateral withdrawal\n        if (newMinted > minted) {\n            _mint(msg.sender, newMinted - minted, newCollateral);\n        }\n        if (newPrice != price) {\n            _adjustPrice(newPrice);\n        }\n        emit MintingUpdate(newCollateral, newPrice, newMinted);\n    }",
+        "phase_duration": "    function challengeData() external view returns (uint256 liqPrice, uint40 phase) {\n        return (price, challengePeriod);\n    }",
+        "withdrawal_and_closure": "    function _withdrawCollateral(address target, uint256 amount) internal noChallenge noCooldown returns (uint256) {\n        uint256 balance = _sendCollateral(target, amount);\n        _checkCollateral(balance, price);\n        return balance;\n    }\n\n    function _sendCollateral(address target, uint256 amount) internal returns (uint256) {\n        if (amount > 0) {\n            // Some weird tokens fail when trying to transfer 0 amounts\n            IERC20(collateral).transfer(target, amount);\n        }\n        uint256 balance = _collateralBalance();\n        if (balance < minimumCollateral) {\n            _close();\n        }\n        return balance;\n    }\n\n    /**\n     * @notice This invariant must always hold and must always be checked when any of the three\n     * variables change in an adverse way.\n     */\n    function _checkCollateral(uint256 collateralReserve, uint256 atPrice) internal view {\n        uint256 relevantCollateral = collateralReserve < minimumCollateral ? 0 : collateralReserve;\n        if (relevantCollateral * atPrice < minted * ONE_DEC18) revert InsufficientCollateral(relevantCollateral * atPrice, minted * ONE_DEC18);"
+      }
+    },
+    "MintingHub.sol": {
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/MintingHub.sol",
+      "source_sha256": "4eea3167e6f814f16538950cd53c85eeaa9ad552e31e2dd830bd160250c07bc2",
+      "line_ranges": {
+        "minimum_liquidation_value": [
+          123,
+          125
+        ],
+        "collateral_at_creation": [
+          141,
+          146
+        ],
+        "clone_and_mint": [
+          157,
+          168
+        ],
+        "challenge": [
+          178,
+          193
+        ],
+        "bid": [
+          207,
+          218
+        ],
+        "bid_reward": [
+          228,
+          231
+        ],
+        "postponed_return": [
+          325,
+          329
+        ]
+      },
+      "excerpts": {
+        "minimum_liquidation_value": "            if (_initialCollateral < _minCollateral) revert InsufficientCollateral();\n            if (_minCollateral * _liqPrice < 5000 ether * 10 ** 18) revert InsufficientCollateral(); // must start with at least 5000 ZCHF worth of collateral\n        }",
+        "collateral_at_creation": "        zchf.registerPosition(address(pos));\n        zchf.collectProfits(msg.sender, OPENING_FEE);\n        IERC20(_collateralAddress).transferFrom(msg.sender, address(pos), _initialCollateral);\n\n        emit PositionOpened(msg.sender, address(pos), address(pos), _collateralAddress);\n        return address(pos);",
+        "clone_and_mint": "    function clone(address owner, address parent, uint256 _initialCollateral, uint256 _initialMint, uint40 expiration) public validPos(parent) returns (address) {\n        address pos = POSITION_FACTORY.clonePosition(parent);\n        IPosition child = IPosition(pos);\n        child.initialize(parent, expiration);\n        zchf.registerPosition(pos);\n        IERC20 collateral = child.collateral();\n        if (_initialCollateral < child.minimumCollateral()) revert InsufficientCollateral();\n        collateral.transferFrom(msg.sender, pos, _initialCollateral); // collateral must still come from sender for security\n        emit PositionOpened(owner, address(pos), parent, address(collateral));\n        child.mint(owner, _initialMint);\n        Ownable(address(child)).transferOwnership(owner);\n        return address(pos);",
+        "challenge": "    function challenge(\n        address _positionAddr,\n        uint256 _collateralAmount,\n        uint256 minimumPrice\n    ) external validPos(_positionAddr) returns (uint256) {\n        IPosition position = IPosition(_positionAddr);\n        // challenger should be ok if frontrun by owner with a higher price\n        // in case owner fruntruns challenger with small price decrease to prevent challenge,\n        // the challenger should set minimumPrice to market price\n        if (position.price() < minimumPrice) revert UnexpectedPrice(); \n        IERC20(position.collateral()).transferFrom(msg.sender, address(this), _collateralAmount);\n        uint256 pos = challenges.length;\n        challenges.push(Challenge(msg.sender, uint40(block.timestamp), position, _collateralAmount));\n        position.notifyChallengeStarted(_collateralAmount);\n        emit ChallengeStarted(msg.sender, address(position), _collateralAmount, pos);\n        return pos;",
+        "bid": "    function bid(uint32 _challengeNumber, uint256 size, bool postponeCollateralReturn) external {\n        Challenge memory _challenge = challenges[_challengeNumber];\n        (uint256 liqPrice, uint40 phase) = _challenge.position.challengeData();\n        size = _challenge.size < size ? _challenge.size : size; // cannot bid for more than the size of the challenge\n\n        if (block.timestamp <= _challenge.start + phase) {\n            _avertChallenge(_challenge, _challengeNumber, liqPrice, size);\n            emit ChallengeAverted(address(_challenge.position), _challengeNumber, size);\n        } else {\n            _returnChallengerCollateral(_challenge, _challengeNumber, size, postponeCollateralReturn);\n            (uint256 transferredCollateral, uint256 offer) = _finishChallenge(_challenge, liqPrice, phase, size);\n            emit ChallengeSucceeded(address(_challenge.position), _challengeNumber, offer, transferredCollateral, size);",
+        "bid_reward": "        uint256 offer = (_calculatePrice(_challenge.start + phase, phase, liqPrice) * collateral) / 10 ** 18;\n        zchf.transferFrom(msg.sender, address(this), offer); // get money from bidder\n        uint256 reward = (offer * CHALLENGER_REWARD) / 1000_000;\n        zchf.transfer(_challenge.challenger, reward); // pay out the challenger reward",
+        "postponed_return": "    function returnPostponedCollateral(address collateral, address target) external {\n        uint256 amount = pendingReturns[collateral][msg.sender];\n        delete pendingReturns[collateral][msg.sender];\n        IERC20(collateral).transfer(target, amount);\n    }"
+      }
+    },
+    "AbstractSavings.sol": {
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/FrankenCoin/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/savings/AbstractSavings.sol",
+      "source_sha256": "64290b615f49427486b9247305c1e1e19dca2c6f09cde8b5d7b2cbb4cafd5c43",
+      "line_ranges": {
+        "target_balance": [
+          116,
+          123
+        ],
+        "drop_referrer": [
+          212,
+          215
+        ],
+        "withdrawal": [
+          149,
+          160
+        ]
+      },
+      "excerpts": {
+        "target_balance": "    function adjust(uint192 targetAmount) public {\n        Account storage balance = refresh(msg.sender);\n        if (balance.saved < targetAmount) {\n            save(targetAmount - balance.saved);\n        } else if (balance.saved > targetAmount) {\n            withdraw(msg.sender, balance.saved - targetAmount);\n        }\n    }",
+        "drop_referrer": "    function dropReferrer() public {\n        refresh(msg.sender); // pay accrued referral fee before dropping referrer\n        setReferrer(address(0x0), 0);\n    }",
+        "withdrawal": "    function withdraw(address target, uint192 amount) public returns (uint256) {\n        Account storage account = refresh(msg.sender);\n        if (amount >= account.saved) {\n            amount = account.saved;\n            delete savings[msg.sender];\n        } else {\n            account.saved -= amount;\n        }\n        ZCHF.transfer(target, amount);\n        emit Withdrawn(msg.sender, amount);\n        return amount;\n    }"
+      }
+    }
+  },
+  "historical_image_baseline": "30f73ce4f07289d69e9d598dde742ef1c30b0013",
+  "historical_images": {
+    "positions/open.md": [
+      "../.gitbook/assets/kuva (46).png",
+      "../.gitbook/assets/kuva (30).png",
+      "../.gitbook/assets/kuva (31).png",
+      "../.gitbook/assets/kuva (33).png",
+      "../.gitbook/assets/kuva (34).png"
+    ],
+    "positions/adjust.md": [
+      "../.gitbook/assets/kuva (37).png",
+      "../.gitbook/assets/kuva (38).png",
+      "../.gitbook/assets/kuva (39).png"
+    ],
+    "positions/clone.md": [
+      "../.gitbook/assets/kuva (35).png",
+      "../.gitbook/assets/kuva (36).png"
+    ],
+    "positions/auctions.md": [
+      "../.gitbook/assets/kuva (41).png",
+      "../.gitbook/assets/kuva (42).png",
+      "../.gitbook/assets/kuva (43).png"
+    ]
+  }
+}

@@ -1,39 +1,46 @@
 ---
-description: >-
-  Challenges and the resulting auctions are a mechanism to ensure positions are
-  backed by sound collateral.
+description: Collateral challenges, the two auction phases and settlement.
 ---
 
 # Challenges and Auctions
 
 ## Auction Design
 
-Challenging a position triggers an auction of the collateral. The auction serves two purposes, the determination of the market price and the liquidation of the collateral at that market price. The auction frees the system from the need for an external oracle. The difficulty lies in designing the auction such that it cannot be profitably manipulated.
+A challenge tests a position's stored liquidation price against the market. It is economically justified when **market value is below the liquidation price**. The challenger supplies the same collateral asset as the position. The [pinned minting sources](README.md#contract-versions) define the implementation described here.
 
-Traditional auctions are prone to price manipulation by the owner of the auctioned assets. For example, if Alice minted 1 000 ZCHF against a collateral whose value has dropped to 950 ZCHF, she might be tempted to bid 1 001 ZCHF for that collateral in an auction, thereby planting the false believe that the position is still well-collateralized. Frankencoin prevents this by cleverly switching the collateral the bidders are bidding for at the critical price point. For bids below 1 000 ZCHF, the bidders will get Alice's collateral. When bidding above 1 000 ZCHF, the bidders will get the collateral asset from the challenger. Thanks to this approach, price manipulation becomes very expensive for Alice as the 1 001 ZCHF bid would not go to her own pockets, but the pockets of the challenger. In order to prevent her position from being liquidated, she would have to pay 1 001 ZCHF for an asset worth 950 ZCHF as often as the challenger chooses to repeat the challenge.
+The auction has two phases:
 
-This example reveals one of the underlying assumptions of the system and a requirement for an asset to be acceptable as a collateral. While it is not necessary that there is a liquid market, it is important that the potential challengers own enough of the collateral asset (or can acquire it somewhere) to repeatedly challenge Alice. Once Alice ends up owning 100% of the collateral asset in circulation, she cannot be challenged anymore and can start minting arbitrary amounts of Frankencoins. That is also why the Frankencoin auction system does not work with non-fungible tokens. It is important that no position is ever accepted that is based on collateral with too limited availability.
+1. **Fixed-price phase:** bidders buy the challenger's collateral at the position's liquidation price. Taking the challenged amount in this phase averts liquidation of that amount of the position's collateral.
+2. **Declining-price phase:** if collateral remains challenged, the auction price falls towards zero. Bidders buy the position's collateral, and the challenger recovers the corresponding posted collateral under the settlement rules.
 
-One good property about the auction design is that as long as someone is willing to bid the market price for a collateral asset, the maintenance of the position does not require any attention of the owner. Only when the market price is about to fall below the liquidation price, the owner should start thinking about repaying it or making it more sound again by providing more collateral and adjusting the liquidation price downwards.
+This separation makes defending an excessive liquidation price costly. If collateral worth 950 ZCHF is challenged at a liquidation value of 1,000 ZCHF, the owner cannot merely buy back their own collateral at 1,000 ZCHF: a first-phase defence buys the challenger's collateral. Repeated challenges therefore depend on challengers having access to that asset. A collateral asset wholly controlled by the position owner cannot support that mechanism.
 
-I the highest bid is below the liquidation price, the challenge is considered successful. After a successful challenge, the minter reserve associated with the position is dissolved and added to the proceeds from the auction. The total proceeds are then used to repay the position and to reward the challenger. If there are not enough funds to do that, equity holders have to jump in and suffer a loss. If there is something left, the remaining amount is sent to the equity holders as a profit. For example, if the minter reserve was 20% and the highest bid for Alice's collateral was 950 ZCHF, the equity holders make a profit of 150 ZCHF, minus the challenger reward. However, if the highest bid was below 800 ZCHF, they will make a loss.
+After a successful challenge, the debt, sale proceeds, challenger reward and assigned reserve determine settlement. In the pinned implementation the challenger reward is 2% of the accepted bid, not an unconditional 2% return on posted collateral. The [reserve example](../reserve.md#challenge-settlement) shows the accounting for an unimpaired reserve. Partial liquidations and excess proceeds have their own allocation rules.
+
+Adding collateral and lowering the stored liquidation price are separate operations. The [adjustment guide](adjust.md#lowering-the-liquidation-price) explains their debt and collateral constraints.
 
 ## How to Initiate an Auction
 
-On the [Monitoring page](https://app.frankencoin.com/monitoring) you can find a list of all open positions. If you believe that the conditions are right to challenge a position, you can simply click on the "Challenge" button here.&#x20;
+The [monitoring page](https://app.frankencoin.com/monitoring) lists positions. Start with the position address, chain, collateral token and stored liquidation price. Compare that price with the amount a market buyer would pay for the collateral; the protocol does not obtain an oracle price for you.
 
-<figure><img src="../.gitbook/assets/kuva (41).png" alt=""><figcaption><p>Click on "Challange" to initiate a new challenge</p></figcaption></figure>
+1. **Select the amount to challenge.** You need that amount of the same collateral token in your own wallet, as well as native gas. The challenged size is an amount of collateral, not a ZCHF bid. Check the position's minimum challenge size and existing challenges.
+2. **Review the price and timing.** Read the current stored price and phase duration. The pinned `challenge` operation also takes `minimumPrice`: it reverts if the position's price has fallen below that value before execution. This protects the price condition you chose; it is not an oracle input.
+3. **Approve and submit.** If needed, approve the hub to transfer your collateral, then submit the challenge transaction. Approval alone does not start an auction. Your posted collateral can be bought in the first phase, so a challenge is not a risk-free report or a guaranteed reward.
+4. **Confirm and follow settlement.** Record the challenge number from the confirmed transaction and read its start time, size and phase. Follow bids to see how much was averted or settled. A first-phase purchase sells your posted collateral; later-phase settlement normally returns the corresponding posted collateral and pays the bid-based reward.
 
-After that, you can initiate a new challenge.&#x20;
+<figure><img src="../.gitbook/assets/kuva (41).png" alt="Historical challenge entry point"><figcaption><p>Historical monitoring interface.</p></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/kuva (42).png" alt=""><figcaption><p>Initiate a new challenge</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/kuva (42).png" alt="Historical challenge setup"><figcaption><p>Historical challenge setup, not a current quote.</p></figcaption></figure>
 
-Here, you can choose the amount of collateral you want to challenge. For that, you need to have the corresponding amount of the collateral asset in your wallet. The "Potential Reward" corresponds to 2%. The challenge itself is divided into two phases. In the first phase, the price remains fixed. In the second phase (in case there is still some collateral left), the price starts to decline towards zero. At this stage, the bidders are buying the original minter's collateral.&#x20;
+Some collateral returns can be postponed. In that case, read the hub's `pendingReturns` for your token and address, then use `returnPostponedCollateral` to collect it to the intended recipient. An indexed success label alone does not tell you whether collateral was returned or proceeds received; check the transaction and balances.
 
 ## How to Participate in Ongoing Auctions
 
-Under the [Auctions page](https://app.frankencoin.com/challenges), you can find all ongoing challenges. As of writing this page, there are no ongoing challenges.
+The [auctions page](https://app.frankencoin.com/challenges) shows indexed challenges. The phase, remaining amount and transaction quote determine what collateral a bid buys and at what price. A confirmed bid can change the remaining amount before another transaction executes.
 
-<figure><img src="../.gitbook/assets/kuva (43).png" alt=""><figcaption><p>No active challenges</p></figcaption></figure>
+1. **Identify the challenge.** Match its chain, hub, position and challenge number. Read its remaining size and current phase. In the first phase you buy the challenger's collateral at the fixed liquidation price; in the second you buy the position's collateral at the declining price.
+2. **Choose how much collateral to buy.** Obtain the corresponding ZCHF cost from the current quote and compare it with your intended purchase. The pinned `bid` method takes a collateral size, not a freely chosen auction price, and reduces that size if less remains available.
+3. **Fund and submit the bid.** You need ZCHF and native gas. Approve the relevant spender if required, review the transaction's phase and expected amounts, then submit. A bid executes the purchase; it is not an offer held until all bids are collected at an auction deadline.
+4. **Check what arrived.** After confirmation, check the ZCHF spent, collateral received and remaining challenge size. Partial bids can leave more collateral under challenge. If the phase changed or another bid executed first, the old page quote may no longer describe the result.
 
-If there were any ongoing challenge, they would show up under this tab. Here, you will have the chance to participate.&#x20;
+<figure><img src="../.gitbook/assets/kuva (43).png" alt="Historical empty auction list"><figcaption><p>Historical empty state, not a statement about current auctions.</p></figcaption></figure>

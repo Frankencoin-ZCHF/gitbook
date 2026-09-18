@@ -1,314 +1,112 @@
 # Prices API
 
-The Prices API provides access to current and historical price data for all collateral assets in the Frankencoin ecosystem, as well as system-wide collateralization ratios. This is essential for monitoring position health, calculating liquidation thresholds, and displaying accurate financial information.
+Use the Prices API to display token prices, chart collateral price history and estimate the fiat value of a position. Each observation carries currency and source information so that an application can keep a valuation tied to its inputs.
 
-## Overview
+These display prices are not a uniform protocol oracle and do not set a position's challenge price. For the canonical share token's reference prices, use [FCS](fcs.md). FPS price routes here report the underlying FPS token, not an FCS market price.
 
-The Prices API enables you to:
+## Endpoints
 
-- Query current prices for all collateral tokens
-- Access historical price data for charting and analysis
-- Monitor collateralization ratios across the ecosystem
-- Track price feeds for specific collateral assets
-- Analyze price trends over time
+| GET path | Response or purpose |
+| --- | --- |
+| `/prices/ticker/:ticker` | `{chf, usd}` numbers for a ticker |
+| `/prices/list` | Array of token metadata and price observations |
+| `/prices/mapping` | Lowercase address -> price observation |
+| `/prices/erc20/mint` | ZCHF metadata |
+| `/prices/erc20/fps` | Legacy FPS metadata |
+| `/prices/erc20/collateral` | Collateral metadata |
+| `/prices/owner/:address/valueLocked` | Year-keyed values in raw ZCHF strings; use the Positions API for current positions |
+| `/prices/marketChart` | Market-data `prices`, `market_caps`, `total_volumes` series |
+| `/prices/history/list` | Available collateral histories keyed by address |
+| `/prices/history/:address` | Available history for a token |
+| `/prices/history/ratio` | `collateralRatioByFreeFloat` and `collateralRatioBySupply` series |
 
-## Key Concepts
+## Currencies, units and freshness
 
-### Price Sources
+A mapping observation contains `chainId`, `address`, `name`, `symbol`, `decimals`, `price.chf`, `price.usd`, `source` and `timestamp`. Prices are already scaled fiat values per whole token. `timestamp` is Unix **milliseconds**, unlike transfer and savings timestamps. Sources include `defillama`, `thegraph`, `custom` and `null`.
 
-Prices in the Frankencoin ecosystem come from:
-- On-chain oracles (Chainlink, Uniswap TWAP, etc.)
-- Position-specific price feeds set during creation
-- Aggregated market data
+A record with a null source, timestamp zero or zero price may represent unavailable data. Reject missing/stale prices for a valuation rather than substitute zero or silently select another currency. Define a freshness threshold for the application. Preserve the quoted currency and source with each displayed value. A ticker alone is not a unique chain/token identity.
 
-All prices are denominated in CHF (Swiss Francs) or ZCHF.
+### Look up a price and build a chart
 
-### Collateralization Ratios
+For a quick ticker display, request `/prices/ticker/:ticker`, for example:
 
-Two key ratios track ecosystem health:
-- **Ratio by Free Float**: Collateral value / circulating ZCHF supply
-- **Ratio by Total Supply**: Collateral value / total ZCHF supply
-
-These ratios indicate how well-backed the ZCHF stablecoin is by collateral.
-
-## Main Endpoints
-
-### Prices Controller
-
-#### Current Prices
-
-- `GET /prices/ticker/:ticker` - Get price for a specific ticker symbol (e.g., WBTC, WETH, FPS)
-- `GET /prices/list` - Get all token prices with metadata
-- `GET /prices/mapping` - Get prices as address-keyed mapping for efficient lookup
-
-#### Token Information
-
-- `GET /prices/erc20/mint` - Get Frankencoin (ZCHF) token information
-- `GET /prices/erc20/fps` - Get FPS token information
-- `GET /prices/erc20/collateral` - Get all collateral token information
-
-#### Owner Analytics
-
-- `GET /prices/owner/:address/valueLocked` - Get historical time series of total value locked by owner
-
-#### Market Data
-
-- `GET /prices/marketChart` - Get Frankencoin market chart data from CoinGecko (prices, market caps, volumes)
-
-### Prices History Controller
-
-#### Price History
-
-- `GET /prices/history/list` - Complete price history for all collateral types with CHF prices
-- `GET /prices/history/:address` - Price history for a specific collateral token
-
-The history endpoint for a specific token returns:
-- Token metadata (name, symbol, decimals, address)
-- Current price in CHF
-- Historical prices as a time-series (timestamp → CHF price mapping)
-
-#### Collateralization Ratios
-
-- `GET /prices/history/ratio` - Historical collateralization ratio data
-
-Returns:
-- Current timestamp
-- `collateralRatioByFreeFloat`: Time series of ratios based on circulating supply
-- `collateralRatioBySupply`: Time series of ratios based on total supply
-
-## Use Cases
-
-### Position Health Monitoring
-
-Fetch current prices to calculate if positions are adequately collateralized:
-
-```
-GET /prices/list
+```bash
+curl --fail 'https://api.frankencoin.com/prices/ticker/WBTC'
 ```
 
-Then compare position collateral value against minted amount.
+Read `chf` or `usd` according to the display currency. For portfolio work, fetch `/prices/mapping` instead, select the lowercase collateral address and verify the observation's chain ID and decimals against the position.
 
-### Quick Price Lookup by Ticker
+To chart one collateral, request `/prices/history/:address`. Read its CHF prices, convert millisecond timestamp keys to dates and sort the observations chronologically. Use `/prices/history/list` when the view needs several collateral histories. Keep gaps visible; observations need not arrive at regular intervals.
 
-Get the price of a specific token by its symbol:
+The separate `/prices/marketChart` route provides `prices`, `market_caps` and `total_volumes` series. Its schema does not specify the quote currency, so confirm the feed's denomination before labelling the chart.
 
-```
-GET /prices/ticker/WBTC
-```
+## Aggregate collateral ratios
 
-Returns price in USD and CHF for WBTC.
+Use `/prices/history/ratio` to plot the `collateralRatioBySupply` and `collateralRatioByFreeFloat` series separately. The names distinguish total supply from free float, but the schema does not specify the full numerator or free-float exclusions. Confirm those inputs before comparing the series to an external ratio. With the same numerator, a smaller free-float denominator yields a larger ratio; it is not inherently a more conservative measure against the same threshold.
 
-### Price Charts
+These series do not define universal “healthy” bands or a protocol liquidation threshold. State the valuation assumptions and denominator whenever displaying a ratio. The protocol's challenge mechanism is separate from an off-chain portfolio estimate.
 
-Build historical price charts for collateral assets:
+## Indicative position valuation
 
-```
-GET /prices/history/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599
-```
+Fetch the owner's positions from `/positions/owners` and price observations from `/prices/mapping`. Match lowercase owner keys and collateral addresses, and use each token's decimals. Both sides of a ratio must use the same currency: collateral units times CHF per token divided by ZCHF debt times CHF per ZCHF. An assumption of one CHF per ZCHF is explicit parity valuation, not an observed exchange price.
 
-This returns WBTC price history that can be charted over time.
-
-### System Health Dashboard
-
-Monitor ecosystem-wide collateralization:
-
-```
-GET /prices/history/ratio
-```
-
-Display ratios over time to show protocol health trends.
-
-### Liquidation Alerts
-
-Compare current prices against position liquidation thresholds to alert users of risks:
-
-1. Get current prices: `GET /prices/list`
-2. Fetch user's positions: `GET /positions/owner/:address`
-3. Calculate collateralization ratios
-4. Alert if approaching liquidation levels
-
-### Multi-Asset Analysis
-
-Compare price performance across different collateral types:
-
-```
-GET /prices/history/list
-```
-
-Analyze which collateral types are most stable or volatile.
-
-### Token Metadata Lookup
-
-Get ERC20 information for system tokens:
-
-```
-GET /prices/erc20/mint        # ZCHF token info
-GET /prices/erc20/fps         # FPS token info
-GET /prices/erc20/collateral  # All collateral tokens
-```
-
-### Owner Value Tracking
-
-Track historical value locked by a specific owner across all their positions:
-
-```
-GET /prices/owner/0x963eC454423CD543dB08bc38fC7B3036B425b301/valueLocked
-```
-
-Returns yearly time series of total collateral value.
-
-### Market Data Integration
-
-Fetch CoinGecko market data for Frankencoin:
-
-```
-GET /prices/marketChart
-```
-
-Returns prices, market caps, and trading volumes over time.
-
-## Data Structure
-
-### Price List Response
-
-Array of price objects with metadata:
-
-```json
-[
-  {
-    "address": "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
-    "name": "Frankencoin Pool Share",
-    "symbol": "FPS",
-    "decimals": 18,
-    "timestamp": 1768915146172,
-    "price": {
-      "usd": 1555.45,
-      "chf": 1234.49
-    }
-  }
-]
-```
-
-### Price Mapping Response
-
-Object mapping addresses to price data:
-
-```json
-{
-  "0x1ba26788dfde592fec8bcb0eaff472a42be341b2": {
-    "address": "0x1bA26788dfDe592fec8bcB0Eaff472a42BE341B2",
-    "name": "Frankencoin Pool Share",
-    "symbol": "FPS",
-    "decimals": 18,
-    "timestamp": 1768915146172,
-    "price": {
-      "usd": 1555.45,
-      "chf": 1234.49
-    }
-  }
-}
-```
-
-### Historical Price Response (Specific Token)
-
-```json
-{
-  "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-  "name": "Wrapped BTC",
-  "symbol": "WBTC",
-  "decimals": 8,
-  "timestamp": 1768964400003,
-  "price": {
-    "chf": 70374.6
-  },
-  "history": {
-    "1759158000005": 90567.46,
-    "1759161600002": 91163.2,
-    ...
-  }
-}
-```
-
-### Collateralization Ratio Response
-
-```json
-{
-  "timestamp": 1768964400003,
-  "collateralRatioByFreeFloat": {
-    "1759158000005": 3.138139819821414,
-    "1759161600002": 3.142567234521876,
-    ...
-  },
-  "collateralRatioBySupply": {
-    "1759158000005": 1.688283955398297,
-    "1759161600002": 1.689342187654321,
-    ...
-  }
-}
-```
-
-## Understanding Collateral Ratios
-
-### Healthy Ranges
-
-- **Above 1.5**: System is overcollateralized, very healthy
-- **1.2 - 1.5**: Normal operating range
-- **1.0 - 1.2**: Warning zone, increased risk
-- **Below 1.0**: Critical, system is undercollateralized
-
-### Free Float vs Total Supply
-
-- **By Free Float**: More conservative, only counts circulating ZCHF
-- **By Supply**: Includes all ZCHF, even locked or uncirculated
-
-The free float ratio is typically higher (more conservative) than the total supply ratio.
-
-## Notes
-
-### Timestamps
-
-- Historical data uses Unix millisecond timestamps as keys
-- The main `timestamp` field indicates when data was last updated
-
-### Price Precision
-
-- Prices are in CHF with decimal precision
-- Historical endpoints may have varying time intervals between data points
-
-### Performance Considerations
-
-- Price history objects can be large (hundreds of data points)
-- Consider caching price data with appropriate TTLs (1-5 minutes for current prices, longer for historical)
-- For charting, you may want to downsample historical data client-side
-
-### Integration Best Practices
-
-1. **Poll Current Prices**: Update every 1-5 minutes for position monitoring
-2. **Cache Historical Data**: Price history changes infrequently, cache for 15-30 minutes
-3. **Handle Missing Data**: Not all timestamps will have data, interpolate when necessary for charts
-4. **Monitor Ratios**: Set up alerts when collateralization ratios drop below thresholds
-5. **Validate Addresses**: Always validate collateral addresses against the Collateral API before using prices
-
-## Example: Building a Position Monitor
+The example below returns a rational pair of `BigInt` values for an indicative ratio. It keeps raw balances exact and uses the decimal values already returned by the price API; it cannot restore precision the server has discarded. It treats zero debt as a separate state and rejects missing or stale prices. The caller supplies chain ID, the ZCHF contract address, valuation time, freshness limit and an explicit CHF-per-ZCHF quote (or parity assumption).
 
 ```javascript
-// 1. Get current prices
-const pricesData = await fetch('https://api.frankencoin.com/prices/mapping').then(r => r.json());
+import {object, uint, address, formatUnits} from './README.mjs';
 
-// 2. Get user positions
-const positions = await fetch(`https://api.frankencoin.com/positions/owners`).then(r => r.json());
-const userPositions = positions.map[address] || [];
-
-// 3. Calculate health for each position
-userPositions.forEach(position => {
-  const priceInfo = pricesData[position.collateral.toLowerCase()];
-  const collateralPrice = priceInfo.price.usd;
-  const collateralValue = (position.collateralBalance / Math.pow(10, position.collateralDecimals)) * collateralPrice;
-  const mintedValue = position.minted / 1e18;
-  const ratio = collateralValue / mintedValue;
-
-  if (ratio < 1.2) {
-    console.warn(`Position ${position.position} is at risk! Ratio: ${ratio.toFixed(2)}`);
+export function ownerPositions(response, owner) {
+  const map = object(object(response).map, 'owner map');
+  const rows = map[address(owner)];
+  if (rows === undefined) return [];
+  if (!Array.isArray(rows)) throw new TypeError('Expected position array');
+  for (const row of rows) {
+    if (address(object(row).owner) !== address(owner)) throw new TypeError('Owner mismatch');
   }
-});
+  return rows;
+}
+
+function decimal(value) {
+  if (typeof value !== 'number' && typeof value !== 'string') throw new TypeError('Invalid decimal');
+  if (typeof value === 'number' && (!Number.isFinite(value) || value <= 0)) throw new TypeError('Invalid quote');
+  const match = /^(0|[1-9][0-9]*)(?:\.([0-9]+))?(?:e([+-]?[0-9]+))?$/i.exec(String(value));
+  if (!match) throw new TypeError('Invalid decimal quote');
+  const fraction = match[2] || '';
+  const scale = fraction.length - Number(match[3] || 0);
+  if (!Number.isSafeInteger(scale) || Math.abs(scale) > 255) throw new RangeError('Quote scale');
+  let numerator = BigInt(match[1] + fraction), denominator = 1n;
+  if (numerator === 0n) throw new RangeError('Quote must be positive');
+  if (scale >= 0) denominator = 10n ** BigInt(scale);
+  else numerator *= 10n ** BigInt(-scale);
+  return {numerator, denominator};
+}
+
+export function indicativeRatio(position, observation, config) {
+  object(position); object(config);
+  if (!Number.isSafeInteger(config.chainId) || config.chainId <= 0 ||
+      address(position.zchf) !== address(config.zchfAddress)) throw new TypeError('Asset mismatch');
+  const collateral = uint(position.collateralBalance), debt = uint(position.minted);
+  const decimals = position.collateralDecimals;
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) throw new TypeError('Invalid decimals');
+  const zchf = decimal(config.zchfChf);
+  if (debt === 0n) return {status: 'no-debt'};
+  object(observation, 'price observation');
+  if (observation.chainId !== config.chainId ||
+      address(observation.address) !== address(position.collateral) ||
+      observation.decimals !== decimals) throw new TypeError('Collateral identity mismatch');
+  const {nowMs, maxAgeMs} = config;
+  if (!Number.isSafeInteger(nowMs) || !Number.isSafeInteger(maxAgeMs) || maxAgeMs < 0 ||
+      !Number.isSafeInteger(observation.timestamp) || observation.timestamp <= 0 ||
+      observation.timestamp > nowMs || nowMs - observation.timestamp > maxAgeMs ||
+      typeof observation.source !== 'string' || observation.source.length === 0) {
+    throw new Error('Missing or stale price');
+  }
+  const chf = decimal(object(observation.price).chf);
+  const numerator = collateral * chf.numerator * zchf.denominator * 10n ** 18n;
+  const denominator = 10n ** BigInt(decimals) * chf.denominator * debt * zchf.numerator;
+  return {status: 'indicative', currency: 'CHF', numerator: numerator.toString(),
+    denominator: denominator.toString(), ratioDecimal: formatUnits((numerator * 1000000n / denominator).toString(), 6)};
+}
 ```
+
+`ratioDecimal` truncates to six decimal places for display. The numerator and denominator preserve the exact ratio of the supplied decimal inputs. The caller can fetch both maps with the [shared GET helper](README.md#executable-examples), then use `priceMap[position.collateral.toLowerCase()]`. An unsupported chain or missing observation is an error, not a zero valuation.

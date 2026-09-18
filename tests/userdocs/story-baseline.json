@@ -1,0 +1,270 @@
+{
+  "base_commit": "4c96e3549716d0d855fcb348325735fc2c79adbd",
+  "provenance": "Heading fragments and exact fenced code extracted from the local Git revision, not API observations.",
+  "anchors": {
+    "README.md": [
+      "borrowing-seignorage",
+      "frankencoin-zchf-and-frankencoin-pool-shares-fps",
+      "overview",
+      "payments",
+      "store-of-wealth",
+      "structure-and-purpose",
+      "technical-architecture",
+      "use-cases"
+    ],
+    "SUMMARY.md": [
+      "table-of-contents"
+    ],
+    "api-docs/README.md": [
+      "api-documentation",
+      "controllers",
+      "executable-examples",
+      "shared-validation-and-exact-display-formatting",
+      "versions-and-data-conventions"
+    ],
+    "api-docs/analytics.md": [
+      "analytics-api",
+      "endpoints-and-limits",
+      "export-completeness",
+      "financial-fields"
+    ],
+    "api-docs/challenges.md": [
+      "challenge-and-bid-mechanics",
+      "challenges-api",
+      "endpoints-and-identifiers",
+      "units-and-outcome-fields"
+    ],
+    "api-docs/ecosystem.md": [
+      "collateral-catalogue",
+      "ecosystem-api",
+      "frankencoin-and-legacy-fps",
+      "minter-proposals"
+    ],
+    "api-docs/fcs.md": [
+      "contract-reads-and-transactions",
+      "fcs-api",
+      "get-fcsdiscount",
+      "get-fcsinfo",
+      "source-and-version-boundary"
+    ],
+    "api-docs/positions.md": [
+      "endpoints",
+      "fields-and-units",
+      "positions-api",
+      "state-and-history"
+    ],
+    "api-docs/prices.md": [
+      "aggregate-collateral-ratios",
+      "currencies-units-and-freshness",
+      "endpoints",
+      "indicative-position-valuation",
+      "prices-api"
+    ],
+    "api-docs/savings.md": [
+      "endpoints",
+      "rates-accrual-and-module-selection",
+      "savings-api",
+      "schemas-and-units",
+      "validated-display-and-hypothetical-projection"
+    ],
+    "api-docs/transfers.md": [
+      "candidate-lookup-example",
+      "counter-and-completeness-limitations",
+      "endpoints-and-response-shapes",
+      "invoice-integration-boundary",
+      "record-fields",
+      "time-ranges-and-errors",
+      "transfers-api"
+    ],
+    "api-docs/wallet-integration.md": [
+      "chain-token-and-module-selection",
+      "displaying-savings",
+      "indexed-activity-and-other-integrations",
+      "savings-contract-interface",
+      "wallet-integration"
+    ],
+    "bridge-to-other-chains.md": [
+      "bridge-to-other-chains",
+      "fcs-votes-are-not-bridged-tokens",
+      "network-and-token-identity",
+      "transfer-sequence"
+    ],
+    "faq.md": [
+      "are-reserve-pool-shares-securities",
+      "background-faq",
+      "can-fcs-be-bridged-to-another-chain",
+      "can-savings-always-be-withdrawn-immediately",
+      "how-can-individuals-invest-in-the-fps-tokens-of-the-frankencoin-ecosystem",
+      "how-does-frankencoin-differ-from-other-stablecoins",
+      "how-long-is-the-locking-period-for-fps",
+      "is-frankencoin-political",
+      "is-the-frankencoin-a-security",
+      "is-the-frankencoin-ecosystem-useful",
+      "what-are-frankencoin-pool-share-fps-tokens",
+      "what-is-the-main-goal-of-the-frankencoin",
+      "what-is-this-all-about",
+      "what-opportunities-does-frankencoin-offer-for-preserving-purchasing-power-and-investment",
+      "what-role-do-governance-token-holders-play-in-the-frankencoin-ecosystem",
+      "when-obtaining-frankencoin-against-a-collateral-is-that-really-_borrowing_"
+    ],
+    "fcs-migration.md": [
+      "identify-the-starting-token",
+      "migrating-from-fps-and-wfps",
+      "remaining-outside-the-wrapper",
+      "returning-to-fps-or-exiting-into-zchf",
+      "transaction-sequence",
+      "two-voting-records"
+    ],
+    "fcs.md": [
+      "accounting-and-erc-4626-views",
+      "binding",
+      "entry-paths",
+      "exit-paths-and-eligibility",
+      "frankencoin-share-token-fcs",
+      "prices-and-redemption-discount",
+      "related-pages",
+      "version-and-terminology",
+      "voting",
+      "withdraw-and-redeem-are-different"
+    ],
+    "governance.md": [
+      "community-consensus",
+      "cross-chain-governance",
+      "exceptional-efficiency",
+      "fcs-qualification",
+      "governance",
+      "immutable-modularity",
+      "legacy-fps-qualification",
+      "overview",
+      "proposal-submission",
+      "veto-process",
+      "vote-accumulation"
+    ],
+    "pool-shares.md": [
+      "economics",
+      "equilibrium",
+      "investing-and-pool-shares",
+      "limits-to-capital-efficiency",
+      "proportional-capital-valuation",
+      "reserve-pool-shares",
+      "usage"
+    ],
+    "positions/README.md": [
+      "collateralized-minting",
+      "contract-versions"
+    ],
+    "positions/adjust.md": [
+      "adjusting-a-position",
+      "increasing-the-liquidation-price",
+      "lowering-the-liquidation-price",
+      "minting-and-repayment",
+      "select-the-position"
+    ],
+    "positions/auctions.md": [
+      "auction-design",
+      "challenges-and-auctions",
+      "how-to-initiate-an-auction",
+      "how-to-participate-in-ongoing-auctions"
+    ],
+    "positions/clone.md": [
+      "cloning-existing-positions"
+    ],
+    "positions/open.md": [
+      "collateral-and-liquidation-price",
+      "interest-and-minting-capacity",
+      "opening-new-positions",
+      "proposal-terms",
+      "reserve-and-auction-duration",
+      "submission-and-confirmation"
+    ],
+    "reserve.md": [
+      "assets",
+      "balance-sheet-diagram",
+      "challenge-settlement",
+      "equilibrium-of-equity",
+      "example-scenarios",
+      "historical-stablecoin-conversion",
+      "liabilities-and-equity",
+      "minting",
+      "protection-mechanisms-during-liquidation",
+      "reserve"
+    ],
+    "risks.md": [
+      "ccip-and-blockchain-hacks",
+      "collapse-of-connected-stablecoins",
+      "fcs-mechanisms-and-dependencies",
+      "for-frankencoin-holders",
+      "for-minters-borrowers",
+      "frontend-hacks",
+      "fundamental-depeg",
+      "general-risks",
+      "governance-failures",
+      "human-errors",
+      "liquidation-cascades",
+      "missing-market-movements",
+      "missing-maturity-dates",
+      "regulatory-risks",
+      "risks",
+      "short-squeeze-upwards-depeg",
+      "swiss-franc-appreciation",
+      "technical-attacks",
+      "temporary-depeg-liquidity-risk",
+      "third-line-bailout",
+      "unknown-risks"
+    ],
+    "savings.md": [
+      "claiming-accrued-referral-fees",
+      "contract-versions",
+      "delay",
+      "how-it-works",
+      "integration-details",
+      "interest",
+      "referral-module",
+      "saving",
+      "savings",
+      "using-the-frankencoin-app-to-refer-users",
+      "wallet-implementation-guide"
+    ],
+    "telegram-api-bot.md": [
+      "basic-messages",
+      "challenges-started",
+      "expiry-and-price-alerts",
+      "historical-subscription-screenshots",
+      "how-to-find-it",
+      "minter-proposals",
+      "minter-proposals-vetoed",
+      "minting-updates",
+      "notification-bot",
+      "position-proposals",
+      "subscription-handels",
+      "welcome-and-environment-information"
+    ],
+    "telegram-bot.md": [
+      "basic-messages",
+      "challenges-started",
+      "minter-proposals-vetoed",
+      "minting-updates",
+      "notification-bot",
+      "position-proposals",
+      "subscription-handels"
+    ],
+    "tests/api-docs/README.md": [
+      "api-documentation-tests"
+    ],
+    "tests/userdocs/README.md": [
+      "user-documentation-checks"
+    ]
+  },
+  "api_fence_sha256": {
+    "api-docs/README.md": "2593955762ff53cbc4f29c7dfa03118b31d23ad71c49c8c57f9423dbe22e06e0",
+    "api-docs/analytics.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "api-docs/challenges.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "api-docs/ecosystem.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "api-docs/fcs.md": "1466556429debf4d86ecb3df19c1f73450628b6314004cb69555eee940c9f876",
+    "api-docs/positions.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "api-docs/prices.md": "df2ed571e4e0caa8d164871d465467f719fc3a2c2de17c2990fa67568668bbf7",
+    "api-docs/savings.md": "863e8ed120df779587e2befcde1e94a635b008fbd7fc8349431c0551081c87ad",
+    "api-docs/transfers.md": "58b58b9f80be5ee955940077ef26c233930d71d4801496e71c4b3ea889ed8b8b",
+    "api-docs/wallet-integration.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

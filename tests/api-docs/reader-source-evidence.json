@@ -1,0 +1,24 @@
+{
+  "commit": "9013d8fadf2bcc251d236c78328958ebcfbe1c26",
+  "kind": "excerpts from pinned public source, not live-response claims",
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/frankencoin-api/9013d8fadf2bcc251d236c78328958ebcfbe1c26/src/modules/analytics/analytics.service.ts",
+      "sha256": "598a394f0f94569c618777cba07cb352196ee2cd95f5f649f119ab2913120313",
+      "quotes": [
+        "analyticDailyLogs(orderBy: \"timestamp\", orderDirection: \"asc\", limit: 1000)",
+        "num: logs.length",
+        "const positionProposalFees: number = 1000 * num;"
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/Frankencoin-ZCHF/frankencoin-api/9013d8fadf2bcc251d236c78328958ebcfbe1c26/src/modules/analytics/analytics.controller.ts",
+      "sha256": "88227b6279911fa08c6a1d70e418974b22233351cf7792130a7e8bd6ce8ca210",
+      "quotes": [
+        "return this.analytics.getTransactionLog(firstItem == 'true' ? false : true, limit ?? 50, after ?? '');",
+        "if (pageInfo == 'true') {",
+        "timestamp: { type: 'string', description: 'Unix timestamp in milliseconds' }"
+      ]
+    }
+  ]
+}

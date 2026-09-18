@@ -1,555 +1,66 @@
----
-description: >-
-  Developer guide for integrating Frankencoin and the Savings Module into
-  wallets and applications
----
+# Wallet integration
 
-# Wallet Integration
+This guide connects a wallet's ZCHF balance and savings view to contract actions. Use the API for indexed account activity and cross-module summaries, contract reads for current balances and pending interest, and wallet transactions for deposits, withdrawals and interest collection.
 
-This guide provides developers with the technical details needed to integrate Frankencoin (ZCHF) and its native savings module into wallets, applications, and services.
+The [savings API](savings.md) defines HTTP schemas, units and limits; the [common helpers](README.md#executable-examples) preserve integer quantities.
 
-## Frankencoin Token (ZCHF)
+## Chain, token and module selection
 
-### ERC-20 Standard
+Configure each integration with an EIP-155 chain ID, ZCHF token address, savings module address and the ABI for that deployment. Addresses can coincide across chains without identifying the same contract state. The API's `status[chainId][moduleAddress]` lookup is explicit: mainnet has more than one reported module.
 
-Frankencoin is a standard ERC-20 token that implements all standard functions:
+ZCHF uses 18 decimals and ERC-20 transfers, balances and allowances. Amounts passed to contracts are integer base units. Check the token address and spender for the selected chain rather than taking them from an arbitrary API record. Use the [contract repository](https://github.com/Frankencoin-ZCHF/FrankenCoin) and a pinned version of the [published SDK](https://www.npmjs.com/package/@frankencoin/zchf) to resolve deployment interfaces.
 
-* `balanceOf(address account)`
-* `totalSupply()`
-* `transfer(address to, uint256 amount)`
-* `transferFrom(address from, address to, uint256 amount)`
-* `allowance(address owner, address spender)`
-* `approve(address spender, uint256 amount)`
+Read `balanceOf(account)` for the wallet's liquid ZCHF balance and `allowance(owner, spender)` before an operation that pulls tokens. Keep liquid ZCHF separate from funds credited to a savings account. Ordinary token transfers use the ERC-20 `transfer` or `transferFrom` interface; the [reference-transfer API](transfers.md) covers only transfers carrying reference messages.
 
-### Multi-chain Support
+## Savings contract interface
 
-Frankencoin is deployed across multiple blockchain networks, allowing users to interact with ZCHF on their preferred chain. When integrating, ensure your wallet supports the relevant chain IDs.
+The methods below describe the referral-capable `AbstractSavings` interface at the [linked source revision](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/savings/AbstractSavings.sol). Older `SavingsV2` contracts do not have the same account/referral interface. Resolve the ABI and conditions for the selected module rather than assuming every indexed module implements these methods.
 
-### Interface Reference
+| Method or getter | Classification | Purpose |
+| --- | --- | --- |
+| `savings(account)` | Read-only | Saved balance, ticks and, where supported, referrer and referral fee |
+| `accruedInterest(account)` | Read-only | Gross pending interest at current state |
+| `accruedInterest(account, timestamp)` | Read-only | Gross interest at the supplied timestamp under contract tick rules |
+| `currentRatePPM`, `currentTicks`, `INTEREST_DELAY` | Read-only | Rate, tick counter and entry-delay parameter |
+| `refreshBalance(owner)`, `refreshMyBalance()` | **Transaction** | Collect interest, pay any referral fee and update saved balance/ticks |
+| `save(amount)`, `save(owner, amount)` | **Transaction** | Deposit ZCHF under the module's conditions |
+| `withdraw(target, amount)` | **Transaction** | Withdraw under the module's conditions |
+| `adjust(targetAmount)` | **Transaction** | Adjust savings balance |
+| Referral overloads and `dropReferrer()` | **Transaction**, ABI-dependent | Set or remove referral terms |
 
-The complete ERC-20 interface can be found in the official repository: [IERC20.sol](https://github.com/Frankencoin-ZCHF/Frankencoin/blob/main/contracts/erc20/IERC20.sol)
+An `eth_call` simulation of a mutating method does not persist its result. It does not turn `refreshBalance` into a view method. Deposits that pull ZCHF require the appropriate allowance to the selected savings module.
 
-## Savings Module Integration
+### Deposit ZCHF
 
-The Frankencoin savings module allows users to lock up Frankencoins to earn yield. This feature can be integrated natively into wallets to provide users with seamless access to earning opportunities.
+1. Select the wallet account, chain and savings module. Read its rate, entry-delay rules and any referral terms for display before confirmation.
+2. Convert the entered ZCHF amount to 18-decimal integer base units. Read the wallet balance and allowance for that module.
+3. If an allowance is needed, submit `approve(spender, amount)` to the ZCHF token with the selected module as spender. Wait for its successful receipt before the deposit.
+4. Submit the supported `save(amount)` call, or `save(owner, amount)` to credit another account. Where referral overloads are supported, show the referrer and fee before requesting the signature.
+5. After the deposit receipt succeeds, re-read the savings account. Indexed activity may appear later; approval alone does not deposit funds.
 
-### Core Concepts
+### Collect interest or withdraw
 
-The savings module uses an `Account` structure that tracks:
+Use `refreshMyBalance()` or `refreshBalance(owner)` to collect interest into the saved balance, with any referral fee paid under the account's terms. This is a transaction, not a balance refresh performed by the API. After its receipt, re-read credited balance and pending interest to avoid displaying the same interest twice.
 
-* `saved`: Amount of ZCHF currently saved
-* `ticks`: Internal counter for interest calculation
-* `referrer`: Optional address for referral fees
-* `referralFeePPM`: Referral fee in parts per million (ppm)
+For a withdrawal, read the account and module conditions, then submit the supported `withdraw(target, amount)` with a validated recipient and base-unit amount. Use the receipt and resulting balances to report the amount transferred; the requested amount is not proof of the amount received. `adjust(targetAmount)` instead sets a target savings balance, depositing or withdrawing as needed, and may require allowance for a deposit.
 
-### Events
+## Displaying savings
 
-The savings module emits three primary events:
+Keep these values separate:
 
-```solidity
-event Saved(address indexed account, uint192 amount);
-event InterestCollected(address indexed account, uint256 interest, uint256 referrerFee);
-event Withdrawn(address indexed account, uint192 amount);
-```
+- **Saved balance**: the contract's current credited principal, including previously collected net interest.
+- **Gross pending interest**: `accruedInterest(account)` before any referral deduction.
+- **Net pending interest**: gross minus the applicable integer-rounded referral fee.
+- **Cumulative collected interest**: indexed historical `interest`, not additional pending funds.
 
-### Key Constants
+Read account terms and accrued interest at a consistent block. `saved + grossPending` is not the user's net balance when a referral fee applies. In this referral-capable contract the fee is at most 250,000 PPM (25% of gross interest), with no deduction for a zero referrer. Account referral terms and the selected version determine the actual deduction.
 
-```solidity
-uint64 public immutable INTEREST_DELAY = uint64(3 days);
-```
+The entry delay, weighted tick adjustment and withdrawal conditions depend on the module version. Do not infer a universal lock period from the HTTP balance or a rate field. See [savings mechanics](../savings.md) and [source](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/savings/AbstractSavings.sol).
 
-Interest accrues after a 3-day delay from when funds are saved.
+## Indexed activity and other integrations
 
-### Data Structure
+`/savings/core/activity/:account` returns at most 1000 recent records. Several events can share a transaction hash, so the hash alone is not a unique event key. A complete history requires an independent event traversal and reconciliation; a capped response cannot establish it.
 
-```solidity
-mapping(address => Account) public savings;
+For reference-bearing payments, use the [candidate-only transfer example](transfers.md#candidate-lookup-example). For the canonical share token FCS, distinguish [reference prices, previews and transaction limits](fcs.md#contract-reads-and-transactions). Use FCS-specific supply and contract references; the underlying FPS fields are not substitutes.
 
-struct Account {
-    uint192 saved;
-    uint64 ticks;
-    address referrer;
-    uint32 referralFeePPM;
-}
-```
-
-### Core Functions
-
-#### Query Functions
-
-```solidity
-// Refresh and return the current balance for an account
-function refreshBalance(address owner) public returns (uint192);
-
-// View accrued interest for an account at current time
-function accruedInterest(address accountOwner) public view returns (uint192);
-
-// View accrued interest for an account at a specific timestamp
-function accruedInterest(address accountOwner, uint256 timestamp) public view returns (uint192);
-```
-
-#### Basic Operations
-
-```solidity
-// Save ZCHF from caller's wallet
-function save(uint192 amount) public;
-
-// Save ZCHF on behalf of another address
-function save(address owner, uint192 amount) public;
-
-// Withdraw ZCHF to a target address
-function withdraw(address target, uint192 amount) public returns (uint256);
-
-// Adjust savings to a target amount (save or withdraw as needed)
-function adjust(uint192 targetAmount) public;
-```
-
-#### Referral Functions
-
-The savings module includes a referral system that allows wallets and frontends to earn fees by facilitating user interactions:
-
-```solidity
-// Save with referrer
-function save(uint192 amount, address referrer, uint24 referralFeePPM) public;
-
-// Withdraw with referrer
-function withdraw(uint192 amount, address referrer, uint24 referralFeePPM) public;
-
-// Adjust with referrer
-function adjust(uint192 targetAmount, address referrer, uint24 referralFeePPM) public;
-
-// Drop the current referrer
-function dropReferrer() public;
-```
-
-### Referral Logic
-
-The referral system allows wallets and frontends to monetize their integration:
-
-* Referral fees can be up to **25%** (250,000 ppm) of earned interest
-* Fees are deducted from the collected interest, not the principal
-* Users can drop or change referrers at any time
-* The fee represents convenience value - users pay for easier interaction with the protocol
-
-**Important**: The referral fee is not sticky. Users retain full control and can modify or remove referrers, so the fee depends on the convenience and value your wallet provides.
-
-## API Helper Endpoints
-
-Frankencoin provides REST API endpoints to simplify integration without requiring direct blockchain queries.
-
-### Base URL
-
-```
-https://api.frankencoin.com
-```
-
-### 1. Module Info
-
-Get comprehensive information about all savings modules across all chains.
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/core/info`
-
-**Example Response**:
-
-```json
-{
-	"status": {
-		"1": {
-			"0x27d9ad987bde08a0d083ef7e0e4043c857a17b38": {
-				"chainId": 1,
-				"updated": 1768146791,
-				"module": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
-				"balance": "3252713131296817909181865",
-				"interest": "17606356382481561618851",
-				"save": "9066019386383589628122254",
-				"withdraw": "5830912611469253280559240",
-				"rate": 40000,
-				"counter": {
-					"interest": 350,
-					"rateChanged": 2,
-					"rateProposed": 1,
-					"save": 436,
-					"withdraw": 177
-				}
-			}
-		},
-		"10": {
-			"0x6426324af1b14df3cd03b2d500529083c5ea61bc": {
-				"chainId": 10,
-				"updated": 1765391881,
-				"module": "0x6426324af1b14df3cd03b2d500529083c5ea61bc",
-				"balance": "0",
-				"interest": "0",
-				"save": "0",
-				"withdraw": "0",
-				"rate": 40000,
-				"counter": {
-					"interest": 0,
-					"rateChanged": 3,
-					"rateProposed": 0,
-					"save": 0,
-					"withdraw": 0
-				}
-			}
-		}
-	}
-}
-```
-
-**Note**: The `rate` is expressed in basis points (e.g., 40000 = 4% annual rate).
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsInfo = {
-	status: SavingsStatusMapping;
-	totalBalance: number;
-	ratioOfSupply: number;
-	totalInterest: number;
-};
-
-export type SavingsStatusMapping = {
-	[K in ChainId]: {
-		[module: Address]: SavingsStatus;
-	};
-};
-
-export type SavingsStatus = {
-	chainId: ChainId;
-	updated: number;
-	module: Address;
-	balance: string;
-	interest: string;
-	save: string;
-	withdraw: string;
-	rate: number;
-	counter: {
-		interest: number;
-		rateChanged: number;
-		rateProposed: number;
-		save: number;
-		withdraw: number;
-	};
-};
-```
-
-### 2. Ranked Accounts
-
-Get a ranked list of accounts by savings balance across all chains.
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/core/ranked`
-
-**Example Response**:
-
-```json
-[
-	{
-		"chainId": 1,
-		"account": "0x963ec454423cd543db08bc38fc7b3036b425b301",
-		"module": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
-		"balance": "800000000000000000000000",
-		"created": 1751307767,
-		"updated": 1767025931,
-		"save": "2999417071917808219178083",
-		"interest": "4424985059912480974118",
-		"withdraw": "2203842056977720700152201",
-		"counter": {
-			"save": 4,
-			"interest": 9,
-			"withdraw": 9
-		}
-	}
-]
-```
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsRanked = SavingsBalance[];
-
-export type SavingsBalance = {
-	chainId: ChainId;
-	account: Address;
-	module: Address;
-	balance: string;
-	created: number;
-	updated: number;
-	interest: string;
-	save: string;
-	withdraw: string;
-	counter: {
-		save: number;
-		interest: number;
-		withdraw: number;
-	};
-};
-```
-
-### 3. Account Balance
-
-Get savings information for a specific account across all chains and modules.
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/core/balance/<account>`
-
-**Example**: `GET https://api.frankencoin.com/savings/core/balance/0x963ec454423cd543db08bc38fc7b3036b425b301`
-
-**Example Response**:
-
-```json
-{
-	"1": {
-		"0x27d9ad987bde08a0d083ef7e0e4043c857a17b38": {
-			"chainId": 1,
-			"account": "0x963ec454423cd543db08bc38fc7b3036b425b301",
-			"module": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
-			"balance": "800000000000000000000000",
-			"created": 1751307767,
-			"updated": 1767025931,
-			"save": "2999417071917808219178083",
-			"interest": "4424985059912480974118",
-			"withdraw": "2203842056977720700152201",
-			"counter": {
-				"save": 4,
-				"interest": 9,
-				"withdraw": 9
-			}
-		}
-	}
-}
-```
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsBalance = {
-	[K in ChainId]: {
-		[module: Address]: SavingsBalance;
-	};
-};
-```
-
-### 4. Account Activities
-
-Get the latest transaction history for an account's savings activities (limited to 1000 entries).
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/core/activity/<account>`
-
-**Example**: `GET https://api.frankencoin.com/savings/core/activity/0x963ec454423cd543db08bc38fc7b3036b425b301`
-
-**Example Response**:
-
-```json
-[
-	{
-		"chainId": 1,
-		"account": "0x963ec454423cd543db08bc38fc7b3036b425b301",
-		"module": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
-		"created": 1767025931,
-		"blockheight": 24119513,
-		"count": 22,
-		"balance": "800000000000000000000000",
-		"save": "2999417071917808219178083",
-		"interest": "4424985059912480974118",
-		"withdraw": "2203842056977720700152201",
-		"kind": "Withdrawn",
-		"amount": "101791599315068493150684",
-		"rate": 40000,
-		"txHash": "0xe0d225c67bdc434da108bf359a40d5a6586b03d93a1843897810aa75cf9ae313"
-	},
-	{
-		"chainId": 1,
-		"account": "0x963ec454423cd543db08bc38fc7b3036b425b301",
-		"module": "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38",
-		"created": 1767025931,
-		"blockheight": 24119513,
-		"count": 21,
-		"balance": "901791599315068493150684",
-		"save": "2999417071917808219178083",
-		"interest": "4424985059912480974118",
-		"withdraw": "2102050457662652207001517",
-		"kind": "InterestCollected",
-		"amount": "1791599315068493150684",
-		"rate": 40000,
-		"txHash": "0xe0d225c67bdc434da108bf359a40d5a6586b03d93a1843897810aa75cf9ae313"
-	}
-]
-```
-
-**Activity kinds**: `Saved`, `Withdrawn`, `InterestCollected`
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsActivity = SavingsActivityQuery[];
-
-export type SavingsActivityQuery = {
-	chainId: ChainId;
-	account: Address;
-	module: Address;
-	created: number;
-	blockheight: number;
-	count: number;
-	balance: string;
-	save: string;
-	interest: string;
-	withdraw: string;
-	kind: string;
-	amount: string;
-	rate: number;
-	txHash: string;
-};
-```
-
-### 5. Referrer Mapping
-
-Get detailed information about all accounts that have set a specific address as their referrer.
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/referrer/<refferer>/mapping`
-
-**Example**: `GET https://api.frankencoin.com/savings/referrer/0x963ec454423cd543db08bc38fc7b3036b425b301/mapping`
-
-**Example Response**:
-
-```json
-{
-  "num": 1,
-  "accounts": ["0x637f00cab9665cb07d91bfb9c6f3fa8fabfef8bc"],
-  "map": {
-    "1": {
-      "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38": {
-        "0x637f00cab9665cb07d91bfb9c6f3fa8fabfef8bc": {
-          "created": 1751307767,
-          "updated": 1767025931,
-          "balance": 250000000000000000000000,
-          "referrer": "0x963ec454423cd543db08bc38fc7b3036b425b301",
-          "referrerFee": 100000
-        }
-      }
-    }
-  }
-}
-```
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsReferrerMapping = {
-	num: number;
-	accounts: Address[];
-	map: SavingsReferrerMapping;
-};
-
-export type SavingsReferrerMapping = {
-	[K in ChainId]: {
-		[module: Address]: {
-			[account: Address]: SavingsReferrerAccountItem;
-		};
-	};
-};
-
-export type SavingsReferrerAccountItem = {
-	created: number;
-	updated: number;
-	balance: number;
-	referrer: Address;
-	referrerFee: number;
-};
-```
-
-**Use Case**: Referrers can use this endpoint to monitor their referred accounts. They can also trigger the `refreshBalance()` function for these accounts to collect accrued interest and receive their referral fee split.
-
-### 6. Referrer Earnings
-
-Get aggregated earnings information for a referrer across all chains and modules.
-
-**Endpoint**: `GET https://api.frankencoin.com/savings/referrer/<referrer>/earnings`
-
-**Example**: `GET https://api.frankencoin.com/savings/referrer/0x5f238e89F3ba043CF202E1831446cA8C5cd40846/earnings`
-
-**Example Response**:
-
-```json
-{
-  "earnings": {
-    "1": {
-      "0x27d9ad987bde08a0d083ef7e0e4043c857a17b38": {
-        "0x637f00cab9665cb07d91bfb9c6f3fa8fabfef8bc": 32.78471424721345
-      }
-    }
-  },
-  "chains": {
-    "1": 32.78471424721345
-  },
-  "total": 32.78471424721345
-}
-```
-
-**TypeScript Interface**:
-
-```typescript
-export type ApiSavingsReferrerEarnings = {
-	earnings: SavingsReferrerEarnings;
-	chains: {
-		[K in ChainId]: number;
-	};
-	total: number;
-};
-
-export type SavingsReferrerEarnings = {
-	[K in ChainId]: {
-		[module: Address]: {
-			[account: Address]: number;
-		};
-	};
-};
-```
-
-**Use Case**: This endpoint provides referrers with a complete view of their earnings across all chains, making it easy to display total revenue from the referral program.
-
-## NPM Package
-
-For faster integration, use the official Frankencoin API package:
-
-```bash
-npm install @frankencoin/api
-# or
-yarn add @frankencoin/api
-```
-
-**Package**: [@frankencoin/api](https://www.npmjs.com/package/@frankencoin/api)
-
-This package provides typed API clients and utilities for interacting with the Frankencoin API endpoints, including all the savings module endpoints described above. All TypeScript types are included, making integration type-safe and easier.
-
-## Integration Best Practices
-
-### For Wallet Developers
-
-1. **Display Savings Balance**: Show users their total ZCHF savings balance alongside their regular ZCHF balance
-2. **Accrued Interest**: Use the `accruedInterest()` function to display pending interest in real-time
-3. **Simple UX**: Provide one-click "Save" and "Withdraw" buttons with amount inputs
-4. **Interest Collection**: Remind users that interest accrues after a 3-day delay
-5. **Referral Integration**: Set your wallet address as the referrer to earn a portion of user interest
-
-### For Frontend Developers
-
-1. **Use API Endpoints**: Leverage the REST API for faster queries instead of direct contract calls
-2. **Multi-chain Support**: Display savings across all supported chains in a unified interface
-3. **Activity History**: Show users their complete savings history using the activity endpoint
-4. **Rate Display**: Convert the rate from basis points to a user-friendly percentage (e.g., 40000 → "4% APY")
-
-### Referral Program Recommendations
-
-* Set a reasonable referral fee (typically 5-15%) to balance user value and wallet revenue
-* Clearly communicate to users that they pay a small convenience fee
-* Allow power users to easily drop the referrer if they prefer direct interaction
-* Use the referrer mapping endpoint to trigger `refreshBalance()` for your referred accounts periodically
-
-## Smart Contract Addresses
-
-For the latest contract addresses across all supported chains, please refer to the [official Frankencoin Landing Page](https://frankencoin.com) or the [GitHub repository](https://github.com/Frankencoin-ZCHF/Frankencoin).
-
-## Support and Resources
-
-* [Frankencoin GitHub](https://github.com/Frankencoin-ZCHF/Frankencoin)
-* [Telegram Community](https://t.me/frankencoinzchf)
-* [API Documentation](https://api.frankencoin.com/)
+The [API package](https://www.npmjs.com/package/@frankencoin/api) can provide types for a pinned release. TypeScript types do not validate runtime JSON; retain HTTP, schema and unit checks.

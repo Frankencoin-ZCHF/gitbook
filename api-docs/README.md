@@ -1,74 +1,118 @@
-# 📡 Developers
+# API documentation
 
-The Frankencoin API provides comprehensive access to all data within the Frankencoin ecosystem. This RESTful API enables developers to integrate Frankencoin functionality into their applications, build analytics tools, monitor positions, and interact with the protocol programmatically.
+The Frankencoin API supplies indexed data for wallets, position explorers, payment-reference searches and financial dashboards. Query token information, account activity and historical observations over HTTP without building an indexer for each view.
 
-## Base URL
+Base URL: `https://api.frankencoin.com`. The [interactive specification](https://api.frankencoin.com/) lists routes and parameters. These pages describe read-only HTTP GET requests. They do not create positions, place bids, deposit savings or transfer tokens; those actions use the relevant contracts.
 
+[FCS](../pool-shares.md) is Frankencoin's canonical governance and share token. Start with the [FCS controller](fcs.md) for its supply, reference prices and discount data. FPS routes remain the source for the underlying equity token's data; use those fields for FPS, not FCS.
+
+## Controllers
+
+- [FCS](fcs.md): canonical share-token information and redemption discount.
+- [Ecosystem](ecosystem.md): ZCHF, underlying FPS, minter proposals and collateral catalogues.
+- [Positions](positions.md): indexed lending positions and owner histories.
+- [Challenges](challenges.md): indexed challenges, bids and current challenge prices.
+- [Prices](prices.md): display prices, currencies, sources and indicative valuations.
+- [Savings](savings.md): balances, rates, activity and referrals.
+- [Transfers](transfers.md): reference-bearing transfers and candidate matching.
+- [Analytics](analytics.md): underlying FPS metrics and shared equity financial logs.
+- [Wallet integration](wallet-integration.md): module selection and contract read/write boundaries.
+
+## Versions and data conventions
+
+These pages describe API version `0.4.2`. API releases, position V1/V2, savings module versions and the FCS audit revision are separate version systems. A cached API result can lag chain state; `/status` reports service/indexer health, not finality for each record.
+
+| Field family | Encoding and unit |
+| --- | --- |
+| ZCHF/FPS/FCS raw contract amounts | Decimal integer strings, 18 decimals |
+| Position collateral balances | Decimal integer strings, use `collateralDecimals`, which may be 0, 6, 8 or 18 |
+| Savings module balances and collected interest | Raw ZCHF strings; savings aggregate totals are already scaled JSON numbers |
+| Savings `rate`, leadrate `approvedRate` | Integer parts per million (PPM); divide by `1e6` for a fraction or `1e4` for a percentage |
+| Ecosystem totals, FPS earnings/exposure, FCS info | Already scaled JSON numbers for display; do not divide again |
+| Transfer `created`, savings `updated`, analytics `timestamp` | Unix seconds; some endpoints encode these as decimal strings |
+| Prices mapping `timestamp` | Unix milliseconds; `0` can mean no usable price |
+| Status `lastChecked` | ISO timestamp string |
+| `targetChain` | Decimal CCIP selector string, not an EIP-155 chain ID |
+
+There is no global “all amounts are wei” or “all timestamps are seconds” rule. Keep raw quantities as integer strings/`BigInt`. JSON numbers may already have lost precision; do not use display totals to construct transaction amounts. Validate field types and units for each endpoint. Missing, null or malformed data is distinct from zero.
+
+## Make a first request
+
+Fetch the ZCHF overview for a supply and TVL dashboard:
+
+```bash
+curl --fail 'https://api.frankencoin.com/ecosystem/frankencoin/info'
 ```
-https://api.frankencoin.com
-```
 
-## API Features
+Read `erc20` for token metadata, `chains` for chain-specific data, `token` for ZCHF metrics and `tvl` for CHF and USD totals. Use the [ecosystem field guide](ecosystem.md#frankencoin-and-legacy-fps) to interpret the response. Add `/fcs/info` for the canonical share token's supply and reference prices.
 
-The Frankencoin API is organized into several controllers, each serving specific data about different aspects of the ecosystem:
+Most routes return JSON, but their wrappers differ: a list may use `{num, list}`, an address lookup may use `{num, owners, map}`, and an account response may be nested by chain and module. Read the endpoint's shape before iterating it. A successful HTTP status can still contain an error object; check both status and payload before displaying results.
 
-### Core Controllers
+## Executable examples
 
-* [**Ecosystem**](ecosystem.md) - Get information about the Frankencoin token, FPS, minters, and collateral
-* [**Positions**](positions.md) - Manage and query collateralized lending positions
-* [**Challenges**](challenges.md) - Access liquidation challenge and auction data
-* [**Prices**](prices.md) - Access price feeds and historical price data for collateral assets
-* [**Savings**](savings.md) - Query savings module data, interest rates, and yields
-* [**Transfers**](transfers.md) - Track ZCHF transfers with custom reference messages
-* [**Analytics**](analytics.md) - Retrieve ecosystem-wide metrics and financial analytics
+The JavaScript blocks are ES modules for Node.js 18+ or a compatible browser. Save each page's JavaScript block as its page name plus `.mjs`, keeping them in one directory (`README.mjs`, `transfers.mjs`, `savings.mjs`, `prices.mjs`). Imports below refer to those files. Functions only perform GET requests when called. The shared helpers below handle transport, type checks and exact amount formatting; the feature pages show how to interpret their results.
 
-## Response Format
+### Shared validation and exact display formatting
 
-In general API responses are returned in JSON format. Most list endpoints follow a consistent structure:
+`getJson` rejects HTTP errors, error envelopes and malformed JSON. This helper accepts object/array endpoints; scalar endpoints need a separate validator. Endpoint functions must also check the expected schema. It propagates failures rather than treating them as empty results. `formatUnits` retains fractional base units without converting to `Number`.
 
-```json
-{
-  "num": 100,
-  "list": [...]
+```javascript
+export function object(value, label = 'object') {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError(`Expected ${label}`);
+  }
+  return value;
+}
+
+export function uint(value) {
+  if (typeof value !== 'string' || !/^(0|[1-9][0-9]*)$/.test(value)) {
+    throw new TypeError('Expected a decimal unsigned integer string');
+  }
+  return BigInt(value);
+}
+
+export function address(value) {
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(value)) {
+    throw new TypeError('Expected a 20-byte address');
+  }
+  return value.toLowerCase();
+}
+
+export function formatUnits(raw, decimals) {
+  const amount = uint(raw);
+  if (!Number.isInteger(decimals) || decimals < 0 || decimals > 255) {
+    throw new TypeError('Invalid decimals');
+  }
+  if (decimals === 0) return amount.toString();
+  const digits = amount.toString().padStart(decimals + 1, '0');
+  const fraction = digits.slice(-decimals).replace(/0+$/, '');
+  return digits.slice(0, -decimals) + (fraction ? `.${fraction}` : '');
+}
+
+export async function getJson(path, fetchImpl = fetch) {
+  if (typeof path !== 'string' || !path.startsWith('/') || path.startsWith('//')) {
+    throw new TypeError('Expected an API-relative path');
+  }
+  const url = new URL(path, 'https://api.frankencoin.com');
+  if (url.origin !== 'https://api.frankencoin.com') throw new TypeError('Invalid origin');
+  const response = await fetchImpl(url, {
+    method: 'GET', redirect: 'error', signal: AbortSignal.timeout(10000)
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const data = await response.json();
+  if (data === null || typeof data !== 'object' ||
+      'error' in data || 'errors' in data || 'statusCode' in data) {
+    throw new Error('Invalid API response or error envelope');
+  }
+  return data;
 }
 ```
 
-or
+The address helper validates syntax, not EIP-55 checksum or contract identity. Use a chain-aware address registry and the selected contract's ABI when moving from indexed data to contract calls.
 
-```json
-{
-  "num": 100,
-  "addresses": [...],
-  "map": {...}
-}
-```
+## Packages and source
 
-## Data Precision
-
-Financial amounts in the API are typically represented as strings to preserve precision:
-
-* Token amounts are in **wei** (1e18 precision for 18-decimal tokens)
-* Timestamps are **Unix epoch** (seconds)
-* Interest rates are in **PPM** (parts per million, e.g., 20000 = 2%)
-
-## Interactive Documentation
-
-For interactive API exploration with request/response examples, visit the Swagger documentation:
-
-```
-https://api.frankencoin.com
-```
-
-## Rate Limiting
-
-The API currently has no rate limiting, but please use reasonable request rates to ensure fair access for all users.
-
-## Support
-
-For API questions or issues:
-
-* GitHub Smart Contracts: [Frankencoin ZCHF](https://github.com/Frankencoin-ZCHF/FrankenCoin)
-* GitHub API NestJS: [Frankencoin API](https://github.com/Frankencoin-ZCHF/frankencoin-api)
-* NPM Package for ABIs, Addresses, SupportedChains, ...: [NPM Package Core](https://www.npmjs.com/package/@frankencoin/zchf)
-* NPM Package for API Types, Return Types, ...: [NPM Package API Types](https://www.npmjs.com/package/@frankencoin/api)
-* Swagger Docs: [api.frankencoin.com](https://api.frankencoin.com)
+- [Interactive API specification](https://api.frankencoin.com/): request parameters and response schemas.
+- [API source](https://github.com/Frankencoin-ZCHF/frankencoin-api) and [API types package](https://www.npmjs.com/package/@frankencoin/api): service implementation and types for a pinned release.
+- [Contract repository](https://github.com/Frankencoin-ZCHF/FrankenCoin) and [contract SDK](https://www.npmjs.com/package/@frankencoin/zchf): contract interfaces and deployment references.
+- [Documentation validation](../tests/api-docs/README.md): example provenance, saved responses and offline test instructions.
