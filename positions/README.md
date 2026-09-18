@@ -1,9 +1,23 @@
 ---
-description: Documentation on minting Frankencoins against a collateral.
+description: Minting Frankencoins against collateral, with version-specific borrowing terms.
 ---
 
 # 🖨️ Collateralized Minting
 
-When someone mints fresh Frankencoins against a collateral, we call the result a [position](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/Position.sol). At the time of writing, the only smart contract that is approved to create new positions is the [minting hub](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/main/contracts/MintingHub.sol). The notation is inspired by portfolio theory, where a position denotes an exposure to a specific asset. In the Frankencoin system, a position always belongs to exactly one owner. Initially, this is the user that created the position, but ownership is transferable through the standard functions of ownable contracts. The owner can deposit collateral into the position and mint Frankencoins up to a certain limit defined by the liquidation price. Anyone can challenge a position if they believe that the liquidation price is below the true value of the collateral, triggering an auction that serves the purpose of determining the market price of the collateral. Thanks to this mechanism, the Frankencoin does not depend on oracles and is very flexible with regard to the provided collateral.
+A **position** holds a user's collateral and records the Frankencoins they have minted against it. It has one owner, initially its creator; ownership can be transferred. The owner can add collateral and mint within the position's price, collateral, time and capacity constraints.
 
-There are two ways to initiate a position: one can either create a completely new one with arbitrary parameters or one can clone an existing position. The former is for advanced users and not exposed in the default frontend. The latter is the faster way of obtaining Frankencoin against a collateral and supported in the default frontend.
+Anyone can challenge a position when they believe the **market value of the collateral is below the stored liquidation price**, not the other way around. A challenge starts a [two-phase auction](auctions.md). Challengers must supply collateral of their own, which can be bought during the first phase. A challenge is not a risk-free price report. This mechanism replaces an external price oracle; it depends on participants being able and willing to challenge.
+
+There are two entry paths:
+
+* [Open a new position](open.md): an advanced-user proposal with configurable parameters and a veto period. The application provides a [creation route](https://app.frankencoin.com/mint/create).
+* [Clone an existing position](clone.md): use an accepted position's terms, subject to available capacity and its expiry. This is usually the simpler path.
+
+## Contract versions
+
+The implementation matters. This guide distinguishes the newer `contracts/minting/` source from historical screenshots and legacy terms. The source references are pinned to commit `8b4c4ab67bb361b91d58c474b87f4608fc4c0566`:
+
+* [Position.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/Position.sol)
+* [MintingHub.sol](https://github.com/Frankencoin-ZCHF/FrankenCoin/blob/8b4c4ab67bb361b91d58c474b87f4608fc4c0566/contracts/minting/MintingHub.sol)
+
+A source commit is not proof of the implementation used by a particular deployed position. Before borrowing, check the chain, position address, originating hub, verified code and transaction quote. The FCS audit does not assess these minting contracts. Never assume that an existing position automatically gains the terms of a newer version.
