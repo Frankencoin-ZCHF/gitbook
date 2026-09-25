@@ -6,7 +6,7 @@ description: Collateral challenges, the two auction phases and settlement.
 
 ## Auction Design
 
-A challenge tests a position's stored liquidation price against the market. It is economically justified when **market value is below the liquidation price**. The challenger supplies the same collateral asset as the position. The [pinned minting sources](README.md#contract-versions) define the implementation described here.
+Auctions in the Frankencoin system serve two purposes at once: price-determination and liquidation. Anyone can challenge any position at any time by posting some collateral that is then put up for sale. If a bidder is wiling to pay the position's liquidation price for the collateral, the system assumes that the position is fine. The position remains untouched and the challenger's posted collateral is sold. If, however, the winning bid is belove the liquidation price, some of the position's collateral is sold at that price, some of the loan repaid, and the challenger rewarded.
 
 The auction has two phases:
 
